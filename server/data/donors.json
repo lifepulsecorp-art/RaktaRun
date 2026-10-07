@@ -1,0 +1,236 @@
+[
+  {
+    "id": "donor_rahul_01",
+    "uid": "donor_rahul_uid",
+    "fullName": "Rahul Shetty",
+    "phone": "+919876543210",
+    "aadhaarVerified": true,
+    "bloodGroup": "O+",
+    "rhType": "positive",
+    "bloodComponentEligibility": [
+      "whole_blood",
+      "RBC",
+      "plasma"
+    ],
+    "lastDonationDate": "2026-06-15T00:00:00.000Z",
+    "hemoglobinLevel": 14.5,
+    "weight": 74,
+    "eligibilityStatus": "eligible",
+    "verification": {
+      "hospitalId": "hosp_manipal_01",
+      "hospitalName": "Kasturba Hospital, Manipal",
+      "certificateId": "LP-CERT-2025-00841",
+      "verifiedAt": "2026-08-15T00:00:00.000Z",
+      "verifiedBy": "Dr. Anand Kumar",
+      "certificateFileName": "cert_LP-CERT-2025-00841.txt",
+      "expiryDate": "2027-08-15T00:00:00.000Z"
+    },
+    "homeLocality": "Manipal, Udupi",
+    "coordinates": {
+      "latitude": 13.3525,
+      "longitude": 74.792
+    },
+    "locationSharingEnabled": false,
+    "preferredRadius": 15,
+    "availabilityStatus": "available",
+    "heroStats": {
+      "totalEmergencyResponses": 4,
+      "totalDonations": 6,
+      "averageResponseTime": 380,
+      "badges": [
+        "life_pulse_hero",
+        "rapid_responder",
+        "repeat_hero"
+      ],
+      "lastResponseDate": "2026-09-12T14:20:00.000Z"
+    },
+    "createdAt": "2026-01-12T00:00:00.000Z",
+    "updatedAt": "2026-09-12T14:20:00.000Z"
+  },
+  {
+    "id": "donor_sneha_02",
+    "uid": "donor_sneha_uid",
+    "fullName": "Sneha Rao",
+    "phone": "+919876543211",
+    "aadhaarVerified": true,
+    "bloodGroup": "A+",
+    "rhType": "positive",
+    "bloodComponentEligibility": [
+      "whole_blood",
+      "platelets"
+    ],
+    "lastDonationDate": "2026-07-20T00:00:00.000Z",
+    "hemoglobinLevel": 13.2,
+    "weight": 58,
+    "eligibilityStatus": "eligible",
+    "verification": {
+      "hospitalId": "hosp_aj_02",
+      "hospitalName": "AJ Hospital & Research Centre",
+      "certificateId": "LP-CERT-2025-00842",
+      "verifiedAt": "2026-09-01T00:00:00.000Z",
+      "verifiedBy": "Dr. Pradeep Nayak",
+      "certificateFileName": "cert_LP-CERT-2025-00842.txt",
+      "expiryDate": "2027-09-01T00:00:00.000Z"
+    },
+    "homeLocality": "Kadri, Mangaluru",
+    "coordinates": {
+      "latitude": 12.8752,
+      "longitude": 74.855
+    },
+    "locationSharingEnabled": false,
+    "preferredRadius": 20,
+    "availabilityStatus": "available",
+    "heroStats": {
+      "totalEmergencyResponses": 2,
+      "totalDonations": 3,
+      "averageResponseTime": 490,
+      "badges": [
+        "life_pulse_hero"
+      ],
+      "lastResponseDate": "2026-08-30T10:15:00.000Z"
+    },
+    "createdAt": "2026-02-14T00:00:00.000Z",
+    "updatedAt": "2026-08-30T10:15:00.000Z"
+  },
+  {
+    "id": "donor_karthik_03",
+    "uid": "donor_karthik_uid",
+    "fullName": "Karthik Poojary",
+    "phone": "+919876543212",
+    "aadhaarVerified": true,
+    "bloodGroup": "B+",
+    "rhType": "positive",
+    "bloodComponentEligibility": [
+      "whole_blood",
+      "RBC",
+      "plasma"
+    ],
+    "lastDonationDate": "2026-05-10T00:00:00.000Z",
+    "hemoglobinLevel": 15,
+    "weight": 78,
+    "eligibilityStatus": "eligible",
+    "verification": {
+      "hospitalId": "hosp_udupi_dist_03",
+      "hospitalName": "District Government Hospital, Udupi",
+      "certificateId": "LP-CERT-2025-00843",
+      "verifiedAt": "2026-05-10T00:00:00.000Z",
+      "verifiedBy": "Dr. Vasudeva K",
+      "expiryDate": "2027-05-10T00:00:00.000Z"
+    },
+    "homeLocality": "Brahmavar, Udupi",
+    "coordinates": {
+      "latitude": 13.421,
+      "longitude": 74.749
+    },
+    "locationSharingEnabled": false,
+    "preferredRadius": 25,
+    "availabilityStatus": "emergency_only",
+    "heroStats": {
+      "totalEmergencyResponses": 5,
+      "totalDonations": 7,
+      "averageResponseTime": 340,
+      "badges": [
+        "life_pulse_hero",
+        "rapid_responder",
+        "community_champion"
+      ],
+      "lastResponseDate": "2026-09-02T18:40:00.000Z"
+    },
+    "createdAt": "2026-01-05T00:00:00.000Z",
+    "updatedAt": "2026-10-07T10:00:15.665Z",
+    "deferralReason": null,
+    "deferralUntil": null
+  },
+  {
+    "id": "donor_ananya_04",
+    "uid": "donor_ananya_uid",
+    "fullName": "Ananya Bhat",
+    "phone": "+919876543213",
+    "aadhaarVerified": true,
+    "bloodGroup": "AB-",
+    "rhType": "negative",
+    "bloodComponentEligibility": [
+      "whole_blood",
+      "platelets"
+    ],
+    "lastDonationDate": "2026-08-01T00:00:00.000Z",
+    "hemoglobinLevel": 12.8,
+    "weight": 54,
+    "eligibilityStatus": "eligible",
+    "verification": {
+      "hospitalId": "hosp_manipal_01",
+      "hospitalName": "Kasturba Hospital, Manipal",
+      "certificateId": "LP-CERT-2025-00844",
+      "verifiedAt": "2026-08-01T00:00:00.000Z",
+      "verifiedBy": "Dr. Anand Kumar",
+      "expiryDate": "2027-08-01T00:00:00.000Z"
+    },
+    "homeLocality": "Udupi City",
+    "coordinates": {
+      "latitude": 13.341,
+      "longitude": 74.745
+    },
+    "locationSharingEnabled": false,
+    "preferredRadius": 15,
+    "availabilityStatus": "available",
+    "heroStats": {
+      "totalEmergencyResponses": 3,
+      "totalDonations": 4,
+      "averageResponseTime": 410,
+      "badges": [
+        "life_pulse_hero",
+        "rare_blood_hero"
+      ],
+      "lastResponseDate": "2026-09-20T08:10:00.000Z"
+    },
+    "createdAt": "2026-03-01T00:00:00.000Z",
+    "updatedAt": "2026-09-20T08:10:00.000Z"
+  },
+  {
+    "id": "donor_mohammed_05",
+    "uid": "donor_mohammed_uid",
+    "fullName": "Mohammed Farooq",
+    "phone": "+919876543214",
+    "aadhaarVerified": true,
+    "bloodGroup": "O-",
+    "rhType": "negative",
+    "bloodComponentEligibility": [
+      "whole_blood",
+      "RBC"
+    ],
+    "lastDonationDate": "2026-04-10T00:00:00.000Z",
+    "hemoglobinLevel": 14.1,
+    "weight": 71,
+    "eligibilityStatus": "eligible",
+    "verification": {
+      "hospitalId": "hosp_aj_02",
+      "hospitalName": "AJ Hospital & Research Centre",
+      "certificateId": "LP-CERT-2025-00845",
+      "verifiedAt": "2026-04-10T00:00:00.000Z",
+      "verifiedBy": "Dr. Pradeep Nayak",
+      "expiryDate": "2027-04-10T00:00:00.000Z"
+    },
+    "homeLocality": "Surathkal, Mangaluru",
+    "coordinates": {
+      "latitude": 13.008,
+      "longitude": 74.796
+    },
+    "locationSharingEnabled": false,
+    "preferredRadius": 20,
+    "availabilityStatus": "available",
+    "heroStats": {
+      "totalEmergencyResponses": 6,
+      "totalDonations": 8,
+      "averageResponseTime": 310,
+      "badges": [
+        "life_pulse_hero",
+        "rapid_responder",
+        "rare_blood_hero",
+        "community_champion"
+      ],
+      "lastResponseDate": "2026-09-28T16:00:00.000Z"
+    },
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-09-28T16:00:00.000Z"
+  }
+]

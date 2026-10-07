@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+firebase-debug.log*
+firebase-debug.*.log*
+
+# Environment & Credentials (STRICTLY IGNORED)
+.env
+.env.*
+!.env.example
+client/.env
+client/.env.*
+!client/.env.example
+server/.env
+server/.env.*
+!server/.env.example
+*.local
+
+# Firebase Service Account Keys (STRICTLY IGNORED)
+*adminsdk*.json
+*service-account*.json
+firebase-service-account.json
+server/firebase-service-account.json
+server/*adminsdk*.json
+*.pem
+*.key
+
+# Build outputs
+dist/
+dist-ssr/
+client/dist/
+server/dist/
+
+# OS and Editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Dynamic user uploads (keep seed mock certificates and .gitkeep)
+server/data/certificates/cert_*_*.pdf
+server/data/certificates/cert_*_*.png
+server/data/certificates/cert_*_*.jpg
+server/data/certificates/cert_*_*.jpeg

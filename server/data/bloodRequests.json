@@ -1,0 +1,32 @@
+[
+  {
+    "id": "req_emergency_001",
+    "hospitalId": "hosp_manipal_01",
+    "hospitalName": "Kasturba Hospital, Manipal",
+    "hospitalLocation": {
+      "latitude": 13.3535,
+      "longitude": 74.7865
+    },
+    "patientInfo": {
+      "name": "Ramesh Hegde",
+      "age": 42,
+      "gender": "Male",
+      "ward": "ICU Trauma Bed 4",
+      "doctor": "Dr. Sudhir Rao"
+    },
+    "bloodGroup": "O+",
+    "component": "whole_blood",
+    "unitsRequired": 2,
+    "urgency": "critical",
+    "requiredBy": "2026-10-07T13:07:25.637Z",
+    "radiusKm": 20,
+    "status": "searching",
+    "createdBy": "hospital_manipal_uid",
+    "contactPerson": {
+      "name": "Dr. Anand Kumar",
+      "phone": "+918202922761"
+    },
+    "createdAt": "2026-10-07T09:07:25.637Z",
+    "updatedAt": "2026-10-07T09:07:25.637Z"
+  }
+]

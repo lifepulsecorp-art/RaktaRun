@@ -1,0 +1,70 @@
+[
+  {
+    "id": "hosp_manipal_01",
+    "uid": "hospital_manipal_uid",
+    "name": "Kasturba Hospital, Manipal",
+    "address": "Tiger Circle, Madhav Nagar, Manipal, Karnataka 576104",
+    "district": "Udupi",
+    "coordinates": {
+      "latitude": 13.3535,
+      "longitude": 74.7865
+    },
+    "verificationStatus": "verified",
+    "bloodBankContact": {
+      "name": "Dr. Anand Kumar",
+      "phone": "+918202922761",
+      "email": "bloodbank.khm@manipal.edu"
+    },
+    "licenseNumber": "KA-BB-UDP-042",
+    "registrationNumber": "REG-KH-1953",
+    "verifiedBy": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "verifiedAt": "2026-10-07T09:59:41.029Z",
+    "createdAt": "2026-01-10T09:00:00.000Z",
+    "updatedAt": "2026-10-07T09:59:41.030Z"
+  },
+  {
+    "id": "hosp_aj_02",
+    "uid": "hospital_aj_uid",
+    "name": "AJ Hospital & Research Centre",
+    "address": "Kuntikana, Mangaluru, Karnataka 575004",
+    "district": "Dakshina Kannada",
+    "coordinates": {
+      "latitude": 12.8988,
+      "longitude": 74.8562
+    },
+    "verificationStatus": "verified",
+    "bloodBankContact": {
+      "name": "Dr. Pradeep Nayak",
+      "phone": "+918242225533",
+      "email": "bloodbank@ajhospital.in"
+    },
+    "licenseNumber": "KA-BB-MNG-088",
+    "registrationNumber": "REG-AJ-2001",
+    "verifiedBy": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "verifiedAt": "2026-01-15T11:30:00.000Z",
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T11:30:00.000Z"
+  },
+  {
+    "id": "hosp_udupi_dist_03",
+    "name": "District Government Hospital, Udupi",
+    "address": "Court Road, Udupi, Karnataka 576101",
+    "district": "Udupi",
+    "coordinates": {
+      "latitude": 13.3409,
+      "longitude": 74.7421
+    },
+    "verificationStatus": "verified",
+    "bloodBankContact": {
+      "name": "Dr. Vasudeva K",
+      "phone": "+918202520555",
+      "email": "dh.udupi@karnataka.gov.in"
+    },
+    "licenseNumber": "KA-BB-UDP-007",
+    "registrationNumber": "REG-DH-1970",
+    "verifiedBy": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "verifiedAt": "2026-02-01T09:00:00.000Z",
+    "createdAt": "2026-02-01T08:30:00.000Z",
+    "updatedAt": "2026-02-01T09:00:00.000Z"
+  }
+]
