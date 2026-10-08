@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Award, ShieldCheck, Heart, LogOut, BellRing, UserCheck, Sliders, MessageSquare, Smartphone, Bell, Clock, Compass } from 'lucide-react';
+import { Award, ShieldCheck, Heart, LogOut, BellRing, UserCheck, Sliders, MessageSquare, Smartphone, Bell, Clock, Compass, Camera, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
@@ -19,6 +19,7 @@ export const DonorDashboardPage: React.FC = () => {
   const [busyId, setBusyId] = useState('');
   const [now, setNow] = useState(Date.now());
   const [consent, setConsent] = useState(Boolean(roleData?.publicHeroConsent));
+  const [consentNotice, setConsentNotice] = useState('');
   
   // Donor preference states
   const [preferredRadius, setPreferredRadius] = useState<number>(roleData?.preferredRadius || 15);
@@ -91,10 +92,15 @@ export const DonorDashboardPage: React.FC = () => {
 
   const setPublicConsent = async (enabled: boolean) => {
     setConsent(enabled);
+    setConsentNotice('');
     try {
       await api.put('/donors/me/public-hero-consent', { enabled });
+      setConsentNotice(enabled ? '✓ Featured on Public Hero Wall!' : 'Profile hidden from Public Wall.');
+      setTimeout(() => setConsentNotice(''), 3000);
     } catch {
       setConsent(!enabled);
+      setConsentNotice('Failed to update hero wall status.');
+      setTimeout(() => setConsentNotice(''), 3000);
     }
   };
 
@@ -399,35 +405,65 @@ export const DonorDashboardPage: React.FC = () => {
         </div>
 
         {/* Public Hero Wall Opt-in */}
-        <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 className="font-bold text-white flex items-center gap-2">
-              <Award className="h-5 w-5 text-amber-400" /> Public Hero Wall Recognition
-            </h3>
-            <p className="mt-1 text-sm text-slate-400">
-              Celebrate your life-saving donations publicly. Shows only your first name, district, and blood group. Contact numbers and home coordinates are strictly private.
+        <section className="mt-8 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2 text-amber-400">
+              <Award className="h-5 w-5" />
+              <h3 className="font-bold text-white text-base">Community Hero Recognition & Shareables</h3>
+            </div>
+            <p className="mt-1 text-sm text-slate-400 leading-relaxed">
+              Celebrate your life-saving donations publicly on the LifePulse Community Wall. Displays only your first name, blood group, and verified district. Contact numbers and home coordinates remain strictly confidential.
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-4">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               <Link
                 to="/donor/hero-card"
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:from-rose-500 hover:to-pink-500 transition"
+                className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:shadow-rose-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
-                📱 Preview & Download My Hero Cards →
+                <Camera className="h-4 w-4 transition-transform group-hover:rotate-6" />
+                <span>📱 Preview & Download My Hero Cards →</span>
               </Link>
-              <Link className="text-xs text-slate-400 font-semibold hover:text-white" to="/hero-wall">
-                Visit Community Hero Wall →
+              <Link
+                to="/hero-wall"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-800/80 hover:bg-slate-750 hover:border-slate-600 text-slate-200 hover:text-white px-4 py-2.5 text-xs font-bold transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                <span>Visit Community Hero Wall →</span>
               </Link>
             </div>
           </div>
-          <label className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm font-semibold cursor-pointer">
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setPublicConsent(e.target.checked)}
-              className="accent-rose-600 h-4 w-4"
-            />
-            <span>Show my profile on Public Hero Wall</span>
-          </label>
+
+          <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
+            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-3.5 shadow-inner">
+              <div className="text-left md:text-right">
+                <span className="block text-xs font-bold text-white">Show My Hero Profile</span>
+                <span className="block text-[11px] text-slate-400">
+                  {consent ? '🟢 Public on Wall' : '⚪ Hidden from Wall'}
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={consent}
+                onClick={() => setPublicConsent(!consent)}
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-slate-950 ${
+                  consent ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/20' : 'bg-slate-700'
+                }`}
+                title="Toggle public recognition on hero wall"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    consent ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+            {consentNotice && (
+              <span className="text-xs font-medium text-emerald-400 animate-in fade-in">
+                {consentNotice}
+              </span>
+            )}
+          </div>
         </section>
       </main>
 

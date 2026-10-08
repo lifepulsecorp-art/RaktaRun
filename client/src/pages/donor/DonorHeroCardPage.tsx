@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Download, Camera, Share2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Download, Camera, Share2, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 
@@ -305,18 +305,31 @@ export const DonorHeroCardPage: React.FC = () => {
                 When enabled, your first name, blood group, and completed donation count appear on the public LifePulse Hero Wall. Exact home location and phone numbers remain strictly confidential.
               </p>
 
-              <label className="mt-4 flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 p-4 text-xs font-semibold cursor-pointer">
-                <span className="flex items-center gap-2 text-slate-200">
-                  <CheckCircle2 className={`h-4 w-4 ${consent ? 'text-emerald-400' : 'text-slate-600'}`} />
-                  Feature my profile on the Public Hero Wall
-                </span>
-                <input
-                  type="checkbox"
-                  checked={consent}
-                  onChange={(e) => toggleConsent(e.target.checked)}
-                  className="accent-rose-600 h-4 w-4"
-                />
-              </label>
+              <div className="mt-4 flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-inner">
+                <div>
+                  <span className="block text-xs font-bold text-white">Feature my profile on the Public Hero Wall</span>
+                  <span className="block text-[11px] text-slate-400 mt-0.5">
+                    {consent ? '🟢 Visible to community' : '⚪ Kept private'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={consent}
+                  onClick={() => toggleConsent(!consent)}
+                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-slate-950 ${
+                    consent ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/20' : 'bg-slate-700'
+                  }`}
+                  title="Toggle public recognition on hero wall"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                      consent ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           </div>
         </div>

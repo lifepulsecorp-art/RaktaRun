@@ -174,7 +174,11 @@ export default function HeroWallPage() {
       <header className="border-b border-slate-800 bg-slate-900/60 px-6 py-4 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/" className="rounded-lg border border-slate-700 p-2 text-slate-300 hover:text-white transition">
+            <Link
+              to={role === 'donor' ? '/donor' : role === 'hospital' ? '/hospital' : role === 'admin' ? '/admin' : '/'}
+              className="rounded-lg border border-slate-700 p-2 text-slate-300 hover:text-white transition"
+              title="Return to dashboard"
+            >
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div>

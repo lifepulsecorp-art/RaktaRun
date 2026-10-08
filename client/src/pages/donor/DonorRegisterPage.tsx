@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -15,28 +15,47 @@ import {
 } from 'lucide-react';
 
 export const DonorRegisterPage: React.FC = () => {
-  const { refreshProfile } = useAuth();
+  const { profile, roleData, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form states
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('+91');
-  const [bloodGroup, setBloodGroup] = useState<'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'>('O+');
-  const [components, setComponents] = useState<string[]>(['whole_blood', 'RBC']);
-  const [hemoglobinLevel, setHemoglobinLevel] = useState<number>(14.0);
-  const [weight, setWeight] = useState<number>(68);
-  const [homeLocality, setHomeLocality] = useState('Manipal, Udupi');
-  const [preferredRadius, setPreferredRadius] = useState<number>(15);
+  const [fullName, setFullName] = useState(roleData?.fullName || profile?.name || '');
+  const [phone, setPhone] = useState(roleData?.phone || '+91');
+  const [bloodGroup, setBloodGroup] = useState<'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'>(roleData?.bloodGroup || 'O+');
+  const [components, setComponents] = useState<string[]>(roleData?.bloodComponentEligibility || ['whole_blood', 'RBC']);
+  const [hemoglobinLevel, setHemoglobinLevel] = useState<number>(roleData?.hemoglobinLevel || 14.0);
+  const [weight, setWeight] = useState<number>(roleData?.weight || 68);
+  const [homeLocality, setHomeLocality] = useState(roleData?.homeLocality || 'Manipal, Udupi');
+  const [preferredRadius, setPreferredRadius] = useState<number>(roleData?.preferredRadius || 15);
 
   // Certificate fields
-  const [hospitalName, setHospitalName] = useState('Kasturba Hospital, Manipal');
-  const [certificateId, setCertificateId] = useState(`LP-CERT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`);
-  const [verifiedBy, setVerifiedBy] = useState('Dr. Screening Officer');
-  const [certificateFileName, setCertificateFileName] = useState<string>('');
+  const [hospitalName, setHospitalName] = useState(roleData?.verification?.hospitalName || 'Kasturba Hospital, Manipal');
+  const [certificateId, setCertificateId] = useState(roleData?.verification?.certificateId || `LP-CERT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [verifiedBy, setVerifiedBy] = useState(roleData?.verification?.verifiedBy || 'Dr. Screening Officer');
+  const [certificateFileName, setCertificateFileName] = useState<string>(roleData?.verification?.certificateFileName || '');
   const [certificateFileBase64, setCertificateFileBase64] = useState<string>('');
+
+  useEffect(() => {
+    if (roleData) {
+      if (roleData.fullName) setFullName(roleData.fullName);
+      if (roleData.phone) setPhone(roleData.phone);
+      if (roleData.bloodGroup) setBloodGroup(roleData.bloodGroup);
+      if (roleData.bloodComponentEligibility?.length) setComponents(roleData.bloodComponentEligibility);
+      if (roleData.hemoglobinLevel) setHemoglobinLevel(roleData.hemoglobinLevel);
+      if (roleData.weight) setWeight(roleData.weight);
+      if (roleData.homeLocality) setHomeLocality(roleData.homeLocality);
+      if (roleData.preferredRadius) setPreferredRadius(roleData.preferredRadius);
+      if (roleData.verification?.hospitalName) setHospitalName(roleData.verification.hospitalName);
+      if (roleData.verification?.certificateId) setCertificateId(roleData.verification.certificateId);
+      if (roleData.verification?.verifiedBy) setVerifiedBy(roleData.verification.verifiedBy);
+      if (roleData.verification?.certificateFileName) setCertificateFileName(roleData.verification.certificateFileName);
+    } else if (profile?.name) {
+      setFullName(profile.name);
+    }
+  }, [roleData, profile]);
 
   const toggleComponent = (comp: string) => {
     if (components.includes(comp)) {

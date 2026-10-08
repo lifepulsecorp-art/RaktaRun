@@ -128,6 +128,20 @@ export const LiveTrackingPage: React.FC = () => {
     }
   };
 
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else if (role === 'donor') {
+      navigate('/donor');
+    } else if (role === 'hospital') {
+      navigate('/hospital');
+    } else if (role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/');
+    }
+  };
+
   const donorLocation = myMatch?.donorCurrentLocation;
   const mapPoints = matches.filter((m: any) => m.donorCurrentLocation).map((m: any) => ({ id: m.id, name: m.donor?.fullName || 'Donor', position: m.donorCurrentLocation }));
   const latitudes = [...mapPoints.map((point: any) => point.position.latitude), request?.hospitalLocation?.latitude].filter(Number.isFinite);
@@ -141,7 +155,7 @@ export const LiveTrackingPage: React.FC = () => {
       <header className="border-b border-slate-800 bg-slate-900/70">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="rounded-xl border border-slate-800 p-2 text-slate-400 hover:text-white transition">
+            <button onClick={handleBack} className="rounded-xl border border-slate-800 p-2 text-slate-400 hover:text-white transition" title="Go back">
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>

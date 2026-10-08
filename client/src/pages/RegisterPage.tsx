@@ -1,6 +1,18 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function RegisterPage() {
+  const { role, firebaseUser, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && firebaseUser && role) {
+      if (role === 'admin') navigate('/admin', { replace: true });
+      else if (role === 'hospital') navigate('/hospital', { replace: true });
+      else if (role === 'donor') navigate('/donor', { replace: true });
+    }
+  }, [loading, firebaseUser, role, navigate]);
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
       <div className="max-w-3xl w-full">

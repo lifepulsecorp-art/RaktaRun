@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 export default function DonorRegisterPage() {
+  const { role } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -93,7 +95,7 @@ export default function DonorRegisterPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
       <div className="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8">
-        <Link to="/register" className="text-xs text-slate-500 hover:text-slate-300">← Back</Link>
+        <Link to={role === 'donor' ? '/donor' : '/register'} className="text-xs text-slate-500 hover:text-slate-300">← Back</Link>
         <h1 className="text-2xl font-bold mt-2 mb-1">Donor Registration</h1>
         <p className="text-sm text-slate-400 mb-6">
           You must have a hospital-issued medical certificate to register.
