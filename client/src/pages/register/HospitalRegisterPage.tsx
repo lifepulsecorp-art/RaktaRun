@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
-import { auth } from '../../config/firebase';
 import { api } from '../../utils/api';
 
 export default function HospitalRegisterPage() {
@@ -34,10 +32,18 @@ export default function HospitalRegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, form.email, form.password);
-      await api.post('/auth/register', { role: 'hospital', displayName: form.name });
+      setLoading(true);
+      const regRes = await api.post('/auth/register', {
+        email: form.email,
+        password: form.password,
+        role: 'hospital',
+        displayName: form.name,
+      });
+
+      if (regRes.data?.token) {
+        localStorage.setItem('lifepulse_token', regRes.data.token);
+      }
 
       await api.post('/hospitals/register', {
         name: form.name,

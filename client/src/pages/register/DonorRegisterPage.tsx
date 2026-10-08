@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
-import { auth } from '../../config/firebase';
 import { api } from '../../utils/api';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -31,11 +29,17 @@ export default function DonorRegisterPage() {
     setLoading(true);
 
     try {
-      // 1. Create Firebase Auth account
-      await createUserWithEmailAndPassword(auth, form.email, form.password);
+      // 1. Create account & local JWT on backend
+      const regRes = await api.post('/auth/register', {
+        email: form.email,
+        password: form.password,
+        role: 'donor',
+        displayName: form.fullName,
+      });
 
-      // 2. Create user + donor records on backend
-      await api.post('/auth/register', { role: 'donor', displayName: form.fullName });
+      if (regRes.data?.token) {
+        localStorage.setItem('lifepulse_token', regRes.data.token);
+      }
 
       await api.post('/donors/register', {
         fullName: form.fullName,

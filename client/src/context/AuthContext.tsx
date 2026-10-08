@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   type User as FirebaseUser,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
@@ -45,45 +44,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const user = response.data.user as UserProfile;
       setProfile(user);
       setRoleData(response.data.profile);
+      setFirebaseUser({ uid: user.uid, email: user.email } as any);
       return user;
     } catch (err: any) {
       console.warn('Could not fetch user profile from server:', err.message);
       setProfile(null);
       setRoleData(null);
+      setFirebaseUser(null);
       return null;
     }
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setFirebaseUser(user);
-      if (user) {
+    const initAuth = async () => {
+      const localToken = localStorage.getItem('lifepulse_token');
+      if (localToken) {
         await fetchProfile();
       } else {
-        setProfile(null);
-        setRoleData(null);
+        // Fallback check on Firebase Auth listener if active
+        try {
+          onAuthStateChanged(auth, async (fbUser) => {
+            if (fbUser) {
+              setFirebaseUser(fbUser);
+              await fetchProfile();
+            }
+          });
+        } catch {
+          // Local mode
+        }
       }
       setLoading(false);
-    });
+    };
 
-    return unsubscribe;
+    initAuth();
   }, []);
 
   const login = async (email: string, pass: string): Promise<UserProfile | null> => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      const userProfile = await fetchProfile();
-      return userProfile;
+      // 1. Authenticate against local Express API
+      const res = await api.post('/auth/login', { email, password: pass });
+      const { token, user, profile: roleProfile } = res.data;
+
+      // Save local JWT
+      if (token) {
+        localStorage.setItem('lifepulse_token', token);
+      }
+
+      setProfile(user);
+      setRoleData(roleProfile);
+      setFirebaseUser({ uid: user.uid, email: user.email } as any);
+      return user;
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || err.message || 'Login failed';
+      throw new Error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   const logout = async () => {
-    await signOut(auth);
+    localStorage.removeItem('lifepulse_token');
+    try {
+      await signOut(auth);
+    } catch {
+      // Ignore
+    }
     setProfile(null);
     setRoleData(null);
+    setFirebaseUser(null);
   };
 
   return (
