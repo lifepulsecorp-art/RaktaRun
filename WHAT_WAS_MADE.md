@@ -1,256 +1,277 @@
-# 🩸 LifePulse — Phase 1 Complete System Delivery Report
+# 🩸 LifePulse — Complete System Delivery Report (Phases 1–4)
 
 > **Project:** LifePulse — Real-Time Emergency Blood Coordination Network for Coastal Karnataka (Udupi & Dakshina Kannada)  
-> **Status:** **Phase 1: Foundation, Authentication & Medical Accreditation — 100% COMPLETE ✅**  
-> **Date:** October 7, 2026  
+> **Status:** **Phases 1–4: Core Emergency Matching, Transit Tracking & Hero Network — 100% IMPLEMENTED & VERIFIED ✅**  
+> **Date:** October 8, 2026  
 > **Architecture:** React 19 (Vite) + Express (TypeScript) + JSON Data Layer + Firebase Auth  
+> **Repository:** [`https://github.com/nosij-playz/lifepulse`](https://github.com/nosij-playz/lifepulse) (`main` branch)
 
 ---
 
 ## 🎯 Executive Summary
 
-Phase 1 established the verified medical foundation of LifePulse. Unlike public open-directory apps, LifePulse operates as a **strictly verified emergency network**:
-- Donors must possess a medical screening certificate issued by accredited blood banks.
-- Hospitals must be verified by the District LifePulse Administrator.
-- All authenticated actions are cryptographically verified using Firebase ID tokens and role-based access control (RBAC).
-
-Both the client and server are fully implemented, verified, and operable via a single root command: `npm run dev`.
+LifePulse is a medically authoritative, real-time emergency blood coordination system built specifically for the **Udupi and Dakshina Kannada** districts. Unlike public directory apps that expose personal numbers, LifePulse enforces:
+1. **Accredited Network Only:** Donors must hold verified hospital screening certificates; hospitals must be accredited by district administrators.
+2. **Medical Authority Matching Engine:** Algorithmic ranking considering blood group compatibility, component interval rules, certificate expiration, and response histories.
+3. **Privacy-by-Design Tracking:** Donor live coordinates are ephemeral and shared only upon accepting an emergency request, terminating automatically within 150m of hospital arrival.
+4. **Community Recognition:** Opt-in Hero Wall with downloadable social share cards celebrating life-saving donors.
 
 ---
 
 ## 🏗️ Architecture Blueprint
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│               React 19 Frontend (client/)               │
-│  - Firebase Auth (Client Login / ID Token Generation)   │
-│  - Axios Interceptor → Attaches 'Bearer <idToken>'      │
-│  - Single App Architecture with 3 Role Route Groups:    │
-│    • /admin/*      → Admin Command Center               │
-│    • /hospital/*   → Hospital Emergency Portal          │
-│    • /donor/*      → Medically Verified Donor Portal    │
-└────────────────────────────┬────────────────────────────┘
-                             │ REST + JWT (Firebase ID token)
-                             ↓
-┌─────────────────────────────────────────────────────────┐
-│               Express Backend (server/)                 │
-│  - Firebase Admin SDK (Verifies ID Tokens via Google)   │
-│  - RBAC Middleware (admin, hospital, donor)             │
-│  - Routes: /api/auth, /api/hospitals, /api/donors       │
-│  - Proximity Matching Engine (Haversine + Scoring)      │
-│  - Static Certificate Document Server                   │
-└────────────────────────────┬────────────────────────────┘
-                             │ Atomic Read / Write
-                             ↓
-┌─────────────────────────────────────────────────────────┐
-│              JSON Data Layer (server/data/)             │
-│  - users.json          (System accounts & roles)        │
-│  - hospitals.json      (Accredited medical centers)     │
-│  - donors.json         (Screened donors & vitals)       │
-│  - bloodRequests.json  (Emergency requests)             │
-│  - matches.json        (Compatibility scores & ranks)   │
-│  - certificates/       (Physical certificate files)     │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                 React 19 Frontend (client/)                 │
+│  - Public Landing & Registration (/, /register, /hero-wall) │
+│  - Hospital Dispatch & Profile (/hospital/*)                │
+│  - Donor Alert & Availability Portal (/donor/*)             │
+│  - Admin Telemetry & Audit Center (/admin/*)                │
+│  - Real-Time Live Radar Transit Tracking (/live-tracking/*) │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ REST + Bearer <Firebase ID Token>
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│                 Express Backend (server/)                   │
+│  - Firebase Admin SDK Token Verification & RBAC Guards      │
+│  - Matching & Dispatch Engine (server/src/services/matching)│
+│  - Auto-Escalation Loop (server/src/services/escalation)    │
+│  - Ephemeral Journey Tracker (server/src/services/journey)  │
+│  - District Telemetry, Audit Logs & Hero Endpoints          │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ Atomic Read / Write
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│                JSON Data Layer (server/data/)               │
+│  - users.json          (System accounts & roles)            │
+│  - hospitals.json      (Accredited medical centers)         │
+│  - donors.json         (Screened donors & vitals)           │
+│  - bloodRequests.json  (Emergency requests & dispatches)    │
+│  - matches.json        (Ranked candidate matches & ETAs)    │
+│  - certificates/       (Stored digital certificates)        │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-> **Future MongoDB / Firestore Migration**: The JSON data layer models exactly match a 1:1 document shape. When migrating to MongoDB or Cloud Firestore, simply swap `server/src/utils/db.ts` methods with collection queries without touching business logic or route controllers.
+---
+
+## 📦 Phase-by-Phase Implementation Details
+
+### 🔹 Phase 1: Foundation, Authentication & Medical Accreditation
+
+1. **Client & Server Foundation:**
+   - React 19, Vite 8, TailwindCSS 4, React Router 7, Express 4, TypeScript 5.
+   - Root orchestration via `concurrently` enabling one-command startup (`npm run dev`).
+2. **Firebase Auth Integration:**
+   - Client token generation with automated Axios Bearer interceptor ([`client/src/utils/api.ts`](file:///d:/Echelonglobal/Lifepulse/client/src/utils/api.ts)).
+   - Backend verification using Firebase Admin SDK ([`server/src/utils/firebaseAdmin.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/utils/firebaseAdmin.ts)) with role-based guards (`admin`, `hospital`, `donor`).
+3. **JSON Data Layer & Seeder:**
+   - Persistence layer in [`server/src/utils/db.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/utils/db.ts).
+   - Seeder in [`server/src/utils/seed.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/utils/seed.ts) pre-populating admin, 3 regional hospitals, 5 verified donors, and active trauma requests.
+4. **Accreditation Portals:**
+   - **Admin Hospital Audit (`/admin/hospitals`):** Accreditation approval and revocation.
+   - **Hospital Profile & Licensing (`/hospital/profile`):** Facility registration, Manipal/Mangaluru/Udupi coordinate presets.
+   - **Donor Screening Submission (`/donor/register`):** Certificate attachment, component eligibility, vitals.
+   - **Admin Donor Inspection (`/admin/donors`):** Document verification, approve, defer, and disqualify actions.
+5. **Public Onboarding & Registration Suite:**
+   - Landing page ([`HomePage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/HomePage.tsx)), Role Chooser ([`RegisterPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/RegisterPage.tsx)), Self-service donor & hospital registration ([`DonorRegisterPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/register/DonorRegisterPage.tsx), [`HospitalRegisterPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/register/HospitalRegisterPage.tsx)), and review holding screens.
 
 ---
 
-## 📦 Detailed Block-by-Block Implementation
+### 🔹 Phase 2: Core Emergency Matching & Alert Dispatch Engine
 
-### 🔹 Block A: Frontend Foundation
-- **Stack:** React 19, Vite 8, TailwindCSS 4, React Router 7, Lucide Icons.
-- **Setup:** Configured client build pipeline, strict typing, responsive layout containers, and emergency theme palette (Rose-600 / Slate-950).
-
-### 🔹 Block B: Express Backend & Firebase Admin SDK
-- **Stack:** Express 4, TypeScript 5, `tsx` watch mode, CORS, Dotenv.
-- **Firebase Admin SDK:** Initialized in [`server/src/utils/firebaseAdmin.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/utils/firebaseAdmin.ts) using the service account key (`lifepulse-dev`).
-- **Cleaned Up:** Deleted obsolete Cloud Functions and Firestore emulator rules from earlier scaffolding, leaving clean REST architecture.
-
-### 🔹 Block C: JSON Data Layer & Seed Database
-- **TypeScript Data Models:** [`server/src/types.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/types.ts) defining `User`, `Hospital`, `Donor`, `BloodRequest`, `Match`, `DonorVerification`, `HeroStats`.
-- **Database Engine:** [`server/src/utils/db.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/utils/db.ts) providing atomic read/write, `find`, `filter`, `insert`, `update`, and `remove`.
-- **Database Seeder:** [`server/src/utils/seed.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/utils/seed.ts) populated with:
-  - 1 System Admin user (UID: `5G6ajWegMiepIzvIyreG7bx82SG2`)
-  - 3 Accredited Hospitals in Udupi & Mangaluru
-  - 5 Hospital-screened donors with coordinates & mock certificates
-  - 1 Trauma ICU emergency request with 2 ranked matches.
-- **Execution:** Run via `npm run seed`.
-
-### 🔹 Block D: Express REST Routes & Authentication Middleware
-- **Auth Middleware:** [`server/src/middleware/auth.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/middleware/auth.ts) with `authenticate` (decodes Firebase ID token) and `authorizeRoles` (`admin`, `hospital`, `donor`).
-- **Auth Routes:** [`server/src/routes/authRoutes.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/routes/authRoutes.ts) (`GET /api/auth/me`, `POST /api/auth/sync`).
-- **Hospital Routes:** [`server/src/routes/hospitalRoutes.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/routes/hospitalRoutes.ts):
-  - `GET /api/hospitals` (Public/verified directory)
-  - `GET /api/hospitals/:id` (Details)
-  - `POST /api/hospitals` (Registration)
-  - `PUT /api/hospitals/:id` (Profile & coordinate update)
-  - `PUT /api/hospitals/:id/verify` (Admin accreditation decision)
-  - `GET /api/hospitals/:id/requests` (List emergency requests)
-  - `POST /api/hospitals/:id/requests` (Emergency dispatch + matching algorithm)
-  - `GET /api/hospitals/:id/requests/:requestId/matches` (Real-time ranked matches)
-- **Donor Routes:** [`server/src/routes/donorRoutes.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/routes/donorRoutes.ts):
-  - `GET /api/donors` (Admin & hospital donor registry)
-  - `GET /api/donors/me` (Authenticated donor profile)
-  - `POST /api/donors` (Registration with certificate file saving)
-  - `PUT /api/donors/:id/availability` (Availability status toggle)
-  - `PUT /api/donors/:id/verify` (Admin eligibility decision & deferrals)
-  - `GET /api/donors/me/alerts` (Incoming emergency alerts)
-  - `POST /api/donors/matches/:matchId/respond` (Accept / Decline alert)
-  - `POST /api/donors/matches/:matchId/location` (Live GPS transit streaming)
-- **Static Documents:** Configured static route `/certificates` serving files from `server/data/certificates/`.
-
-### 🔹 Block E: React Auth Shell & Role Guard
-- **API Client:** [`client/src/utils/api.ts`](file:///d:/Echelonglobal/Lifepulse/client/src/utils/api.ts) with Axios interceptor fetching Firebase ID tokens automatically.
-- **Auth Context:** [`client/src/context/AuthContext.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/context/AuthContext.tsx) tracking login session, user profile, role, and role records.
-- **Route Guard:** [`client/src/routes/ProtectedRoute.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/routes/ProtectedRoute.tsx) blocking unauthorized users and roles.
-- **Login Screen:** [`client/src/pages/LoginPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/LoginPage.tsx) with emergency branding, demo quick-fill, and immediate role-based redirecting.
-- **403 Screen:** [`client/src/pages/UnauthorizedPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/UnauthorizedPage.tsx).
-
-### 🔹 Block F: Admin Hospital Accreditation Audit UI
-- **URL:** [`/admin/hospitals`](http://localhost:5173/admin/hospitals)
-- **File:** [`client/src/pages/admin/AdminHospitalsPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/admin/AdminHospitalsPage.tsx)
-- **Capabilities:**
-  - Real table listing all hospitals with search and multi-district filters (Udupi / Dakshina Kannada).
-  - Inspects blood bank license, hospital registration number, coordinates, emergency officer details.
-  - **Live Audit Actions:** One-click "Approve Accreditation" and "Revoke Approval" with instant database updates.
-
-### 🔹 Block G: Hospital Profile & Licensing Setup UI
-- **URL:** [`/hospital/profile`](http://localhost:5173/hospital/profile)
-- **File:** [`client/src/pages/hospital/HospitalProfilePage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/hospital/HospitalProfilePage.tsx)
-- **Capabilities:**
-  - Live accreditation status card (`Accredited` vs `Verification In Progress`).
-  - Facility details form: Hospital name, physical address, district.
-  - **One-Click Location Presets:** Pre-fills exact coordinates for Manipal, Mangaluru, and Udupi City.
-  - Licensing & state registration fields.
-  - Emergency officer contact details (Doctor name, direct phone, official email).
-
-### 🔹 Block H: Donor Medical Onboarding & Certificate Upload UI
-- **URL:** [`/donor/register`](http://localhost:5173/donor/register)
-- **File:** [`client/src/pages/donor/DonorRegisterPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/donor/DonorRegisterPage.tsx)
-- **Capabilities:**
-  - Personal information: Full name, phone, locality, emergency response radius.
-  - Medical typing & vitals: Blood group selection (`O+`, `O-`, `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-`), Hemoglobin (g/dL), Weight (kg).
-  - Component eligibility multi-select: Whole Blood, RBC, Platelets, Plasma.
-  - **Hospital Certificate Attachment:** Input for screening hospital, certificate serial ID, screener doctor, and document file upload (PDF/PNG/JPG/TXT) converted to base64.
-
-### 🔹 Block I: Admin Donor Certificate Approval UI
-- **URL:** [`/admin/donors`](http://localhost:5173/admin/donors)
-- **File:** [`client/src/pages/admin/AdminDonorsPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/admin/AdminDonorsPage.tsx)
-- **Capabilities:**
-  - Live table of all registered donors with search and blood group filters.
-  - Vitals inspector (Hemoglobin, weight, component eligibility).
-  - Hospital certificate inspector: Certificate ID, screening facility, doctor, and direct link to view the document.
-  - **Live Audit Decisions:** "Approve & Activate" (marks eligible), "Defer" (temporary deferral with reason), and "Disqualify" (permanent deferral).
+1. **Medical Matching Service ([`server/src/services/matching.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/services/matching.ts)):**
+   - **Strict Compatibility Matrix:** Full recipient-to-donor compatibility table (`O-`, `O+`, `A-`, `A+`, `B-`, `B+`, `AB-`, `AB+`).
+   - **Component Donation Interval Enforcement:**
+     - Whole Blood & RBC: 90 days minimum interval.
+     - Platelets: 14 days minimum interval.
+     - Plasma: 28 days minimum interval.
+   - **Certificate Validity Validation:** Donors with expired hospital certificates are automatically excluded from alerts.
+   - **Availability Rules:** Donors marked `emergency_only` are alerted solely for `critical` trauma cases; `unavailable` donors are excluded.
+   - **Distance & Ranked Scoring:** Calculates distance via Haversine formula and scores candidates based on proximity, response time history, donation recency, and component match.
+2. **Auto-Escalation Engine ([`server/src/services/escalation.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/services/escalation.ts)):**
+   - Alerts include a strict **2-minute response window** (`alertExpiresAt`). Unanswered alerts transition to `expired`.
+   - If required units remain unfulfilled, the search radius automatically expands in **+5 km increments (up to 50 km)**.
+   - Background scheduler runs every 30 seconds ([`server/src/index.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/index.ts)).
+3. **Emergency Dispatch UI ([`client/src/pages/hospital/EmergencyRequestPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/hospital/EmergencyRequestPage.tsx)):**
+   - URL: [`/hospital/request/new`](http://localhost:5173/hospital/request/new)
+   - Form fields: Recipient blood group, component type, units required (1–10), urgency level (`critical`, `urgent`, `standard`), initial radius (10–50 km), ward/bed, clinician in charge.
+   - Recent dispatches feed with auto-polling every 8 seconds.
+   - Seamless navigation to live tracking upon dispatch creation.
+4. **Donor Real-Time Alert Feeds:**
+   - Integrated into [`client/src/pages/DonorDashboardPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/DonorDashboardPage.tsx).
+   - Displays incoming emergency alert cards with 2-minute countdown timer, hospital name, distance, component needed, and one-click **"Accept Emergency"** or **"Decline"** actions.
 
 ---
 
-## 🗺️ System Route Reference
+### 🔹 Phase 3: Real-Time Live Journey & Transit Tracking
+
+1. **Journey Service ([`server/src/services/journey.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/services/journey.ts)):**
+   - `resolveDonorResponse`: Handles donor accept/decline state transitions with quota limits.
+   - `updateJourney`: Computes real-time straight-line distance remaining and dynamic ETA in minutes.
+   - **150m Arrival Auto-Cutoff:** When a donor arrives within 150 metres of the hospital, status changes to `reached`, and live location sharing is automatically stopped to protect donor privacy.
+   - `completeDonation`: Marks donation fulfilled, increments lifetime counts, and issues appropriate recognition badges.
+2. **Live Radar Tracking UI ([`client/src/pages/LiveTrackingPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/LiveTrackingPage.tsx)):**
+   - URL: [`/live-tracking/:requestId`](http://localhost:5173/live-tracking/req_emergency_001)
+   - **Hospital View:**
+     - Custom SVG transit radar visualizing approximate donor positions relative to the medical center.
+     - Active donors in transit with score, remaining distance, ETA countdown, and GPS timestamp.
+     - One-click **"Confirm donation complete"** button once donor arrives.
+     - Option to **"Cancel request"** which halts all transit streams.
+   - **Donor View:**
+     - "Your trip to the hospital" journey interface.
+     - One-click **"Start live location sharing"** streaming browser Geolocation coordinates.
+     - Real-time notice when within 150m: *"Hospital reached. Location sharing has stopped."*
+3. **Endpoints & Security Scoping:**
+   - `POST /api/donors/matches/:matchId/location`: Validates coordinate bounds and restricts writes strictly to the accepted donor.
+   - `POST /api/hospitals/:id/requests/:requestId/matches/:matchId/complete`: Confirms completion and awards hero statistics.
+   - `POST /api/hospitals/:id/requests/:requestId/cancel`: Closes request and clears ephemeral locations.
+
+---
+
+### 🔹 Phase 4: Hero Recognition & Public Wall
+
+1. **Public Hero Wall ([`client/src/pages/HeroWallPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/HeroWallPage.tsx)):**
+   - URL: [`/hero-wall`](http://localhost:5173/hero-wall)
+   - Celebrates community donors who have completed donations and explicitly opted into public visibility.
+   - Displays donor display name, district, blood group, donation count, and earned badges.
+   - **Privacy Protection:** Phone numbers, home locations, and coordinates are strictly excluded from public views.
+2. **Automated Social Share Card Generator:**
+   - Client-side Canvas rendering (1200x630 banner).
+   - Generates high-resolution PNG share cards with donor name, district, blood group, completed donations count, and emergency motto.
+   - 1-click **"Download share card"** button.
+3. **Donor Consent Management:**
+   - `PUT /api/donors/me/public-hero-consent` allows donors to toggle public visibility on or off from their profile.
+4. **Hero Badge Issuance Engine:**
+   - `life_pulse_hero`: Awarded upon first completed emergency donation.
+   - `repeat_hero`: Awarded after 3+ completed donations.
+   - `rare_blood_hero`: Awarded to donors with Rh-negative blood groups (`O-`, `A-`, `B-`, `AB-`).
+   - `rapid_responder`: Awarded when average response time is under 10 minutes (600s).
+
+---
+
+### 🔹 Security Hardening & Administrative Telemetry
+
+1. **District Telemetry API ([`server/src/routes/adminRoutes.ts`](file:///d:/Echelonglobal/Lifepulse/server/src/routes/adminRoutes.ts)):**
+   - `GET /api/admin/telemetry`: Aggregates active requests, fulfilled requests, donors en route, verified hospitals, and breakdown by district (Udupi & Dakshina Kannada).
+2. **Audit Logging Framework:**
+   - `GET /api/admin/audit-logs`: Administrative audit trail logging timestamped actor actions (`request.dispatched`, `donation.completed`, `donor.eligibility_updated`, `request.cancelled`).
+3. **Access Controls:**
+   - Scoped route authorization preventing unauthorized hospitals from reading peer dispatches or unauthorized users accessing private donor dossiers.
+
+---
+
+## 🗺️ Complete Route Directory
 
 ### Frontend URLs
-| Path | Component | Protected Role | Purpose |
+| Path | Component | Access | Description |
 |---|---|---|---|
-| `/login` | `LoginPage` | Public | Emergency sign-in portal |
+| `/` | `HomePage` | Public | Emergency network landing page |
+| `/login` | `LoginPage` | Public | Sign-in portal with quick-fill demo buttons |
+| `/register` | `RegisterPage` | Public | Role selection (Donor vs. Hospital) |
+| `/register/donor` | `DonorRegisterPage` | Public | Fresh donor signup & certificate upload |
+| `/register/hospital` | `HospitalRegisterPage` | Public | Fresh hospital registration & presets |
+| `/hero-wall` | `HeroWallPage` | Public | Opt-in community hero wall & share card generator |
+| `/donor/pending` | `DonorPendingPage` | Authenticated | Holding screen awaiting certificate verification |
+| `/hospital/pending` | `HospitalPendingPage` | Authenticated | Holding screen awaiting licensing review |
+| `/admin` | `AdminDashboardPage` | `admin` | District command center & telemetry overview |
+| `/admin/hospitals` | `AdminHospitalsPage` | `admin` | Hospital accreditation audit table |
+| `/admin/donors` | `AdminDonorsPage` | `admin` | Donor medical certificate inspection & approval |
+| `/hospital` | `HospitalDashboardPage` | `hospital`, `admin` | Hospital dispatch console & emergency stats |
+| `/hospital/profile` | `HospitalProfilePage` | `hospital`, `admin` | Facility licensing & coordinate configuration |
+| `/hospital/request/new` | `EmergencyRequestPage` | `hospital`, `admin` | Emergency request creation & dispatch |
+| `/donor` | `DonorDashboardPage` | `donor`, `admin` | Hero portal, live alerts, and availability toggle |
+| `/live-tracking/:requestId` | `LiveTrackingPage` | Authenticated | Real-time transit radar & GPS tracker |
 | `/unauthorized` | `UnauthorizedPage` | Public | 403 Forbidden screen |
-| `/admin` | `AdminDashboardPage` | `admin` | Command center with system telemetry |
-| `/admin/hospitals` | `AdminHospitalsPage` | `admin` | **Block F**: Hospital accreditation audit table |
-| `/admin/donors` | `AdminDonorsPage` | `admin` | **Block I**: Donor certificate inspection & approval |
-| `/hospital` | `HospitalDashboardPage` | `hospital`, `admin` | Hospital portal shell & active dispatches |
-| `/hospital/profile` | `HospitalProfilePage` | `hospital`, `admin` | **Block G**: Accreditation profile & licensing setup |
-| `/donor` | `DonorDashboardPage` | `donor`, `admin` | Donor hero portal, certificate badge & availability |
-| `/donor/register` | `DonorRegisterPage` | `donor`, `admin` | **Block H**: Medical screening registration & certificate upload |
-| `/live-tracking/:requestId` | `LiveTrackingPage` | Authenticated | Real-time transit telemetry & donor ETA tracker |
+
+---
 
 ### Backend REST API Endpoints
 | Method | Endpoint | Access Role | Description |
 |---|---|---|---|
 | `GET` | `/api/health` | Public | Server health check |
 | `GET` | `/api/auth/me` | Authenticated | Current user profile & attached role record |
-| `POST` | `/api/auth/sync` | Authenticated | Synchronize user role, name, phone |
-| `GET` | `/api/hospitals` | Public | List verified hospitals in coastal Karnataka |
-| `GET` | `/api/hospitals/:id` | Public | Single hospital details |
-| `POST` | `/api/hospitals` | Authenticated | Register new hospital |
-| `PUT` | `/api/hospitals/:id` | Hospital / Admin | Update hospital profile, coordinates, license |
+| `POST` | `/api/auth/sync` | Authenticated | Synchronize user details |
+| `POST` | `/api/auth/register` | Authenticated | Assign role & name during onboarding |
+| `GET` | `/api/hospitals` | Public | Directory of accredited hospitals |
+| `GET` | `/api/hospitals/:id` | Public | Hospital details |
+| `POST` | `/api/hospitals/register` | Authenticated | Self-service hospital registration |
+| `PUT` | `/api/hospitals/:id` | Hospital / Admin | Update hospital profile & coordinates |
 | `PUT` | `/api/hospitals/:id/verify` | Admin | Approve or reject hospital accreditation |
-| `GET` | `/api/hospitals/:id/requests` | Authenticated | Get hospital's emergency blood requests |
+| `GET` | `/api/hospitals/:id/requests` | Authenticated | List hospital's emergency blood requests |
 | `POST` | `/api/hospitals/:id/requests` | Hospital / Admin | Dispatch emergency request + run matching engine |
-| `GET` | `/api/hospitals/:id/requests/:requestId/matches` | Authenticated | Ranked matches with donor vitals & tracking |
-| `GET` | `/api/donors` | Hospital / Admin | Registry of verified donors |
-| `GET` | `/api/donors/me` | Authenticated | Current donor profile |
-| `POST` | `/api/donors` | Authenticated | Onboard donor with certificate file |
+| `GET` | `/api/hospitals/:id/requests/:requestId/matches` | Authenticated | Ranked matches with transit telemetry |
+| `POST` | `/api/hospitals/:id/requests/:requestId/cancel` | Hospital / Admin | Cancel active emergency request |
+| `POST` | `/api/hospitals/:id/requests/:requestId/matches/:matchId/complete` | Hospital / Admin | Mark donation complete and award badges |
+| `GET` | `/api/requests/:requestId` | Authenticated | Get blood request metadata |
+| `GET` | `/api/donors` | Hospital / Admin | Registry of screened donors |
+| `GET` | `/api/donors/me` | Authenticated | Authenticated donor profile |
+| `POST` | `/api/donors/register` | Authenticated | Self-service donor registration |
+| `POST` | `/api/donors/certificate` | Authenticated | Upload screening certificate document |
 | `PUT` | `/api/donors/:id/availability` | Authenticated | Toggle availability status |
-| `PUT` | `/api/donors/:id/verify` | Admin | Set donor eligibility (eligible / deferred) |
-| `GET` | `/api/donors/me/alerts` | Authenticated | Incoming emergency requests for donor |
-| `POST` | `/api/donors/matches/:matchId/respond` | Authenticated | Accept or decline emergency request |
+| `PUT` | `/api/donors/:id/verify` | Admin | Set donor eligibility status |
+| `GET` | `/api/donors/me/alerts` | Authenticated | Active incoming emergency alerts for donor |
+| `POST` | `/api/donors/matches/:matchId/respond` | Authenticated | Accept or decline emergency alert |
 | `POST` | `/api/donors/matches/:matchId/location` | Authenticated | Stream live GPS coordinates |
-| `GET` | `/certificates/:filename` | Public | Serve static certificate documents |
+| `GET` | `/api/donors/me/matches/:requestId` | Authenticated | Donor trip and match details |
+| `PUT` | `/api/donors/me/public-hero-consent` | Authenticated | Toggle public hero wall opt-in |
+| `GET` | `/api/heroes` | Public | List opt-in public heroes & badges |
+| `GET` | `/api/admin/telemetry` | Admin | District-wide totals and telemetry |
+| `GET` | `/api/admin/audit-logs` | Admin | System audit trail |
+| `GET` | `/certificates/:filename` | Public | Static certificate document server |
 
 ---
 
-## 🔑 Demonstration Credentials & Seed Data
+## 🔑 Demonstration Credentials & Accounts
 
-### 1. System Administrator
-- **Email:** `admin@lifepulse.in`
-- **Password:** Set in Firebase Console
-- **Firebase UID:** `5G6ajWegMiepIzvIyreG7bx82SG2`
-- **Role:** `admin` (Full access to all command centers, hospital approvals, and donor audits)
+| Role | Email | Password | Access Rights |
+| :--- | :--- | :--- | :--- |
+| 🛡️ **System Admin** | `admin@lifepulse.in` | *(Console Password)* | Full administrative oversight, approvals, and telemetry |
+| 🏥 **Hospital Staff (Manipal)** | `manipal@lifepulse.in` | `LifePulse@123` | Kasturba Hospital Manipal dispatch & profile console |
+| 🏥 **Hospital Staff (Mangaluru)** | `ajhospital@lifepulse.in` | `LifePulse@123` | AJ Hospital & Research Centre dispatch console |
+| 🩸 **Verified Donor (Rahul)** | `rahul.shetty@gmail.com` | `LifePulse@123` | O+ Screened donor with active alert feeds & journey tracking |
+| 🩸 **Verified Donor (Sneha)** | `sneha.rao@gmail.com` | `LifePulse@123` | A+ Screened donor with active alert feeds |
 
-### 2. Pre-Seeded Hospitals
-1. **Kasturba Hospital, Manipal** (`hosp_manipal_01`)
-   - District: Udupi | Coordinates: `13.3535, 74.7865`
-   - License: `KA-BB-UDP-042` | Status: `verified`
-2. **AJ Hospital & Research Centre** (`hosp_aj_02`)
-   - District: Dakshina Kannada | Coordinates: `12.8988, 74.8562`
-   - License: `KA-BB-MNG-088` | Status: `verified`
-3. **District Government Hospital, Udupi** (`hosp_udupi_dist_03`)
-   - District: Udupi | Coordinates: `13.3409, 74.7421`
-   - License: `KA-BB-UDP-007` | Status: `verified`
+*(All non-admin accounts are provisioned directly in Firebase Auth with matching records in `users.json`)*.
 
 ---
 
-## 🌐 Public Onboarding & Self-Service Registration Suite
+## 🧪 Automated Testing & Verification
 
-To accommodate fresh users joining the network, a complete public onboarding and self-service registration pipeline was added:
+1. **Server Unit & Simulation Test Suite:**
+   ```bash
+   npm run test --prefix server
+   ```
+   **Output:** `✔ 7 tests passed (0 failed)`
+   - Recipient-to-donor compatibility matrix.
+   - Kasturba Hospital Manipal O-negative proximity dispatch.
+   - AJ Hospital Mangaluru localized trauma matching.
+   - Deferral, certificate expiry, and component interval rejections.
+   - Emergency-only availability constraints.
+   - Full trauma journey simulation (dispatch ➔ accept ➔ stream ➔ arrive ➔ complete ➔ badge issuance).
+   - 2-minute alert expiration timeout enforcement.
 
-### 1. New Pages & UI Routes
-- **Landing Page (`/` — `HomePage.tsx`)**: Hero banner, district scope overview, role highlights, direct links to Login and Register.
-- **Role Chooser (`/register` — `RegisterPage.tsx`)**: Interactive card selection between Donor Registration and Hospital Registration.
-- **Donor Registration (`/register/donor` — `DonorRegisterPage.tsx`)**: Public signup creating Firebase Auth credentials, demographic/vitals profile, and digital hospital certificate file upload.
-- **Hospital Registration (`/register/hospital` — `HospitalRegisterPage.tsx`)**: Public facility registration with license details, contacts, and Manipal/Mangaluru/Udupi coordinate presets.
-- **Donor Pending View (`/donor/pending` — `DonorPendingPage.tsx`)**: Friendly review holding screen for donors whose certificates are awaiting admin verification.
-- **Hospital Pending View (`/hospital/pending` — `HospitalPendingPage.tsx`)**: Review holding screen for hospital administrators awaiting licensing accreditation.
-- **Login Page (`/login` — `LoginPage.tsx`)**: Added "Register here →" link and "← Back to home" navigation.
+2. **Client Production Build:**
+   ```bash
+   npm run build --prefix client
+   ```
+   **Output:** `✓ built in 7.69s` (Zero TypeScript or bundling errors).
 
-### 2. Backend Self-Service Endpoints
-- **`POST /api/auth/register`**: Assigns onboarding user roles (`donor` or `hospital`) and display names.
-- **`POST /api/donors/register`**: Creates donor records with status `pending` linked to the authenticated UID.
-- **`POST /api/donors/certificate`**: Uploads and saves screening certificates (base64) to `server/data/certificates/`.
-- **`POST /api/hospitals/register`**: Registers hospital facilities with status `pending` linked to the authenticated UID.
-- **Admin Verification (`PUT /api/donors/:id/verify`)**: Updated to handle approving newly registered pending donors.
+---
 
-## 🚀 How to Run the Application
-
-From the project root directory (`D:\Echelonglobal\Lifepulse`):
+## 🚀 Running the Project
 
 ```bash
-# Start both Backend (port 5000) and Frontend (port 5173) simultaneously:
+# 1. Install root dependencies:
+npm install
+
+# 2. Run backend (port 5000) and frontend (port 5173) concurrently:
 npm run dev
 
-# Re-seed the JSON database at any time:
+# 3. Optional: Re-seed demo database at any time:
 npm run seed
 ```
 
-- **Open Frontend in Browser:** [http://localhost:5173](http://localhost:5173)
-- **Backend API Health Check:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
-
----
-
-## 🔜 Phase 2 Roadmap — Next Deliverables
-
-With Phase 1 complete, the project moves to **Phase 2: Core Emergency Matching**:
-1. **Emergency Dispatch Modal (`/hospital/request/new`)**: Hospital form to trigger emergency alerts for critical trauma cases.
-2. **Real-Time Matching & Scoring Engine Integration**: Hospital UI displaying top ranked donors within specified radius (10–25km).
-3. **Donor Emergency Alert Modal**: Pop-up alert for matched donors with countdown timer and one-click Accept / Decline.
-4. **Escalation Logic**: Automatic radius expansion and alert escalation if insufficient donors respond within 2 minutes.
-
+- **Frontend:** [http://localhost:5173](http://localhost:5173)
+- **Backend Health:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
+- **Public Hero Wall:** [http://localhost:5173/hero-wall](http://localhost:5173/hero-wall)
+- **Pilot Readiness Guide:** See [`PILOT_READINESS.md`](file:///d:/Echelonglobal/Lifepulse/PILOT_READINESS.md) for clinical and operational pre-launch steps.
