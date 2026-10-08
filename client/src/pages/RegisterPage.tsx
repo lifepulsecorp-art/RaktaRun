@@ -34,12 +34,17 @@ export default function RegisterPage() {
             <p className="text-sm text-slate-400 mb-4">
               You've been medically screened by a hospital and have a valid donor certificate.
             </p>
-            <ul className="text-xs text-slate-500 space-y-1 mb-6">
+            <ul className="text-xs text-slate-500 space-y-1 mb-4">
               <li>✓ Upload your hospital-issued certificate</li>
               <li>✓ Set your location & availability</li>
               <li>✓ Receive emergency alerts</li>
             </ul>
-            <div className="text-red-500 font-semibold text-sm">Continue →</div>
+            <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800/80">
+              <span className="text-red-500 font-semibold text-sm">Continue →</span>
+              <span className="text-[11px] text-amber-400/90 font-medium group-hover:text-amber-300">
+                No certificate? See hospitals →
+              </span>
+            </div>
           </Link>
 
           {/* Hospital Card */}
