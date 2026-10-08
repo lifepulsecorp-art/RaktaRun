@@ -1,6 +1,24 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Award, ShieldCheck, Heart, LogOut, BellRing, UserCheck, Sliders, MessageSquare, Smartphone, Bell, Clock, Compass, Camera, Sparkles } from 'lucide-react';
+import {
+  Award,
+  ShieldCheck,
+  Heart,
+  LogOut,
+  BellRing,
+  UserCheck,
+  Sliders,
+  MessageSquare,
+  Smartphone,
+  Bell,
+  Clock,
+  Compass,
+  Camera,
+  Sparkles,
+  History,
+  Calendar,
+  X,
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
@@ -20,6 +38,30 @@ export const DonorDashboardPage: React.FC = () => {
   const [now, setNow] = useState(Date.now());
   const [consent, setConsent] = useState(Boolean(roleData?.publicHeroConsent));
   const [consentNotice, setConsentNotice] = useState('');
+
+  // History states
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyData, setHistoryData] = useState<{ summary?: any; history: any[] }>({ history: [] });
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'donations' | 'alerts'>('all');
+
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const res = await api.get('/donors/me/history');
+      setHistoryData(res.data);
+    } catch (e) {
+      console.error('Failed to load donor history', e);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showHistoryModal) {
+      fetchHistory();
+    }
+  }, [showHistoryModal]);
   
   // Donor preference states
   const [preferredRadius, setPreferredRadius] = useState<number>(roleData?.preferredRadius || 15);
@@ -134,7 +176,14 @@ export const DonorDashboardPage: React.FC = () => {
               <span className="text-xs text-rose-400 font-medium">Udupi & Dakshina Kannada Emergency Network</span>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 hover:text-white transition"
+              title="View my donation and emergency response history"
+            >
+              <History className="h-3.5 w-3.5 text-amber-400" /> Donation History
+            </button>
             <Link
               to="/donor/register"
               className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
@@ -165,12 +214,20 @@ export const DonorDashboardPage: React.FC = () => {
               Ready to respond to hospital emergencies across coastal Karnataka.
             </p>
           </div>
-          <Link
-            to="/donor/register"
-            className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition self-start sm:self-auto"
-          >
-            Update Screening Certificate →
-          </Link>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 hover:text-white transition"
+            >
+              <History className="h-4 w-4 text-amber-400" /> View History Details
+            </button>
+            <Link
+              to="/donor/register"
+              className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition"
+            >
+              Update Screening Certificate →
+            </Link>
+          </div>
         </div>
 
         {/* 3 Status Cards */}
@@ -204,6 +261,14 @@ export const DonorDashboardPage: React.FC = () => {
             <p className="mt-4 text-xs text-slate-400">
               Completed donations: <strong className="text-white">{roleData?.heroStats?.totalDonations || 0}</strong> · Emergency responses: <strong className="text-white">{roleData?.heroStats?.totalEmergencyResponses || 0}</strong>
             </p>
+            <button
+              type="button"
+              onClick={() => setShowHistoryModal(true)}
+              className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-300 hover:text-white transition shadow-sm"
+            >
+              <History className="h-3.5 w-3.5 text-amber-400" />
+              <span>View Full History ({roleData?.heroStats?.totalDonations || 0}) →</span>
+            </button>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
@@ -556,6 +621,174 @@ export const DonorDashboardPage: React.FC = () => {
             <p className="mt-4 text-center text-xs text-slate-500">
               Exact location sharing begins only after you accept and grant browser GPS permission.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Donor Contribution & History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="relative w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 my-8">
+            <button
+              onClick={() => setShowHistoryModal(false)}
+              className="absolute top-5 right-5 rounded-xl border border-slate-800 bg-slate-950 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              title="Close history modal"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-start gap-4 pr-10">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                <History className="h-6 w-6" />
+              </div>
+              <div>
+                <span className="inline-block rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">
+                  Verified Contribution Log
+                </span>
+                <h2 className="text-xl font-bold text-white">Donation & Emergency Response History</h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Complete record of your hospital screenings, emergency alert dispatches, and life-saving donations.
+                </p>
+              </div>
+            </div>
+
+            {/* Metric Summary Cards */}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+                <div className="flex items-center gap-2 text-rose-400 mb-1">
+                  <Heart className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Donations</span>
+                </div>
+                <p className="text-2xl font-black text-white">{historyData.summary?.totalDonations ?? roleData?.heroStats?.totalDonations ?? 0}</p>
+                <p className="text-[11px] text-emerald-400 font-medium mt-1">Verified hospital transfusions</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+                <div className="flex items-center gap-2 text-amber-400 mb-1">
+                  <BellRing className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Dispatches Answered</span>
+                </div>
+                <p className="text-2xl font-black text-white">{historyData.summary?.totalEmergencyResponses ?? roleData?.heroStats?.totalEmergencyResponses ?? 0}</p>
+                <p className="text-[11px] text-amber-300 font-medium mt-1">Coastal Karnataka trauma alerts</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+                <div className="flex items-center gap-2 text-sky-400 mb-1">
+                  <ShieldCheck className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Screening Center</span>
+                </div>
+                <p className="text-sm font-bold text-white truncate">{historyData.summary?.hospitalName || roleData?.verification?.hospitalName || 'Kasturba Hospital, Manipal'}</p>
+                <p className="text-[11px] font-mono text-slate-400 mt-1 truncate">{historyData.summary?.certificateId || roleData?.verification?.certificateId || 'Screened Network'}</p>
+              </div>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="mt-6 flex items-center justify-between gap-3 border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <button
+                  onClick={() => setHistoryFilter('all')}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'all' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                >
+                  All Entries ({historyData.history.length})
+                </button>
+                <button
+                  onClick={() => setHistoryFilter('donations')}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'donations' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                >
+                  Completed Donations ({historyData.history.filter((h: any) => h.matchStatus === 'donated').length})
+                </button>
+                <button
+                  onClick={() => setHistoryFilter('alerts')}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'alerts' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                >
+                  Emergency Responses ({historyData.history.filter((h: any) => h.response === 'accepted' || h.type?.includes('Emergency')).length})
+                </button>
+              </div>
+
+              <span className="text-xs text-slate-500 font-mono hidden sm:inline">
+                Blood Group: {roleData?.bloodGroup}
+              </span>
+            </div>
+
+            {/* History List */}
+            <div className="mt-4 space-y-3 max-h-80 overflow-y-auto pr-1">
+              {loadingHistory && (
+                <div className="py-8 text-center text-xs text-slate-400">Loading verified contribution history…</div>
+              )}
+
+              {!loadingHistory && historyData.history.length === 0 && (
+                <div className="rounded-2xl border border-slate-800 bg-slate-950 p-8 text-center text-xs text-slate-400">
+                  No previous donations or responses logged yet. When you answer hospital alerts and donate, your verified history will be displayed here.
+                </div>
+              )}
+
+              {!loadingHistory && historyData.history
+                .filter((item: any) => {
+                  if (historyFilter === 'donations') return item.matchStatus === 'donated';
+                  if (historyFilter === 'alerts') return item.response === 'accepted' || item.type?.includes('Emergency');
+                  return true;
+                })
+                .map((item: any, idx: number) => {
+                  const dateStr = item.donationCompletedAt || item.alertedAt;
+                  const dateFormatted = dateStr ? new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Verified Date';
+
+                  return (
+                    <article
+                      key={item.id || idx}
+                      className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 hover:border-slate-700 transition"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-start gap-3">
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-bold ${
+                            item.matchStatus === 'donated' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+                          }`}>
+                            {item.matchStatus === 'donated' ? '🩸' : '🚨'}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-white text-sm">{item.hospitalName}</h4>
+                              <span className="rounded-md bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-300">
+                                {item.bloodGroup} · {item.component?.replace('_', ' ')}
+                              </span>
+                            </div>
+                            <p className="mt-0.5 text-xs text-slate-400 flex items-center gap-1.5">
+                              <Calendar className="h-3 w-3 text-slate-500" />
+                              <span>{dateFormatted}</span>
+                              <span className="text-slate-600">·</span>
+                              <span>{item.type || 'Verified Blood Donation'}</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="sm:text-right flex sm:flex-col items-center sm:items-end justify-between gap-1 pt-2 sm:pt-0 border-t sm:border-0 border-slate-800/80">
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                            item.matchStatus === 'donated' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
+                          }`}>
+                            {item.matchStatus === 'donated' ? '✓ Donation Fulfilled' : 'Alert Answered'}
+                          </span>
+                          <span className="text-[11px] text-slate-500">
+                            Verified by: {item.verifiedBy || 'Dr. Medical Officer'}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
+              <span className="text-xs text-slate-500">
+                LifePulse Emergency Health Network • Coastal Karnataka
+              </span>
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 transition border border-slate-700"
+              >
+                Close History
+              </button>
+            </div>
           </div>
         </div>
       )}

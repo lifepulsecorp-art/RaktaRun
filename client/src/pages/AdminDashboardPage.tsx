@@ -2,7 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { Shield, Building2, Users, AlertCircle, LogOut, ArrowRight, ShieldCheck, Download, Settings, Flag, RefreshCw } from 'lucide-react';
+import {
+  Shield,
+  Building2,
+  Users,
+  AlertCircle,
+  LogOut,
+  ArrowRight,
+  ShieldCheck,
+  Download,
+  Settings,
+  Flag,
+  RefreshCw,
+  History,
+  Calendar,
+  X,
+  Search,
+  CheckCircle2,
+} from 'lucide-react';
 
 export const AdminDashboardPage: React.FC = () => {
   const { profile, logout } = useAuth();
@@ -17,6 +34,32 @@ export const AdminDashboardPage: React.FC = () => {
   });
   const [configNotice, setConfigNotice] = useState('');
   const [savingConfig, setSavingConfig] = useState(false);
+
+  // History states
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyData, setHistoryData] = useState<{ summary?: any; history: any[] }>({ history: [] });
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyDistrictFilter, setHistoryDistrictFilter] = useState<'All' | 'Udupi' | 'Dakshina Kannada'>('All');
+  const [historyStatusFilter, setHistoryStatusFilter] = useState<'all' | 'fulfilled' | 'active' | 'unfulfilled'>('all');
+  const [historySearch, setHistorySearch] = useState('');
+
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const res = await api.get('/admin/history');
+      setHistoryData(res.data);
+    } catch (err) {
+      console.error('Error fetching admin history', err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showHistoryModal) {
+      fetchHistory();
+    }
+  }, [showHistoryModal]);
 
   // Flag suspicious activity state
   const [flagModal, setFlagModal] = useState(false);
@@ -131,6 +174,12 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <button
+              onClick={() => setShowHistoryModal(true)}
+              className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3.5 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 hover:text-white transition shadow-sm"
+            >
+              <History className="h-3.5 w-3.5 text-amber-400" /> Network Dispatch History
+            </button>
+            <button
               onClick={() => setFlagModal(true)}
               className="flex items-center gap-1.5 rounded-xl border border-amber-900/80 bg-amber-950/40 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-900/60 transition"
             >
@@ -145,8 +194,8 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Phase 1 Core Action Modules (Blocks F & I) */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-10">
+        {/* Phase 1 Core Action Modules (Blocks F, I & History) */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-10">
           {/* Block F Card */}
           <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
             <div>
@@ -198,6 +247,33 @@ export const AdminDashboardPage: React.FC = () => {
               >
                 Inspect Certificates <ArrowRight className="h-3.5 w-3.5" />
               </Link>
+            </div>
+          </div>
+
+          {/* Network Dispatch History Card */}
+          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <History className="h-6 w-6" />
+                </div>
+                <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-400">
+                  Audit Trail
+                </span>
+              </div>
+              <h3 className="mt-4 text-xl font-bold text-white">Network Dispatch & Donation History</h3>
+              <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+                Audit complete emergency dispatch logs across Udupi and Dakshina Kannada, fulfilled transfusions, and hero donor completions.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+              <span className="text-xs text-amber-400 font-semibold">{telemetry?.totals?.completedDonations ?? 7} Donations Recorded</span>
+              <button
+                onClick={() => setShowHistoryModal(true)}
+                className="flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-amber-600/30 hover:bg-amber-500 transition"
+              >
+                Inspect History <ArrowRight className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
         </div>
@@ -478,6 +554,276 @@ export const AdminDashboardPage: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Network Dispatch & Donation History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md">
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="flex max-h-[90vh] w-full max-w-5xl flex-col rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 p-6 bg-slate-950/50">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                  <History className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    Network Dispatch & Donation Audit History
+                    <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-300">
+                      Coastal Karnataka Network
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Comprehensive chronological record of all emergency dispatches, hospital alerts, and completed donor handoffs.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowHistoryModal(false)}
+                className="rounded-xl border border-slate-800 bg-slate-800/40 p-2 text-slate-400 hover:border-slate-700 hover:text-white transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Summary Metrics */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                  <p className="text-xs text-slate-400 uppercase font-semibold">Total Dispatches</p>
+                  <p className="mt-1 text-2xl font-black text-white">
+                    {historyData.summary?.totalDispatches ?? historyData.history.length}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Across network</p>
+                </div>
+                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                  <p className="text-xs text-emerald-400 uppercase font-semibold">Fulfilled Requests</p>
+                  <p className="mt-1 text-2xl font-black text-emerald-300">
+                    {historyData.summary?.fulfilled ?? 0}
+                  </p>
+                  <p className="text-[11px] text-emerald-500 mt-0.5">Completed handoffs</p>
+                </div>
+                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+                  <p className="text-xs text-amber-400 uppercase font-semibold">Active Dispatches</p>
+                  <p className="mt-1 text-2xl font-black text-amber-300">
+                    {historyData.summary?.active ?? 0}
+                  </p>
+                  <p className="text-[11px] text-amber-500 mt-0.5">Searching or matched</p>
+                </div>
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4">
+                  <p className="text-xs text-rose-400 uppercase font-semibold">Units Donated</p>
+                  <p className="mt-1 text-2xl font-black text-rose-300">
+                    {historyData.summary?.totalDonations ?? 0}
+                  </p>
+                  <p className="text-[11px] text-rose-500 mt-0.5">Verified units saved</p>
+                </div>
+              </div>
+
+              {/* Filters & Search */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-950/40 p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-slate-400 font-semibold px-1">District:</span>
+                  {(['All', 'Udupi', 'Dakshina Kannada'] as const).map((dist) => (
+                    <button
+                      key={dist}
+                      type="button"
+                      onClick={() => setHistoryDistrictFilter(dist)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                        historyDistrictFilter === dist
+                          ? 'bg-rose-600 text-white'
+                          : 'border border-slate-800 bg-slate-900 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {dist}
+                    </button>
+                  ))}
+
+                  <span className="text-xs text-slate-400 font-semibold px-1 ml-2">Status:</span>
+                  {(['all', 'fulfilled', 'active', 'unfulfilled'] as const).map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setHistoryStatusFilter(st)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition ${
+                        historyStatusFilter === st
+                          ? 'bg-rose-600 text-white'
+                          : 'border border-slate-800 bg-slate-900 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative min-w-[200px]">
+                  <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
+                  <input
+                    type="text"
+                    value={historySearch}
+                    onChange={(e) => setHistorySearch(e.target.value)}
+                    placeholder="Search hospital or blood group…"
+                    className="w-full rounded-lg border border-slate-800 bg-slate-900 pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 outline-none focus:border-rose-500"
+                  />
+                </div>
+              </div>
+
+              {/* History Records List */}
+              {loadingHistory ? (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                  <RefreshCw className="h-6 w-6 animate-spin text-rose-500" />
+                  <p className="mt-2 text-sm font-semibold">Loading network dispatch history…</p>
+                </div>
+              ) : (
+                (() => {
+                  const filtered = (historyData.history || []).filter((item: any) => {
+                    if (
+                      historyDistrictFilter !== 'All' &&
+                      !item.district?.toLowerCase().includes(historyDistrictFilter.toLowerCase())
+                    ) {
+                      return false;
+                    }
+                    if (historyStatusFilter === 'fulfilled' && item.status !== 'fulfilled') return false;
+                    if (historyStatusFilter === 'active' && !['searching', 'matched'].includes(item.status)) return false;
+                    if (historyStatusFilter === 'unfulfilled' && item.status !== 'unfulfilled') return false;
+                    if (historySearch.trim()) {
+                      const q = historySearch.toLowerCase();
+                      const match =
+                        item.hospitalName?.toLowerCase().includes(q) ||
+                        item.bloodGroup?.toLowerCase().includes(q) ||
+                        item.id?.toLowerCase().includes(q) ||
+                        item.district?.toLowerCase().includes(q);
+                      if (!match) return false;
+                    }
+                    return true;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="rounded-2xl border border-dashed border-slate-800 p-8 text-center text-slate-400">
+                        <History className="mx-auto h-8 w-8 text-slate-600 mb-2" />
+                        <p className="font-semibold text-white">No dispatches match the selected filters.</p>
+                        <p className="text-xs text-slate-500 mt-1">Try switching district or status filters.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {filtered.map((item: any) => (
+                        <div
+                          key={item.id}
+                          className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 transition hover:border-slate-700"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/20 font-black text-rose-400 border border-rose-500/30 text-sm">
+                                {item.bloodGroup}
+                              </span>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-white text-sm">{item.hospitalName}</h4>
+                                  <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+                                    {item.district}
+                                  </span>
+                                  {item.urgency === 'critical' && (
+                                    <span className="rounded-full bg-rose-500/20 border border-rose-500/30 px-2 py-0.5 text-[10px] font-bold uppercase text-rose-400 animate-pulse">
+                                      Critical
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="mt-0.5 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                                  <span>ID: <code className="font-mono text-[11px] text-slate-300">{item.id}</code></span>
+                                  <span>•</span>
+                                  <span>Component: <strong className="text-white capitalize">{item.component}</strong></span>
+                                  <span>•</span>
+                                  <span>Required: <strong className="text-white">{item.unitsRequired} unit(s)</strong></span>
+                                  <span>•</span>
+                                  <span>Fulfilled: <strong className="text-emerald-400">{item.unitsDonated} unit(s)</strong></span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`rounded-full px-2.5 py-1 text-xs font-bold uppercase ${
+                                  item.status === 'fulfilled'
+                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                    : item.status === 'unfulfilled'
+                                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                }`}
+                              >
+                                {item.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Donor Completion Sub-List if any */}
+                          {item.donors && item.donors.length > 0 && (
+                            <div className="mt-3 border-t border-slate-900 pt-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1.5">
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                                Donors Who Fulfilled ({item.donors.length}):
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {item.donors.map((d: any, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-xs text-emerald-300"
+                                  >
+                                    <span className="font-medium">{d.fullName}</span>
+                                    {d.bloodGroup && (
+                                      <span className="rounded bg-emerald-500/20 px-1 py-0.2 text-[10px] font-bold">
+                                        {d.bloodGroup}
+                                      </span>
+                                    )}
+                                    <span className="text-[10px] text-slate-400">
+                                      ({new Date(d.donatedAt).toLocaleDateString()})
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              Created: {new Date(item.createdAt).toLocaleString()}
+                            </span>
+                            <span className="text-slate-400">
+                              Alerted: {item.totalAlerted} | Accepted: {item.totalAccepted}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between border-t border-slate-800 bg-slate-950/60 p-4">
+              <span className="text-xs text-slate-400">
+                LifePulse Emergency Dispatch System · Audit Logs Synchronized
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowHistoryModal(false)}
+                className="rounded-xl bg-slate-800 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition"
+              >
+                Close Audit History
+              </button>
+            </div>
           </div>
         </div>
       )}

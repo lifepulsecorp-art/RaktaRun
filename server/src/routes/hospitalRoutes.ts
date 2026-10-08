@@ -308,5 +308,56 @@ router.post('/:id/requests/:requestId/unfulfilled', authenticate, authorizeRoles
   res.json({ message: 'Request recorded as unfulfilled', status: 'unfulfilled' });
 });
 
+// GET /api/hospitals/:id/history - Hospital dispatch & fulfillment history
+router.get('/:id/history', authenticate, (req: AuthenticatedRequest, res) => {
+  const hospital = find<Hospital>('hospitals', (h) => h.id === req.params.id);
+  if (!hospital) return res.status(404).json({ error: 'Hospital not found' });
+  if (req.user!.role !== 'admin' && hospital.uid !== req.user!.uid && req.user!.hospitalId !== hospital.id) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  const requests = filter<BloodRequest>('bloodRequests', (r) => r.hospitalId === hospital.id);
+  const matches = readJson<Match>('matches');
+  const donors = readJson<Donor>('donors');
+
+  const history = requests.map((r) => {
+    const reqMatches = matches.filter((m) => m.requestId === r.id);
+    const donatedMatches = reqMatches.filter((m) => m.status === 'donated');
+    const acceptedMatches = reqMatches.filter((m) => ['accepted', 'en_route', 'reached', 'donated'].includes(m.status));
+
+    return {
+      ...r,
+      totalAlerted: reqMatches.length,
+      totalAccepted: acceptedMatches.length,
+      totalDonated: donatedMatches.length,
+      donors: donatedMatches.map((m) => {
+        const d = donors.find((donor) => donor.id === m.donorId);
+        return {
+          matchId: m.id,
+          donorId: m.donorId,
+          fullName: d?.fullName || 'Verified Donor',
+          bloodGroup: d?.bloodGroup,
+          donatedAt: m.donationCompletedAt || m.updatedAt,
+        };
+      }),
+    };
+  }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const totalFulfilled = history.filter((r) => r.status === 'fulfilled').length;
+  const totalUnitsCollected = history.reduce((sum, r) => sum + r.totalDonated, 0);
+
+  res.json({
+    summary: {
+      hospitalName: hospital.name,
+      district: hospital.district,
+      totalRequests: history.length,
+      totalFulfilled,
+      totalUnitsCollected,
+      activeRequests: history.filter((r) => ['searching', 'matched'].includes(r.status)).length,
+    },
+    history,
+  });
+});
+
 export default router;
 

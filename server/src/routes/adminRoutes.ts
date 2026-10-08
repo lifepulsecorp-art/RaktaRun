@@ -112,4 +112,56 @@ router.post('/flags', (req: AuthenticatedRequest, res) => {
   res.status(201).json({ message: 'Suspicious activity recorded and audited', flagId });
 });
 
+// GET /api/admin/history - Network-wide dispatch & donation fulfillment history
+router.get('/history', (_req, res) => {
+  const requests = readJson<BloodRequest>('bloodRequests');
+  const matches = readJson<Match>('matches');
+  const donors = readJson<Donor>('donors');
+  const hospitals = readJson<Hospital>('hospitals');
+
+  const history = requests.map((r) => {
+    const hosp = hospitals.find((h) => h.id === r.hospitalId);
+    const reqMatches = matches.filter((m) => m.requestId === r.id);
+    const donatedMatches = reqMatches.filter((m) => m.status === 'donated');
+    const acceptedMatches = reqMatches.filter((m) => ['accepted', 'en_route', 'reached', 'donated'].includes(m.status));
+
+    return {
+      id: r.id,
+      hospitalId: r.hospitalId,
+      hospitalName: r.hospitalName || hosp?.name || 'Hospital',
+      district: hosp?.district || 'Coastal Karnataka',
+      bloodGroup: r.bloodGroup,
+      component: r.component,
+      unitsRequired: r.unitsRequired,
+      unitsDonated: donatedMatches.length,
+      urgency: r.urgency,
+      status: r.status,
+      createdAt: r.createdAt,
+      requiredBy: r.requiredBy,
+      totalAlerted: reqMatches.length,
+      totalAccepted: acceptedMatches.length,
+      donors: donatedMatches.map((m) => {
+        const d = donors.find((donor) => donor.id === m.donorId);
+        return {
+          donorId: m.donorId,
+          fullName: d?.fullName || 'Verified Donor',
+          bloodGroup: d?.bloodGroup,
+          donatedAt: m.donationCompletedAt || m.updatedAt,
+        };
+      }),
+    };
+  }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  res.json({
+    summary: {
+      totalDispatches: requests.length,
+      fulfilled: requests.filter((r) => r.status === 'fulfilled').length,
+      unfulfilled: requests.filter((r) => r.status === 'unfulfilled').length,
+      active: requests.filter((r) => ['searching', 'matched'].includes(r.status)).length,
+      totalDonations: matches.filter((m) => m.status === 'donated').length,
+    },
+    history,
+  });
+});
+
 export default router;
