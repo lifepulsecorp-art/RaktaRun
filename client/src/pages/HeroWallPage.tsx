@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Award, Share2, Camera, Sparkles } from 'lucide-react';
+import { ArrowLeft, Award, Share2, Camera, Sparkles, Lock } from 'lucide-react';
 import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 type Hero = { id: string; displayName: string; district: string; bloodGroup: string; donations: number; responses: number; badges: string[] };
 
@@ -140,6 +141,7 @@ function makeInstagramStoryCard(hero: Hero) {
 }
 
 export default function HeroWallPage() {
+  const { profile, role } = useAuth();
   const [heroes, setHeroes] = useState<Hero[]>([]);
   const [error, setError] = useState('');
 
@@ -150,6 +152,10 @@ export default function HeroWallPage() {
   }, []);
 
   const downloadCard = (hero: Hero, format: 'landscape' | 'story') => {
+    if (!profile) {
+      window.alert('Please log in to download verified LifePulse recognition cards.');
+      return;
+    }
     const canvas = format === 'story' ? makeInstagramStoryCard(hero) : makeLandscapeCard(hero);
     if (!canvas) return;
     canvas.toBlob((blob) => {
@@ -176,9 +182,19 @@ export default function HeroWallPage() {
               <p className="text-xs text-rose-400">Celebrating coastal Karnataka donors who responded when seconds counted</p>
             </div>
           </div>
-          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-400">
-            <Sparkles className="h-3.5 w-3.5" /> Opt-In Recognition Only
-          </span>
+          <div className="flex items-center gap-3">
+            {role === 'donor' && (
+              <Link
+                to="/donor/hero-card"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition"
+              >
+                <Camera className="h-3.5 w-3.5" /> My Hero Card & Preview →
+              </Link>
+            )}
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-400">
+              <Sparkles className="h-3.5 w-3.5" /> Opt-In Recognition Only
+            </span>
+          </div>
         </div>
       </header>
 
@@ -190,6 +206,35 @@ export default function HeroWallPage() {
             Recognizing donors based on verified emergency actions, not gamified points. Donors appear here only with explicit consent. Exact locations and contact numbers remain completely private.
           </p>
         </div>
+
+        {/* Private Portal Callout Banner for Donors */}
+        {role === 'donor' && (
+          <div className="mt-6 rounded-2xl border border-rose-500/30 bg-rose-950/20 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">Verified Donor Recognition Portal</p>
+                <p className="text-xs text-slate-400">Access your private preview with live canvas rendering and high-res downloads.</p>
+              </div>
+            </div>
+            <Link
+              to="/donor/hero-card"
+              className="shrink-0 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition"
+            >
+              Open My Private Card Portal →
+            </Link>
+          </div>
+        )}
+
+        {/* Public Visitor Notice */}
+        {!profile && (
+          <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900/60 p-4 flex items-center justify-between text-xs text-slate-400">
+            <span>Viewing public community wall. To download verified high-res shareable post cards, please log in.</span>
+            <Link to="/login" className="text-rose-400 font-semibold hover:underline ml-2">Login here →</Link>
+          </div>
+        )}
 
         {error && <p role="alert" className="mt-6 rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm text-rose-300">{error}</p>}
         {!error && heroes.length === 0 && (
@@ -234,20 +279,31 @@ export default function HeroWallPage() {
                 </div>
               </div>
 
-              {/* Share Actions */}
-              <div className="mt-6 pt-4 border-t border-slate-800/80 space-y-2">
-                <button
-                  onClick={() => downloadCard(hero, 'story')}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 py-2.5 text-xs font-semibold text-white shadow-lg shadow-rose-600/20 hover:from-rose-500 hover:to-pink-500 transition"
-                >
-                  <Camera className="h-3.5 w-3.5" /> Instagram Story (9:16)
-                </button>
-                <button
-                  onClick={() => downloadCard(hero, 'landscape')}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/60 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition"
-                >
-                  <Share2 className="h-3.5 w-3.5" /> Landscape Banner
-                </button>
+              {/* Share / Download Actions: Authenticated vs Public Lock */}
+              <div className="mt-6 pt-4 border-t border-slate-800/80">
+                {profile ? (
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => downloadCard(hero, 'story')}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 py-2.5 text-xs font-semibold text-white shadow-lg shadow-rose-600/20 hover:from-rose-500 hover:to-pink-500 transition"
+                    >
+                      <Camera className="h-3.5 w-3.5" /> Instagram Story (9:16)
+                    </button>
+                    <button
+                      onClick={() => downloadCard(hero, 'landscape')}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/60 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition"
+                    >
+                      <Share2 className="h-3.5 w-3.5" /> Landscape Banner
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/80 py-2.5 text-xs font-semibold text-slate-400 hover:text-white hover:border-slate-700 transition"
+                  >
+                    <Lock className="h-3.5 w-3.5 text-amber-400" /> Login to Download Share Cards
+                  </Link>
+                )}
               </div>
             </article>
           ))}

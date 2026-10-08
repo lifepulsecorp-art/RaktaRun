@@ -31,6 +31,28 @@ export const DonorDashboardPage: React.FC = () => {
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [prefNotice, setPrefNotice] = useState('');
 
+  // Emergency status controls
+  const [availabilityStatus, setAvailabilityStatus] = useState<'available' | 'unavailable' | 'emergency_only'>(
+    roleData?.availabilityStatus || 'available'
+  );
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusNotice, setStatusNotice] = useState('');
+
+  const updateEmergencyStatus = async (newStatus: 'available' | 'unavailable' | 'emergency_only') => {
+    setStatusUpdating(true);
+    setStatusNotice('');
+    try {
+      await api.put('/donors/me/availability', { availabilityStatus: newStatus });
+      setAvailabilityStatus(newStatus);
+      setStatusNotice(`Emergency status updated to: ${newStatus === 'emergency_only' ? 'Critical Trauma Only' : newStatus}`);
+      setTimeout(() => setStatusNotice(''), 3500);
+    } catch {
+      setStatusNotice('Failed to update status.');
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
   const refreshAlerts = useCallback(async () => {
     try {
       const { data } = await api.get('/donors/me/alerts');
@@ -178,19 +200,76 @@ export const DonorDashboardPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl">
-            <div className="flex items-center gap-3 text-emerald-400">
-              <BellRing className="h-6 w-6" />
-              <h3 className="font-bold text-white">Emergency Availability</h3>
+          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-emerald-400">
+                  <BellRing className="h-6 w-6" />
+                  <h3 className="font-bold text-white">Emergency Status</h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`h-3 w-3 rounded-full ${
+                    availabilityStatus === 'available' ? 'bg-emerald-500 animate-ping' :
+                    availabilityStatus === 'emergency_only' ? 'bg-amber-500 animate-ping' :
+                    'bg-slate-500'
+                  }`} />
+                  <span className={`text-xs font-bold uppercase ${
+                    availabilityStatus === 'available' ? 'text-emerald-400' :
+                    availabilityStatus === 'emergency_only' ? 'text-amber-400' :
+                    'text-slate-400'
+                  }`}>
+                    {availabilityStatus === 'emergency_only' ? 'Trauma Only' : availabilityStatus}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status Selector Pills */}
+              <div className="mt-4 grid grid-cols-3 gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs font-semibold">
+                <button
+                  type="button"
+                  disabled={statusUpdating}
+                  onClick={() => updateEmergencyStatus('available')}
+                  className={`py-2 rounded-lg transition text-center ${
+                    availabilityStatus === 'available'
+                      ? 'bg-emerald-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  🟢 Ready
+                </button>
+                <button
+                  type="button"
+                  disabled={statusUpdating}
+                  onClick={() => updateEmergencyStatus('emergency_only')}
+                  className={`py-2 rounded-lg transition text-center ${
+                    availabilityStatus === 'emergency_only'
+                      ? 'bg-amber-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  🟡 Trauma
+                </button>
+                <button
+                  type="button"
+                  disabled={statusUpdating}
+                  onClick={() => updateEmergencyStatus('unavailable')}
+                  className={`py-2 rounded-lg transition text-center ${
+                    availabilityStatus === 'unavailable'
+                      ? 'bg-slate-700 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  🔴 Pause
+                </button>
+              </div>
+
+              {statusNotice && (
+                <p className="mt-2 text-[11px] text-emerald-400 font-medium">{statusNotice}</p>
+              )}
             </div>
-            <div className="mt-4 flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-emerald-500 animate-ping"></span>
-              <span className="text-sm font-semibold text-emerald-400 capitalize">
-                {roleData?.availabilityStatus || 'Available'}
-              </span>
-            </div>
-            <p className="mt-4 text-xs text-slate-400">
-              Locality: <strong className="text-white">{roleData?.homeLocality || 'Manipal / Mangaluru'}</strong> • Preferred Radius: <strong className="text-white">{preferredRadius} km</strong>
+
+            <p className="mt-4 text-xs text-slate-400 pt-3 border-t border-slate-800/80">
+              Locality: <strong className="text-white">{roleData?.homeLocality || 'Manipal / Mangaluru'}</strong> • Radius: <strong className="text-white">{preferredRadius} km</strong>
             </p>
           </div>
         </div>
@@ -328,9 +407,15 @@ export const DonorDashboardPage: React.FC = () => {
             <p className="mt-1 text-sm text-slate-400">
               Celebrate your life-saving donations publicly. Shows only your first name, district, and blood group. Contact numbers and home coordinates are strictly private.
             </p>
-            <div className="mt-3 flex items-center gap-4">
-              <Link className="text-xs text-rose-400 font-semibold hover:underline" to="/hero-wall">
-                Visit the Community Hero Wall →
+            <div className="mt-4 flex flex-wrap items-center gap-4">
+              <Link
+                to="/donor/hero-card"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:from-rose-500 hover:to-pink-500 transition"
+              >
+                📱 Preview & Download My Hero Cards →
+              </Link>
+              <Link className="text-xs text-slate-400 font-semibold hover:text-white" to="/hero-wall">
+                Visit Community Hero Wall →
               </Link>
             </div>
           </div>

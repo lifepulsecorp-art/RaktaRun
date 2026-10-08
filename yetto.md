@@ -1,6 +1,6 @@
 # 📋 LifePulse — Gap Analysis & Pending Requirements (`yetto.md`)
 
-> **Reference Document:** [`reduired.md`](file:///d:/Echelonglobal/Lifepulse/reduired.md) (Vinay VJEC Project Specification)  
+> **Reference Document:** [`reduired.md`](file:///d:/Echelonglobal/Lifepulse/reduired.md) (Project Specification)  
 > **Current Build Status:** Phases 1–4 Core Implemented (Offline Local JWT, Rule-based Matching, Ephemeral Transit Radar, Public Hero Wall)  
 > **Date:** October 8, 2026  
 > **Scope:** Coastal Karnataka (Udupi & Dakshina Kannada)

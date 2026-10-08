@@ -44,3 +44,4 @@ export function updateSystemConfig(patch: Partial<SystemConfig>): SystemConfig {
   }
   return updated;
 }
+

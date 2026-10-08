@@ -218,7 +218,18 @@ router.post('/certificate', authenticate, (req: AuthenticatedRequest, res) => {
   });
 });
 
-// PUT /api/donors/:id/availability - Toggle status
+// PUT /api/donors/me/availability or /api/donors/:id/availability - Toggle emergency status
+router.put('/me/availability', authenticate, (req: AuthenticatedRequest, res) => {
+  const { availabilityStatus } = req.body;
+  if (!['available', 'unavailable', 'emergency_only'].includes(availabilityStatus)) {
+    return res.status(400).json({ error: 'Invalid availability status. Must be available, unavailable, or emergency_only' });
+  }
+  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+  if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
+  const updated = update<Donor>('donors', donor.id, { availabilityStatus });
+  res.json({ message: 'Emergency status updated', donor: updated, availabilityStatus: updated?.availabilityStatus });
+});
+
 router.put('/:id/availability', authenticate, (req: AuthenticatedRequest, res) => {
   const { availabilityStatus } = req.body;
   if (!['available', 'unavailable', 'emergency_only'].includes(availabilityStatus)) {

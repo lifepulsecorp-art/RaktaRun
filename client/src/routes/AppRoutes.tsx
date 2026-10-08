@@ -17,6 +17,7 @@ import DonorDashboardPage from '../pages/DonorDashboardPage';
 import LiveTrackingPage from '../pages/LiveTrackingPage';
 import EmergencyRequestPage from '../pages/hospital/EmergencyRequestPage';
 import HeroWallPage from '../pages/HeroWallPage';
+import DonorHeroCardPage from '../pages/donor/DonorHeroCardPage';
 
 export default function AppRoutes() {
   return (
@@ -38,6 +39,7 @@ export default function AppRoutes() {
       <Route path="/donor" element={<ProtectedRoute allowedRoles={['donor']}><DonorDashboardPage /></ProtectedRoute>} />
       <Route path="/donor/dashboard" element={<ProtectedRoute allowedRoles={['donor']}><DonorDashboardPage /></ProtectedRoute>} />
       <Route path="/donor/register" element={<ProtectedRoute allowedRoles={['donor']}><DonorRegisterPage /></ProtectedRoute>} />
+      <Route path="/donor/hero-card" element={<ProtectedRoute allowedRoles={['donor']}><DonorHeroCardPage /></ProtectedRoute>} />
 
       {/* HOSPITAL (verified) */}
       <Route path="/hospital" element={<ProtectedRoute allowedRoles={['hospital']}><HospitalDashboardPage /></ProtectedRoute>} />
