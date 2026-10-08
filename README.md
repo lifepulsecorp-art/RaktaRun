@@ -87,5 +87,8 @@ npm run seed
 ---
 
 ## 📦 Version Status
-- **Current Milestone:** Version 1 — Phase 1 (Foundation, Medical Onboarding, Authentication Shell & Self-Service Registration Suite)
-- **Roadmap:** Phase 2 (Emergency Request Matching & Alert Dispatch Engine)
+- **Current Milestone:** Phases 1–4 implemented; Phase 5 simulation and pilot readiness completed
+- **Implemented:** Emergency dispatch, timed donor alerts, eligibility matching, radius escalation, consent-based hero wall, privacy-scoped location tracking, admin telemetry and audit events
+- **Pilot status:** Not yet launched with real hospitals. Review [`PILOT_READINESS.md`](PILOT_READINESS.md) for required deployment and clinical operations steps.
+
+The current pilot build uses JSON files and an in-app alert feed. It does not include a production push/SMS/WhatsApp provider or a production road-routing map service. ETA is an approximate straight-line estimate.

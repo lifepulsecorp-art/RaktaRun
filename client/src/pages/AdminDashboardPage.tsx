@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 import { Shield, Building2, Users, AlertCircle, LogOut, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export const AdminDashboardPage: React.FC = () => {
   const { profile, logout } = useAuth();
+  const [telemetry, setTelemetry] = useState<any>(null);
+  const [logs, setLogs] = useState<any[]>([]);
+  useEffect(() => { Promise.all([api.get('/admin/telemetry'), api.get('/admin/audit-logs')]).then(([stats, audit]) => { setTelemetry(stats.data); setLogs(audit.data.logs); }).catch((e) => console.error('Admin telemetry unavailable', e)); }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -41,9 +45,7 @@ export const AdminDashboardPage: React.FC = () => {
       <main className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold tracking-tight text-white">District Verification & Governance</h2>
-          <p className="text-sm text-slate-400">
-            Phase 1 Active: Screen hospital registrations and audit donor medical certificates across Udupi and Mangaluru.
-          </p>
+          <p className="text-sm text-slate-400">Live dispatch governance, district telemetry and audit history across Udupi and Dakshina Kannada.</p>
         </div>
 
         {/* Phase 1 Core Action Modules (Blocks F & I) */}
@@ -110,7 +112,7 @@ export const AdminDashboardPage: React.FC = () => {
               <span className="text-sm font-medium text-slate-400">Accredited Hospitals</span>
               <Building2 className="h-5 w-5 text-rose-500" />
             </div>
-            <p className="mt-4 text-3xl font-extrabold text-white">3</p>
+            <p className="mt-4 text-3xl font-extrabold text-white">{telemetry?.totals.hospitals ?? '—'}</p>
             <span className="mt-1 inline-block text-xs text-emerald-400">Udupi & Dakshina Kannada</span>
           </div>
 
@@ -119,7 +121,7 @@ export const AdminDashboardPage: React.FC = () => {
               <span className="text-sm font-medium text-slate-400">Verified Donors</span>
               <Users className="h-5 w-5 text-blue-500" />
             </div>
-            <p className="mt-4 text-3xl font-extrabold text-white">5</p>
+            <p className="mt-4 text-3xl font-extrabold text-white">{telemetry?.totals.verifiedDonors ?? '—'}</p>
             <span className="mt-1 inline-block text-xs text-blue-400">Hospital Screened</span>
           </div>
 
@@ -128,8 +130,8 @@ export const AdminDashboardPage: React.FC = () => {
               <span className="text-sm font-medium text-slate-400">Active Requests</span>
               <AlertCircle className="h-5 w-5 text-amber-500" />
             </div>
-            <p className="mt-4 text-3xl font-extrabold text-white">1</p>
-            <span className="mt-1 inline-block text-xs text-amber-400">Kasturba Trauma ICU</span>
+            <p className="mt-4 text-3xl font-extrabold text-white">{telemetry?.totals.activeRequests ?? '—'}</p>
+            <span className="mt-1 inline-block text-xs text-amber-400">Across both districts</span>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-sm">
@@ -137,10 +139,13 @@ export const AdminDashboardPage: React.FC = () => {
               <span className="text-sm font-medium text-slate-400">District Compliance</span>
               <Shield className="h-5 w-5 text-emerald-500" />
             </div>
-            <p className="mt-4 text-3xl font-extrabold text-white">100%</p>
-            <span className="mt-1 inline-block text-xs text-emerald-400">Medical Authority Active</span>
+            <p className="mt-4 text-3xl font-extrabold text-white">{telemetry?.totals.completedDonations ?? '—'}</p>
+            <span className="mt-1 inline-block text-xs text-emerald-400">Completed donations</span>
           </div>
         </div>
+
+        <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-6"><div className="flex items-center justify-between"><div><h3 className="text-lg font-bold">District pilot telemetry</h3><p className="text-xs text-slate-400">Operational totals, updated when this page loads.</p></div><span className="text-xs text-slate-500">{telemetry?.totals.donorsEnRoute ?? 0} donors en route</span></div><div className="mt-4 grid gap-3 sm:grid-cols-2">{(telemetry?.byDistrict || []).map((row:any)=><div key={row.district} className="rounded-xl border border-slate-800 bg-slate-950/60 p-4"><p className="font-semibold">{row.district}</p><p className="mt-1 text-sm text-slate-400">{row.activeRequests} active requests</p></div>)}</div></section>
+        <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6"><h3 className="text-lg font-bold">Recent audit events</h3><div className="mt-4 divide-y divide-slate-800">{logs.slice(0,12).map((log:any)=><div key={log.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span className="text-slate-200">{log.action.replace(/[._]/g,' ')} <span className="text-slate-500">· {log.entityType} {log.entityId}</span></span><time className="text-xs text-slate-500">{new Date(log.createdAt).toLocaleString()}</time></div>)}{logs.length===0&&<p className="py-3 text-sm text-slate-500">No audit events recorded yet.</p>}</div></section>
       </main>
     </div>
   );

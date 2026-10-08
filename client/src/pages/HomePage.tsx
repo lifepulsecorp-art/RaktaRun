@@ -5,12 +5,15 @@ export default function HomePage() {
     <div className="min-h-screen bg-slate-950 text-white flex flex-col">
       {/* Header */}
       <header className="p-6 border-b border-slate-800">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center font-bold">♥</div>
           <div>
             <h1 className="text-xl font-bold">LifePulse</h1>
             <p className="text-xs text-red-400">Udupi & Dakshina Kannada Emergency Response</p>
           </div>
+        </div>
+        <Link to="/hero-wall" className="text-sm text-slate-300 hover:text-white">Community Hero Wall</Link>
         </div>
       </header>
 
@@ -68,7 +71,7 @@ export default function HomePage() {
       </main>
 
       <footer className="p-6 text-center text-xs text-slate-500 border-t border-slate-800">
-        LifePulse Emergency Portal • Version 1.0 (Phase 1)
+        LifePulse Emergency Portal • Udupi & Dakshina Kannada pilot
       </footer>
     </div>
   );

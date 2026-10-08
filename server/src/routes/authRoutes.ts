@@ -25,15 +25,12 @@ router.get('/me', authenticate, (req: AuthenticatedRequest, res) => {
 // POST /api/auth/sync - Update user details or assign role
 router.post('/sync', authenticate, (req: AuthenticatedRequest, res) => {
   const user = req.user!;
-  const { name, phone, role, hospitalId, donorId } = req.body;
+  const { name, phone, hospitalId, donorId } = req.body;
 
   const patch: Partial<User> = {};
   if (name) patch.name = name;
   if (phone) patch.phone = phone;
-  // If user is not yet an admin, allow setting role (for onboarding demo)
-  if (role && user.role !== 'admin') {
-    patch.role = role;
-  }
+  // Role assignment is handled only by the dedicated onboarding endpoints.
   if (hospitalId) patch.hospitalId = hospitalId;
   if (donorId) patch.donorId = donorId;
 

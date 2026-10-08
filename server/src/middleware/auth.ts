@@ -16,7 +16,7 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
   const idToken = authHeader.split('Bearer ')[1].trim();
 
   try {
-    const decoded = await admin.auth().verifyIdToken(idToken);
+    const decoded = await admin.auth().verifyIdToken(idToken, true);
     let user = find<User>('users', (u) => u.uid === decoded.uid);
 
     if (!user) {

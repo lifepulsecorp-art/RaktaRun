@@ -15,6 +15,8 @@ import HospitalDashboardPage from '../pages/HospitalDashboardPage';
 import HospitalProfilePage from '../pages/hospital/HospitalProfilePage';
 import DonorDashboardPage from '../pages/DonorDashboardPage';
 import LiveTrackingPage from '../pages/LiveTrackingPage';
+import EmergencyRequestPage from '../pages/hospital/EmergencyRequestPage';
+import HeroWallPage from '../pages/HeroWallPage';
 
 export default function AppRoutes() {
   return (
@@ -26,6 +28,7 @@ export default function AppRoutes() {
       <Route path="/register/donor" element={<DonorRegisterPage />} />
       <Route path="/register/hospital" element={<HospitalRegisterPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
+      <Route path="/hero-wall" element={<HeroWallPage />} />
 
       {/* PENDING (logged in but not verified) */}
       <Route path="/donor/pending" element={<ProtectedRoute><DonorPendingPage /></ProtectedRoute>} />
@@ -39,6 +42,7 @@ export default function AppRoutes() {
       {/* HOSPITAL (verified) */}
       <Route path="/hospital" element={<ProtectedRoute allowedRoles={['hospital']}><HospitalDashboardPage /></ProtectedRoute>} />
       <Route path="/hospital/profile" element={<ProtectedRoute allowedRoles={['hospital']}><HospitalProfilePage /></ProtectedRoute>} />
+      <Route path="/hospital/request/new" element={<ProtectedRoute allowedRoles={['hospital']}><EmergencyRequestPage /></ProtectedRoute>} />
 
       {/* ADMIN */}
       <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage /></ProtectedRoute>} />

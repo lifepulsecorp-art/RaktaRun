@@ -10,6 +10,10 @@ import './utils/firebaseAdmin.js';
 import authRoutes from './routes/authRoutes.js';
 import hospitalRoutes from './routes/hospitalRoutes.js';
 import donorRoutes from './routes/donorRoutes.js';
+import heroRoutes from './routes/heroRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import requestRoutes from './routes/requestRoutes.js';
+import { escalateUnansweredRequests } from './services/escalation.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +48,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/hospitals', hospitalRoutes);
 app.use('/api/donors', donorRoutes);
+app.use('/api/heroes', heroRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/requests', requestRoutes);
 
 app.get('/api', (req, res) => {
   res.json({ message: 'LifePulse API v1 — ready' });
@@ -66,5 +73,11 @@ app.listen(PORT, () => {
   console.log(`🚀 LifePulse API running at http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
 });
+
+// A lightweight scheduler for the JSON-backed pilot implementation.
+setInterval(() => {
+  try { escalateUnansweredRequests(); }
+  catch (error) { console.error('[Escalation]', error); }
+}, 30_000).unref();
 
 export default app;

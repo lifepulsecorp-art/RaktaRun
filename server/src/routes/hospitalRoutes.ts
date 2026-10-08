@@ -2,33 +2,14 @@ import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticate, authorizeRoles, AuthenticatedRequest } from '../middleware/auth.js';
 import { readJson, find, filter, insert, update } from '../utils/db.js';
-import type { Hospital, BloodRequest, Match, Donor, BloodGroup, BloodComponent, User } from '../types.js';
+import type { Hospital, BloodRequest, Match, Donor, BloodGroup, BloodComponent, User, AuditLog } from '../types.js';
+import { findCandidates } from '../services/matching.js';
+import { completeDonation } from '../services/journey.js';
 
 const router = Router();
 
-const BLOOD_COMPATIBILITY: Record<string, BloodGroup[]> = {
-  'O-': ['O-'],
-  'O+': ['O-', 'O+'],
-  'A-': ['O-', 'A-'],
-  'A+': ['O-', 'O+', 'A-', 'A+'],
-  'B-': ['O-', 'B-'],
-  'B+': ['O-', 'O+', 'B-', 'B+'],
-  'AB-': ['O-', 'A-', 'B-', 'AB-'],
-  'AB+': ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'],
-};
-
-function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(R * c * 10) / 10;
+function audit(req: AuthenticatedRequest, action: string, entityType: string, entityId: string, details?: Record<string, unknown>) {
+  insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action, entityType, entityId, details, createdAt: new Date().toISOString() });
 }
 
 // GET /api/hospitals - List hospitals
@@ -164,11 +145,15 @@ router.put('/:id/verify', authenticate, authorizeRoles('admin'), (req: Authentic
   });
 
   if (!updated) return res.status(404).json({ error: 'Hospital not found' });
+  insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action: 'hospital.accreditation_updated', entityType: 'hospital', entityId: updated.id, details: { status: updated.verificationStatus }, createdAt: new Date().toISOString() });
   res.json({ message: 'Hospital verification updated', hospital: updated });
 });
 
 // GET /api/hospitals/:id/requests - List requests for this hospital
-router.get('/:id/requests', authenticate, (req, res) => {
+router.get('/:id/requests', authenticate, (req: AuthenticatedRequest, res) => {
+  const hospital = find<Hospital>('hospitals', (h) => h.id === req.params.id);
+  if (!hospital) return res.status(404).json({ error: 'Hospital not found' });
+  if (req.user!.role !== 'admin' && hospital.uid !== req.user!.uid && req.user!.hospitalId !== hospital.id) return res.status(403).json({ error: 'Forbidden' });
   const requests = filter<BloodRequest>('bloodRequests', (r) => r.hospitalId === req.params.id);
   res.json(requests);
 });
@@ -177,15 +162,21 @@ router.get('/:id/requests', authenticate, (req, res) => {
 router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
   const hospital = find<Hospital>('hospitals', (h) => h.id === req.params.id);
   if (!hospital) return res.status(404).json({ error: 'Hospital not found' });
+  if (req.user!.role !== 'admin' && hospital.uid !== req.user!.uid && req.user!.hospitalId !== hospital.id) return res.status(403).json({ error: 'Forbidden: cannot dispatch for this hospital' });
+  if (hospital.verificationStatus !== 'verified') return res.status(403).json({ error: 'Hospital accreditation must be verified before dispatch' });
 
   const { bloodGroup, component, unitsRequired, urgency, radiusKm, patientInfo, contactPerson, requiredBy } = req.body;
 
-  if (!bloodGroup || !unitsRequired) {
-    return res.status(400).json({ error: 'Blood group and units required are mandatory' });
+  const validGroups: BloodGroup[] = ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'];
+  const validComponents: BloodComponent[] = ['whole_blood', 'RBC', 'platelets', 'plasma'];
+  if (!validGroups.includes(bloodGroup) || !Number.isInteger(Number(unitsRequired)) || Number(unitsRequired) < 1 || Number(unitsRequired) > 10) {
+    return res.status(400).json({ error: 'Choose a valid blood group and request between 1 and 10 units' });
   }
+  if (component && !validComponents.includes(component)) return res.status(400).json({ error: 'Invalid blood component' });
+  if (urgency && !['critical', 'urgent', 'standard'].includes(urgency)) return res.status(400).json({ error: 'Invalid urgency' });
 
   const requestId = `req_${uuidv4().substring(0, 8)}`;
-  const searchRadius = Number(radiusKm) || 25;
+  const searchRadius = Math.min(50, Math.max(5, Number(radiusKm) || 25));
 
   const newRequest: BloodRequest = {
     id: requestId,
@@ -200,6 +191,8 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
     requiredBy: requiredBy || new Date(Date.now() + 1000 * 3600 * 4).toISOString(),
     radiusKm: searchRadius,
     status: 'searching',
+    escalationLevel: 0,
+    lastEscalatedAt: null,
     createdBy: req.user!.uid,
     contactPerson: contactPerson || hospital.bloodBankContact,
     createdAt: new Date().toISOString(),
@@ -208,41 +201,7 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
 
   insert<BloodRequest>('bloodRequests', newRequest);
 
-  // Run Matching Algorithm
-  const compatibleBloodGroups = BLOOD_COMPATIBILITY[bloodGroup] || [bloodGroup];
-  const allDonors = readJson<Donor>('donors');
-
-  const candidates: { donor: Donor; distance: number; score: number }[] = [];
-
-  for (const donor of allDonors) {
-    // 1. Eligibility & Availability check
-    if (donor.eligibilityStatus !== 'eligible') continue;
-    if (donor.availabilityStatus === 'unavailable') continue;
-
-    // 2. Compatibility check
-    if (!compatibleBloodGroups.includes(donor.bloodGroup)) continue;
-
-    // 3. Distance check
-    const dist = calculateDistanceKm(
-      hospital.coordinates.latitude,
-      hospital.coordinates.longitude,
-      donor.coordinates.latitude,
-      donor.coordinates.longitude
-    );
-    if (dist > searchRadius) continue;
-
-    // 4. Calculate Match Score
-    let score = 100;
-    score += Math.max(0, 40 - dist * 2);
-    if (donor.heroStats.averageResponseTime < 600) score += 20;
-    if (donor.availabilityStatus === 'available') score += 10;
-    if (donor.bloodComponentEligibility.includes(newRequest.component)) score += 10;
-
-    candidates.push({ donor, distance: dist, score: Math.round(score) });
-  }
-
-  // Sort by score descending and take top matches
-  candidates.sort((a, b) => b.score - a.score);
+  const candidates = findCandidates(newRequest, readJson<Donor>('donors'));
   const topMatches = candidates.slice(0, newRequest.unitsRequired * 5);
 
   const createdMatches: Match[] = [];
@@ -258,12 +217,15 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
       alertedAt: new Date().toISOString(),
       respondedAt: null,
       response: null,
+      alertExpiresAt: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     insert<Match>('matches', match);
     createdMatches.push(match);
   });
+
+  audit(req, 'request.dispatched', 'bloodRequest', requestId, { matchedCount: createdMatches.length, radiusKm: searchRadius });
 
   res.status(201).json({
     request: newRequest,
@@ -274,6 +236,11 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
 
 // GET /api/hospitals/:id/requests/:requestId/matches - Get matches for a request
 router.get('/:id/requests/:requestId/matches', authenticate, (req, res) => {
+  const request = find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  const hospital = find<Hospital>('hospitals', (h) => h.id === request.hospitalId);
+  const authReq = req as AuthenticatedRequest;
+  if (authReq.user!.role !== 'admin' && authReq.user!.uid !== hospital?.uid && authReq.user!.hospitalId !== hospital?.id) return res.status(403).json({ error: 'Forbidden' });
   const matches = filter<Match>('matches', (m) => m.requestId === req.params.requestId);
   const donors = readJson<Donor>('donors');
 
@@ -286,7 +253,6 @@ router.get('/:id/requests/:requestId/matches', authenticate, (req, res) => {
             id: donor.id,
             fullName: donor.fullName,
             bloodGroup: donor.bloodGroup,
-            phone: donor.phone,
             homeLocality: donor.homeLocality,
             heroStats: donor.heroStats,
             verification: donor.verification,
@@ -296,6 +262,36 @@ router.get('/:id/requests/:requestId/matches', authenticate, (req, res) => {
   });
 
   res.json(detailedMatches);
+});
+
+router.post('/:id/requests/:requestId/cancel', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
+  const request = find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  const hospital = find<Hospital>('hospitals', (h) => h.id === request.hospitalId);
+  if (req.user!.role !== 'admin' && req.user!.uid !== hospital?.uid && req.user!.hospitalId !== hospital?.id) return res.status(403).json({ error: 'Forbidden' });
+  if (['fulfilled', 'cancelled'].includes(request.status)) return res.status(409).json({ error: 'Request is already closed' });
+  update<BloodRequest>('bloodRequests', request.id, { status: 'cancelled' });
+  readJson<Match>('matches').filter((m) => m.requestId === request.id && !['donated', 'reached'].includes(m.status)).forEach((m) => update<Match>('matches', m.id, { status: 'cancelled', donorCurrentLocation: null, etaSeconds: null, distanceRemaining: null }));
+  audit(req, 'request.cancelled', 'bloodRequest', request.id);
+  res.json({ message: 'Request cancelled' });
+});
+
+router.post('/:id/requests/:requestId/matches/:matchId/complete', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
+  const request = find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id);
+  const hospital = request && find<Hospital>('hospitals', (h) => h.id === request.hospitalId);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  if (req.user!.role !== 'admin' && req.user!.uid !== hospital?.uid && req.user!.hospitalId !== hospital?.id) return res.status(403).json({ error: 'Forbidden' });
+  const match = find<Match>('matches', (m) => m.id === req.params.matchId && m.requestId === request.id);
+  if (!match || !['accepted', 'en_route', 'reached'].includes(match.status)) return res.status(409).json({ error: 'Only an accepted donor can be marked as donated' });
+  const donor = find<Donor>('donors', (d) => d.id === match.donorId);
+  if (!donor) return res.status(404).json({ error: 'Donor not found' });
+  const completion = completeDonation(match, donor);
+  const updated = update<Match>('matches', match.id, completion.matchPatch);
+  update<Donor>('donors', donor.id, completion.donorPatch);
+  const stillNeeded = filter<Match>('matches', (m) => m.requestId === request.id && m.status === 'donated').length;
+  if (stillNeeded >= request.unitsRequired) update<BloodRequest>('bloodRequests', request.id, { status: 'fulfilled' });
+  audit(req, 'donation.completed', 'match', match.id, { requestId: request.id });
+  res.json({ message: 'Donation marked complete; location sharing stopped', match: updated });
 });
 
 export default router;

@@ -404,20 +404,6 @@ const matches: Match[] = [
     createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
     updatedAt: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
   },
-  {
-    id: 'match_001_mohammed',
-    requestId: 'req_emergency_001',
-    donorId: 'donor_mohammed_05',
-    distance: 38.5,
-    score: 85,
-    rank: 2,
-    status: 'alerted',
-    alertedAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-    respondedAt: null,
-    response: null,
-    createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-  },
 ];
 
 console.log('🌱 Seeding LifePulse JSON Database...');

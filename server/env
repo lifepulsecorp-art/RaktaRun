@@ -1,0 +1,9 @@
+PORT=5000
+NODE_ENV=development
+
+# Firebase Admin SDK (service account key)
+# We'll fill this in Step B.6
+FIREBASE_PROJECT_ID=lifepulse-dev
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+

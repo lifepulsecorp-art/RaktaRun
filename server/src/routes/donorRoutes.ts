@@ -5,7 +5,8 @@ import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticate, authorizeRoles, AuthenticatedRequest } from '../middleware/auth.js';
 import { readJson, find, filter, insert, update } from '../utils/db.js';
-import type { Donor, Match, BloodRequest, User } from '../types.js';
+import type { Donor, Match, BloodRequest, User, AuditLog } from '../types.js';
+import { resolveDonorResponse, updateJourney } from '../services/journey.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,9 +15,10 @@ const CERTIFICATES_DIR = path.join(__dirname, '../../data/certificates');
 const router = Router();
 
 // GET /api/donors - List all donors (hospital or admin)
-router.get('/', authenticate, authorizeRoles('hospital', 'admin'), (req, res) => {
+router.get('/', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
   const donors = readJson<Donor>('donors');
-  res.json(donors);
+  if (req.user!.role === 'admin') return res.json(donors);
+  res.json(donors.map(({ phone, coordinates, preciseLocation, ...publicProfile }) => publicProfile));
 });
 
 // GET /api/donors/me - Get current donor profile
@@ -30,9 +32,10 @@ router.get('/me', authenticate, (req: AuthenticatedRequest, res) => {
 });
 
 // GET /api/donors/:id - Get specific donor
-router.get('/:id', authenticate, (req, res) => {
+router.get('/:id', authenticate, (req: AuthenticatedRequest, res) => {
   const donor = find<Donor>('donors', (d) => d.id === req.params.id);
   if (!donor) return res.status(404).json({ error: 'Donor not found' });
+  if (req.user!.role !== 'admin' && donor.uid !== req.user!.uid) return res.status(403).json({ error: 'Donor profiles are private' });
   res.json(donor);
 });
 
@@ -222,8 +225,10 @@ router.put('/:id/availability', authenticate, (req: AuthenticatedRequest, res) =
     return res.status(400).json({ error: 'Invalid availability status' });
   }
 
+  const donor = find<Donor>('donors', (d) => d.id === req.params.id);
+  if (!donor) return res.status(404).json({ error: 'Donor not found' });
+  if (req.user!.role !== 'admin' && donor.uid !== req.user!.uid) return res.status(403).json({ error: 'Forbidden' });
   const updated = update<Donor>('donors', req.params.id, { availabilityStatus });
-  if (!updated) return res.status(404).json({ error: 'Donor not found' });
   res.json({ message: 'Availability updated', donor: updated });
 });
 
@@ -242,6 +247,7 @@ router.put('/:id/verify', authenticate, authorizeRoles('admin'), (req: Authentic
 
   const updated = update<Donor>('donors', req.params.id, patch);
   if (!updated) return res.status(404).json({ error: 'Donor not found' });
+  insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action: 'donor.eligibility_updated', entityType: 'donor', entityId: updated.id, details: { eligibilityStatus: updated.eligibilityStatus }, createdAt: new Date().toISOString() });
   res.json({ message: 'Donor eligibility updated', donor: updated });
 });
 
@@ -254,7 +260,7 @@ router.get('/me/alerts', authenticate, (req: AuthenticatedRequest, res) => {
   const donorMatches = filter<Match>('matches', (m) => m.donorId === donor.id);
   const requests = readJson<BloodRequest>('bloodRequests');
 
-  const alerts = donorMatches.map((match) => {
+  const alerts = donorMatches.filter((match) => ['alerted', 'accepted', 'en_route', 'reached'].includes(match.status) && (match.status !== 'alerted' || Date.parse(match.alertExpiresAt || match.alertedAt || '') > Date.now())).map((match) => {
     const request = requests.find((r) => r.id === match.requestId);
     return {
       match,
@@ -274,49 +280,59 @@ router.post('/matches/:matchId/respond', authenticate, (req: AuthenticatedReques
 
   const match = find<Match>('matches', (m) => m.id === req.params.matchId);
   if (!match) return res.status(404).json({ error: 'Match record not found' });
-
-  const patch: Partial<Match> = {
-    response,
-    status: response === 'accepted' ? 'accepted' : 'declined',
-    respondedAt: new Date().toISOString(),
-  };
-
-  const updatedMatch = update<Match>('matches', match.id, patch);
-
-  // If accepted, update donor hero statistics!
-  if (response === 'accepted') {
-    const donor = find<Donor>('donors', (d) => d.id === match.donorId);
-    if (donor) {
-      const heroStats = { ...donor.heroStats };
-      heroStats.totalEmergencyResponses = (heroStats.totalEmergencyResponses || 0) + 1;
-      heroStats.lastResponseDate = new Date().toISOString();
-      if (!heroStats.badges.includes('life_pulse_hero')) {
-        heroStats.badges.push('life_pulse_hero');
-      }
-      update<Donor>('donors', donor.id, { heroStats });
-    }
+  const donor = find<Donor>('donors', (d) => d.id === match.donorId);
+  if (!donor || (req.user!.role !== 'admin' && donor.uid !== req.user!.uid)) return res.status(403).json({ error: 'This alert belongs to another donor' });
+  const request = find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  const acceptedCount = filter<Match>('matches', (m) => m.requestId === match.requestId && ['accepted', 'en_route', 'reached', 'donated'].includes(m.status)).length;
+  const result = resolveDonorResponse(match, request, response, acceptedCount);
+  if (!result.ok) {
+    if (result.expire) update<Match>('matches', match.id, { status: 'expired' });
+    return res.status(409).json({ error: result.error });
   }
+  const updatedMatch = update<Match>('matches', match.id, result.matchPatch);
+  if (result.requestStatus) update<BloodRequest>('bloodRequests', request.id, { status: result.requestStatus });
 
   res.json({ message: `Alert ${response}`, match: updatedMatch });
 });
 
 // POST /api/donors/matches/:matchId/location - Live GPS coordinates stream from donor
 router.post('/matches/:matchId/location', authenticate, (req: AuthenticatedRequest, res) => {
-  const { latitude, longitude, speed } = req.body;
+  const { latitude, longitude } = req.body;
   if (typeof latitude !== 'number' || typeof longitude !== 'number') {
     return res.status(400).json({ error: 'Valid latitude and longitude required' });
   }
 
   const match = find<Match>('matches', (m) => m.id === req.params.matchId);
   if (!match) return res.status(404).json({ error: 'Match record not found' });
+  const donor = find<Donor>('donors', (d) => d.id === match.donorId);
+  if (!donor || (req.user!.role !== 'admin' && donor.uid !== req.user!.uid)) return res.status(403).json({ error: 'This tracking session belongs to another donor' });
+  if (!['accepted', 'en_route'].includes(match.status)) return res.status(409).json({ error: 'Location sharing is available only after accepting an active request' });
+  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return res.status(400).json({ error: 'Coordinates are outside valid bounds' });
+  const request = find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId);
+  if (!request || !['searching', 'matched'].includes(request.status)) return res.status(409).json({ error: 'Request is closed; tracking has stopped' });
+  const journey = updateJourney(match, request, { latitude, longitude });
+  const updatedMatch = update<Match>('matches', match.id, journey.matchPatch);
 
-  // Update match location and status
-  const updatedMatch = update<Match>('matches', match.id, {
-    status: 'en_route',
-    donorCurrentLocation: { latitude, longitude },
-  });
+  res.json({ message: journey.message, match: updatedMatch, trackingActive: journey.trackingActive });
+});
 
-  res.json({ message: 'Location updated', match: updatedMatch });
+router.get('/me/matches/:requestId', authenticate, (req: AuthenticatedRequest, res) => {
+  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+  if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
+  const match = find<Match>('matches', (m) => m.requestId === req.params.requestId && m.donorId === donor.id);
+  if (!match || !['accepted', 'en_route', 'reached', 'donated'].includes(match.status)) return res.status(404).json({ error: 'Active match not found' });
+  const request = find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  res.json({ match, request: { id: request.id, hospitalName: request.hospitalName, hospitalLocation: request.hospitalLocation, status: request.status } });
+});
+
+router.put('/me/public-hero-consent', authenticate, (req: AuthenticatedRequest, res) => {
+  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+  if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
+  if (typeof req.body.enabled !== 'boolean') return res.status(400).json({ error: 'enabled must be a boolean' });
+  const updated = update<Donor>('donors', donor.id, { publicHeroConsent: req.body.enabled });
+  res.json({ publicHeroConsent: updated?.publicHeroConsent || false });
 });
 
 export default router;

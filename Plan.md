@@ -916,29 +916,28 @@ service cloud.firestore {
   - Verification Pending Screens (`/donor/pending`, `/hospital/pending`)
   - Backend Onboarding Endpoints (`POST /api/auth/register`, `POST /api/donors/register`, `POST /api/donors/certificate`, `POST /api/hospitals/register`)
 
-### Phase 2 — Core Emergency Matching (Next Up)
-- [ ] Hospital Emergency Blood Request creation UI (`/hospital/request/new`)
-- [ ] Emergency alert dispatch engine with medical compatibility matching
-- [ ] Donor Emergency Alert modal (Accept / Decline with timeout)
-- [ ] Multi-donor dispatch & escalation logic for critical trauma
+### Phase 2 — Core Emergency Matching (Complete)
+- [x] Hospital Emergency Blood Request creation UI (`/hospital/request/new`)
+- [x] Emergency alert dispatch engine with compatibility, component eligibility, donation intervals, certificate expiry, donor radius and ranked scoring
+- [x] Donor Emergency Alert modal (Accept / Decline with two-minute timeout)
+- [x] Multi-donor dispatch & two-minute radius expansion for critical trauma
 
 ### Phase 3 — Real-Time Live Journey Tracking
-- [ ] Live Transit Tracking (`/live-tracking/:requestId` with Google Maps / Leaflet)
-- [ ] Ephemeral GPS location streaming (`POST /api/donors/matches/:matchId/location`)
-- [ ] Dynamic ETA & distance countdown
-- [ ] Auto-termination on hospital arrival
+- [x] Live transit tracking (`/live-tracking/:requestId`) with approximate positions and a live donor list
+- [x] Ephemeral, authenticated GPS streaming (`POST /api/donors/matches/:matchId/location`)
+- [x] Dynamic straight-line distance and ETA estimates
+- [x] Auto-termination within 150 metres of hospital arrival or request closure
 
 ### Phase 4 — Hero Recognition & Public Wall
-- [ ] Hero badge issuance engine (`life_pulse_hero`, `rapid_responder`, `rare_blood_hero`)
-- [ ] Public Hero Wall (`/hero-wall`)
-- [ ] Social share card generation for life-saving donors
-- [ ] Admin district-wide telemetry and audit logs
+- [x] Hero badge issuance on confirmed donations (`life_pulse_hero`, `repeat_hero`, `rare_blood_hero`, `rapid_responder`)
+- [x] Opt-in public Hero Wall (`/hero-wall`)
+- [x] Social share card generation for life-saving donors
+- [x] Admin district telemetry and audit logs
 
 ### Phase 5 — Testing & Pilot Launch
-- [ ] End-to-end trauma simulation with Kasturba Hospital Manipal & AJ Hospital Mangaluru
-- [ ] Security audit & token expiration handling
-- [ ] District pilot rollout in Udupi & Dakshina Kannada
-
+- [x] End-to-end dispatch, response, GPS arrival, and donation simulations, including Kasturba Hospital Manipal and AJ Hospital Mangaluru matching scenarios
+- [x] Security hardening: ownership checks, role-scoped access, location privacy and Firebase token revocation checks
+- [ ] Live district pilot rollout in Udupi & Dakshina Kannada (requires deployment, hospital operators and approval; see `PILOT_READINESS.md`)
 ---
 
 ## 🎯 FINAL POSITIONING
@@ -955,4 +954,4 @@ service cloud.firestore {
 
 **For Donors:** Get an alert → See you're 3.2 km away → Accept → Become a hero.
 
-**For the Community:** A wall of real heroes who responded when it mattered.                
+**For the Community:** A wall of real heroes who responded when it mattered.

@@ -62,6 +62,7 @@ export interface Donor {
   preciseLocation?: Coordinates | null;
   preferredRadius: number; // in km
   availabilityStatus: 'available' | 'unavailable' | 'emergency_only';
+  publicHeroConsent?: boolean;
   heroStats: HeroStats;
   createdAt: string;
   updatedAt: string;
@@ -107,6 +108,8 @@ export interface BloodRequest {
   requiredBy: string;
   radiusKm: number;
   status: 'searching' | 'matched' | 'fulfilled' | 'cancelled' | 'expired' | 'unfulfilled';
+  escalationLevel?: number;
+  lastEscalatedAt?: string | null;
   createdBy: string;
   contactPerson: {
     name: string;
@@ -123,7 +126,7 @@ export interface Match {
   distance: number;
   score: number;
   rank: number;
-  status: 'pending_alert' | 'alerted' | 'accepted' | 'declined' | 'en_route' | 'donated' | 'cancelled';
+  status: 'pending_alert' | 'alerted' | 'accepted' | 'declined' | 'expired' | 'en_route' | 'reached' | 'donated' | 'cancelled';
   alertedAt: string | null;
   respondedAt: string | null;
   response: 'accepted' | 'declined' | null;
@@ -132,7 +135,19 @@ export interface Match {
   distanceRemaining?: number | null;
   reachedAt?: string | null;
   donationCompletedAt?: string | null;
+  alertExpiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AuditLog {
+  id: string;
+  actorUid: string;
+  actorRole: UserRole;
+  action: string;
+  entityType: string;
+  entityId: string;
+  details?: Record<string, unknown>;
+  createdAt: string;
 }
 
