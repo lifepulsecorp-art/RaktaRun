@@ -177,28 +177,15 @@ export const DonorDashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowHistoryModal(true)}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 hover:text-white transition"
-              title="View my donation and emergency response history"
-            >
-              <History className="h-3.5 w-3.5 text-amber-400" /> Donation History
-            </button>
-            <Link
-              to="/donor/register"
-              className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
-            >
-              <UserCheck className="h-3.5 w-3.5 text-rose-400" /> Screening Certificate
-            </Link>
             <div className="text-right">
               <p className="text-sm font-medium text-white">{roleData?.fullName || profile?.name || 'Verified Donor'}</p>
-              <span className="inline-block rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
+              <span className="inline-block rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-500/30">
                 Blood Group: {roleData?.bloodGroup || '—'} Verified
               </span>
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
+              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition shadow-sm"
             >
               <LogOut className="h-3.5 w-3.5" /> Sign Out
             </button>
@@ -211,64 +198,69 @@ export const DonorDashboardPage: React.FC = () => {
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-white">Emergency Readiness & Hero Status</h2>
             <p className="text-sm text-slate-400">
-              Ready to respond to hospital emergencies across coastal Karnataka.
+              Active volunteer responder across the Udupi & Dakshina Kannada trauma emergency network.
             </p>
           </div>
-          <div className="flex items-center gap-3 self-start sm:self-auto">
-            <button
-              onClick={() => setShowHistoryModal(true)}
-              className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 hover:text-white transition"
-            >
-              <History className="h-4 w-4 text-amber-400" /> View History Details
-            </button>
-            <Link
-              to="/donor/register"
-              className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition"
-            >
-              Update Screening Certificate →
-            </Link>
+          <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 border border-slate-800 px-3.5 py-2 rounded-xl">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Network Status: <strong>Live Connected</strong></span>
           </div>
         </div>
 
         {/* 3 Status Cards */}
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl">
-            <div className="flex items-center gap-3 text-rose-400">
-              <ShieldCheck className="h-6 w-6" />
-              <h3 className="font-bold text-white">Hospital Certificate</h3>
+          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3 text-rose-400">
+                <ShieldCheck className="h-6 w-6" />
+                <h3 className="font-bold text-white">Hospital Certificate</h3>
+              </div>
+              <p className="mt-4 text-xs font-semibold tracking-wider text-slate-400 uppercase">Certificate ID</p>
+              <p className="font-mono text-sm font-bold text-white">{roleData?.verification?.certificateId || 'Awaiting verification'}</p>
+              <p className="mt-3 text-xs text-slate-400">Verified by: <strong className="text-white">{roleData?.verification?.hospitalName || '—'}</strong></p>
+              <p className="text-xs text-slate-500 mt-1">Medical Officer: {roleData?.verification?.verifiedBy || '—'}</p>
             </div>
-            <p className="mt-4 text-xs font-semibold tracking-wider text-slate-400 uppercase">Certificate ID</p>
-            <p className="font-mono text-sm font-bold text-white">{roleData?.verification?.certificateId || 'Awaiting verification'}</p>
-            <p className="mt-3 text-xs text-slate-400">Verified by: {roleData?.verification?.hospitalName || '—'}</p>
-            <p className="text-xs text-slate-500 mt-1">Medical Officer: {roleData?.verification?.verifiedBy || '—'}</p>
+            <div className="mt-5 pt-3 border-t border-slate-800/80">
+              <Link
+                to="/donor/register"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400 hover:text-rose-300 transition"
+              >
+                <UserCheck className="h-3.5 w-3.5" />
+                <span>Update Screening Certificate →</span>
+              </Link>
+            </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl">
-            <div className="flex items-center gap-3 text-amber-400">
-              <Award className="h-6 w-6" />
-              <h3 className="font-bold text-white">Hero Badges & Score</h3>
+          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3 text-amber-400">
+                <Award className="h-6 w-6" />
+                <h3 className="font-bold text-white">Hero Badges & Score</h3>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {(roleData?.heroStats?.badges || []).map((b: string) => {
+                  const info = BADGE_MAP[b] || { label: b.replace(/_/g, ' '), icon: '🏆' };
+                  return (
+                    <span key={b} className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-400 border border-amber-500/20">
+                      <span>{info.icon}</span> {info.label}
+                    </span>
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-xs text-slate-400">
+                Completed donations: <strong className="text-white">{roleData?.heroStats?.totalDonations || 0}</strong> · Emergency responses: <strong className="text-white">{roleData?.heroStats?.totalEmergencyResponses || 0}</strong>
+              </p>
             </div>
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {(roleData?.heroStats?.badges || []).map((b: string) => {
-                const info = BADGE_MAP[b] || { label: b.replace(/_/g, ' '), icon: '🏆' };
-                return (
-                  <span key={b} className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-400 border border-amber-500/20">
-                    <span>{info.icon}</span> {info.label}
-                  </span>
-                );
-              })}
+            <div className="mt-5 pt-3 border-t border-slate-800/80">
+              <button
+                type="button"
+                onClick={() => setShowHistoryModal(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-3.5 py-2 text-xs font-bold text-rose-300 hover:text-white transition shadow-sm active:scale-[0.98]"
+              >
+                <History className="h-3.5 w-3.5 text-rose-400" />
+                <span>View Donation History ({roleData?.heroStats?.totalDonations || 0}) →</span>
+              </button>
             </div>
-            <p className="mt-4 text-xs text-slate-400">
-              Completed donations: <strong className="text-white">{roleData?.heroStats?.totalDonations || 0}</strong> · Emergency responses: <strong className="text-white">{roleData?.heroStats?.totalEmergencyResponses || 0}</strong>
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowHistoryModal(true)}
-              className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-300 hover:text-white transition shadow-sm"
-            >
-              <History className="h-3.5 w-3.5 text-amber-400" />
-              <span>View Full History ({roleData?.heroStats?.totalDonations || 0}) →</span>
-            </button>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
@@ -639,11 +631,11 @@ export const DonorDashboardPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex items-start gap-4 pr-10">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
                 <History className="h-6 w-6" />
               </div>
               <div>
-                <span className="inline-block rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">
+                <span className="inline-block rounded-full bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 text-[11px] font-bold text-rose-300 uppercase tracking-wider mb-1">
                   Verified Contribution Log
                 </span>
                 <h2 className="text-xl font-bold text-white">Donation & Emergency Response History</h2>
@@ -665,7 +657,7 @@ export const DonorDashboardPage: React.FC = () => {
               </div>
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                <div className="flex items-center gap-2 text-amber-400 mb-1">
+                <div className="flex items-center gap-2 text-rose-400 mb-1">
                   <BellRing className="h-4 w-4" />
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Dispatches Answered</span>
                 </div>
@@ -688,19 +680,19 @@ export const DonorDashboardPage: React.FC = () => {
               <div className="flex items-center gap-2 text-xs font-semibold">
                 <button
                   onClick={() => setHistoryFilter('all')}
-                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'all' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'all' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
                 >
                   All Entries ({historyData.history.length})
                 </button>
                 <button
                   onClick={() => setHistoryFilter('donations')}
-                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'donations' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'donations' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
                 >
                   Completed Donations ({historyData.history.filter((h: any) => h.matchStatus === 'donated').length})
                 </button>
                 <button
                   onClick={() => setHistoryFilter('alerts')}
-                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'alerts' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'alerts' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
                 >
                   Emergency Responses ({historyData.history.filter((h: any) => h.response === 'accepted' || h.type?.includes('Emergency')).length})
                 </button>

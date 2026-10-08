@@ -31,6 +31,7 @@ export default function AppRoutes() {
       <Route path="/register/hospital" element={<HospitalRegisterPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/hero-wall" element={<HeroWallPage />} />
+      <Route path="/heroes" element={<HeroWallPage />} />
 
       {/* PENDING (logged in but not verified) */}
       <Route path="/donor/pending" element={<ProtectedRoute><DonorPendingPage /></ProtectedRoute>} />
@@ -42,6 +43,7 @@ export default function AppRoutes() {
       <Route path="/donor/register" element={<ProtectedRoute allowedRoles={['donor']}><DonorMedicalProfilePage /></ProtectedRoute>} />
       <Route path="/donor/profile" element={<ProtectedRoute allowedRoles={['donor']}><DonorMedicalProfilePage /></ProtectedRoute>} />
       <Route path="/donor/hero-card" element={<ProtectedRoute allowedRoles={['donor']}><DonorHeroCardPage /></ProtectedRoute>} />
+      <Route path="/donor/hero-studio" element={<ProtectedRoute allowedRoles={['donor']}><DonorHeroCardPage /></ProtectedRoute>} />
 
       {/* HOSPITAL (verified) */}
       <Route path="/hospital" element={<ProtectedRoute allowedRoles={['hospital']}><HospitalDashboardPage /></ProtectedRoute>} />

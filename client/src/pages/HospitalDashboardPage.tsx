@@ -64,18 +64,11 @@ export const HospitalDashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowHistoryModal(true)}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 hover:text-white transition"
-              title="View past emergency dispatches and fulfillment history"
-            >
-              <History className="h-3.5 w-3.5 text-amber-400" /> Dispatch History
-            </button>
             <Link
               to="/hospital/profile"
-              className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
+              className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition shadow-sm"
             >
-              <Settings className="h-3.5 w-3.5" /> Hospital profile
+              <Settings className="h-3.5 w-3.5 text-rose-400" /> Hospital Profile
             </Link>
             <div className="text-right hidden sm:block">
               <p className="text-xs font-medium text-white">{profile?.name || 'Hospital staff'}</p>
@@ -83,9 +76,9 @@ export const HospitalDashboardPage: React.FC = () => {
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
+              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition shadow-sm"
             >
-              <LogOut className="h-3.5 w-3.5" /> Sign out
+              <LogOut className="h-3.5 w-3.5" /> Sign Out
             </button>
           </div>
         </div>
@@ -94,23 +87,24 @@ export const HospitalDashboardPage: React.FC = () => {
       <main className="mx-auto max-w-7xl px-6 py-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-2xl font-bold text-white">Emergency Dispatches</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-white">Emergency Dispatches</h2>
             <p className="text-sm text-slate-400">
-              Create requests and monitor donor responses. Exact donor location appears only after acceptance.
+              Create emergency requests and monitor donor responses. Exact donor location appears only after acceptance.
             </p>
           </div>
           <div className="flex items-center gap-3 self-start sm:self-auto">
             <button
+              type="button"
               onClick={() => setShowHistoryModal(true)}
-              className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 hover:text-white transition"
+              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition shadow-sm active:scale-[0.98]"
             >
-              <History className="h-4 w-4 text-amber-400" /> View History
+              <History className="h-4 w-4 text-rose-400" /> Dispatch History
             </button>
             <Link
               to="/hospital/request/new"
-              className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition"
+              className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition active:scale-[0.98]"
             >
-              <Send className="h-4 w-4" /> New emergency request
+              <Send className="h-4 w-4" /> New Emergency Request
             </Link>
           </div>
         </div>
@@ -150,7 +144,7 @@ export const HospitalDashboardPage: React.FC = () => {
                   to={`/live-tracking/${request.id}`}
                   className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition"
                 >
-                  <Send className="h-3.5 w-3.5" /> View matches & live tracking →
+                  <Send className="h-3.5 w-3.5 text-rose-400" /> View matches & live tracking →
                 </Link>
               </article>
             ))}
@@ -158,15 +152,10 @@ export const HospitalDashboardPage: React.FC = () => {
         </section>
 
         <div className="mt-10 pt-6 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-          <Link to="/hospital/profile" className="inline-flex items-center gap-2 hover:text-white transition">
+          <Link to="/hospital/profile" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition font-medium">
             <Building2 className="h-4 w-4 text-rose-400" /> Manage hospital accreditation profile
           </Link>
-          <button
-            onClick={() => setShowHistoryModal(true)}
-            className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-semibold"
-          >
-            <History className="h-3.5 w-3.5" /> View historical transfusion dispatches →
-          </button>
+          <span className="text-slate-500">LifePulse Emergency Network · Coastal Karnataka</span>
         </div>
       </main>
 
@@ -184,11 +173,11 @@ export const HospitalDashboardPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex items-start gap-4 pr-10">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
                 <History className="h-6 w-6" />
               </div>
               <div>
-                <span className="inline-block rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">
+                <span className="inline-block rounded-full bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 text-[11px] font-bold text-rose-300 uppercase tracking-wider mb-1">
                   Clinical Audit Trail
                 </span>
                 <h2 className="text-xl font-bold text-white">Emergency Dispatch & Fulfillment History</h2>
@@ -230,19 +219,19 @@ export const HospitalDashboardPage: React.FC = () => {
               <div className="flex items-center gap-2 text-xs font-semibold">
                 <button
                   onClick={() => setStatusFilter('all')}
-                  className={`rounded-lg px-3 py-1.5 transition ${statusFilter === 'all' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${statusFilter === 'all' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
                 >
                   All ({historyData.history.length})
                 </button>
                 <button
                   onClick={() => setStatusFilter('fulfilled')}
-                  className={`rounded-lg px-3 py-1.5 transition ${statusFilter === 'fulfilled' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${statusFilter === 'fulfilled' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
                 >
                   Fulfilled ({historyData.history.filter((h: any) => h.status === 'fulfilled').length})
                 </button>
                 <button
                   onClick={() => setStatusFilter('unfulfilled')}
-                  className={`rounded-lg px-3 py-1.5 transition ${statusFilter === 'unfulfilled' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white bg-slate-950'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${statusFilter === 'unfulfilled' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
                 >
                   Unfulfilled / Expired ({historyData.history.filter((h: any) => ['unfulfilled', 'expired', 'cancelled'].includes(h.status)).length})
                 </button>
