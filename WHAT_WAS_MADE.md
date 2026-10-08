@@ -179,7 +179,9 @@ LifePulse is a medically authoritative, real-time emergency blood coordination s
 | `/hospital` | `HospitalDashboardPage` | `hospital`, `admin` | Hospital dispatch console & emergency stats |
 | `/hospital/profile` | `HospitalProfilePage` | `hospital`, `admin` | Facility licensing & coordinate configuration |
 | `/hospital/request/new` | `EmergencyRequestPage` | `hospital`, `admin` | Emergency request creation & dispatch |
-| `/donor` | `DonorDashboardPage` | `donor`, `admin` | Hero portal, live alerts, and availability toggle |
+| `/donor` | `DonorDashboardPage` | `donor`, `admin` | Hero portal, live alerts, availability & history modals |
+| `/donor/hero-studio` | `DonorHeroStudioPage` | `donor`, `admin` | Private hero share studio & multi-format export |
+| `/heroes` | `HeroWallPage` | Public | Public community hero showcase (downloads restricted) |
 | `/live-tracking/:requestId` | `LiveTrackingPage` | Authenticated | Real-time transit radar & GPS tracker |
 | `/unauthorized` | `UnauthorizedPage` | Public | 403 Forbidden screen |
 
@@ -189,25 +191,30 @@ LifePulse is a medically authoritative, real-time emergency blood coordination s
 | Method | Endpoint | Access Role | Description |
 |---|---|---|---|
 | `GET` | `/api/health` | Public | Server health check |
+| `POST` | `/api/auth/login` | Public | Offline Local JWT login fallback |
+| `POST` | `/api/auth/register` | Public | Local user registration |
 | `GET` | `/api/auth/me` | Authenticated | Current user profile & attached role record |
 | `POST` | `/api/auth/sync` | Authenticated | Synchronize user details |
-| `POST` | `/api/auth/register` | Authenticated | Assign role & name during onboarding |
 | `GET` | `/api/hospitals` | Public | Directory of accredited hospitals |
 | `GET` | `/api/hospitals/:id` | Public | Hospital details |
 | `POST` | `/api/hospitals/register` | Authenticated | Self-service hospital registration |
 | `PUT` | `/api/hospitals/:id` | Hospital / Admin | Update hospital profile & coordinates |
 | `PUT` | `/api/hospitals/:id/verify` | Admin | Approve or reject hospital accreditation |
 | `GET` | `/api/hospitals/:id/requests` | Authenticated | List hospital's emergency blood requests |
+| `GET` | `/api/hospitals/:id/history` | Hospital / Admin | Historical dispatches, donor completions & units |
 | `POST` | `/api/hospitals/:id/requests` | Hospital / Admin | Dispatch emergency request + run matching engine |
 | `GET` | `/api/hospitals/:id/requests/:requestId/matches` | Authenticated | Ranked matches with transit telemetry |
 | `POST` | `/api/hospitals/:id/requests/:requestId/cancel` | Hospital / Admin | Cancel active emergency request |
+| `POST` | `/api/hospitals/:id/requests/:requestId/complete` | Hospital / Admin | Mark request fulfilled or unfulfilled with reason |
 | `POST` | `/api/hospitals/:id/requests/:requestId/matches/:matchId/complete` | Hospital / Admin | Mark donation complete and award badges |
 | `GET` | `/api/requests/:requestId` | Authenticated | Get blood request metadata |
 | `GET` | `/api/donors` | Hospital / Admin | Registry of screened donors |
 | `GET` | `/api/donors/me` | Authenticated | Authenticated donor profile |
+| `GET` | `/api/donors/me/history` | Authenticated | Comprehensive donor donation timeline & response history |
+| `GET` | `/api/donors/me/studio` | Authenticated | Private hero studio data & customizable cards |
 | `POST` | `/api/donors/register` | Authenticated | Self-service donor registration |
 | `POST` | `/api/donors/certificate` | Authenticated | Upload screening certificate document |
-| `PUT` | `/api/donors/:id/availability` | Authenticated | Toggle availability status |
+| `PUT` | `/api/donors/:id/availability` | Authenticated | Toggle availability status & emergency mode |
 | `PUT` | `/api/donors/:id/verify` | Admin | Set donor eligibility status |
 | `GET` | `/api/donors/me/alerts` | Authenticated | Active incoming emergency alerts for donor |
 | `POST` | `/api/donors/matches/:matchId/respond` | Authenticated | Accept or decline emergency alert |
@@ -216,8 +223,39 @@ LifePulse is a medically authoritative, real-time emergency blood coordination s
 | `PUT` | `/api/donors/me/public-hero-consent` | Authenticated | Toggle public hero wall opt-in |
 | `GET` | `/api/heroes` | Public | List opt-in public heroes & badges |
 | `GET` | `/api/admin/telemetry` | Admin | District-wide totals and telemetry |
+| `GET` | `/api/admin/history` | Admin | Network-wide dispatch & fulfillment history audit |
+| `GET` | `/api/admin/config` | Admin | Get matching rules & escalation parameters |
+| `PUT` | `/api/admin/config` | Admin | Save matching & escalation parameters live |
+| `GET` | `/api/admin/users` | Admin | System user directory across all roles |
+| `POST` | `/api/admin/flags` | Admin | Flag suspicious activity or abuse into audit log |
+| `GET` | `/api/admin/reports/export` | Admin | Export system audit logs to CSV |
 | `GET` | `/api/admin/audit-logs` | Admin | System audit trail |
 | `GET` | `/certificates/:filename` | Public | Static certificate document server |
+
+---
+
+### 🔹 Phase 5: Advanced Controls, Hero Studio, Full History Auditing & Governance
+
+1. **Multi-Portal Donation & Dispatch History:**
+   - **Donor Portal:** Full timeline view of 7 completed donations and 5 emergency responses, with component badges, dates, and filtering by emergency vs routine donations.
+   - **Hospital Portal:** Historical dispatch records, units fulfilled, response rates, and list of donors who contributed.
+   - **Admin Portal:** Network-wide dispatch audit across Udupi and Dakshina Kannada with district, status filters, and search.
+
+2. **Community Recognition & Private Hero Studio:**
+   - Separated **Public Hero Wall** (`/heroes`) with restricted downloading from the **Private Hero Studio** (`/donor/hero-studio`).
+   - Private studio renders high-resolution **1:1 Square (1080x1080)** and **9:16 Instagram Story (1080x1920)** canvas graphics with instant one-click download.
+   - Integrated the 5th badge: **🌟 LifePulse Community Champion**.
+
+3. **Human-Centric Emergency Alerts:**
+   - Redesigned alert modal featuring emotional copywriting (*"Someone near you needs your help"*, *"[ I CAN HELP ]"* button, prominent travel ETA).
+
+4. **Medical Certificate Registration Guidance:**
+   - Added *"Don't have a certificate?"* guidance modal on [`DonorRegisterPage.tsx`](file:///d:/Echelonglobal/Lifepulse/client/src/pages/register/DonorRegisterPage.tsx) listing certified hospitals across Udupi and Dakshina Kannada with contact details and blood bank operating hours.
+
+5. **Admin Live Rule Console & Safety Controls:**
+   - Real-time adjustment of alert timeout (seconds), radius expansion step (km), and max ceiling (km).
+   - Abuse prevention modal to flag suspicious events directly into immutable audit logs.
+   - CSV audit log exporter for regulatory compliance.
 
 ---
 
@@ -225,13 +263,13 @@ LifePulse is a medically authoritative, real-time emergency blood coordination s
 
 | Role | Email | Password | Access Rights |
 | :--- | :--- | :--- | :--- |
-| 🛡️ **System Admin** | `admin@lifepulse.in` | *(Console Password)* | Full administrative oversight, approvals, and telemetry |
-| 🏥 **Hospital Staff (Manipal)** | `manipal@lifepulse.in` | `LifePulse@123` | Kasturba Hospital Manipal dispatch & profile console |
+| 🛡️ **System Admin** | `admin@lifepulse.in` | `AdminPulse@2026` / `LifePulse@123` | Full administrative oversight, approvals, telemetry & history |
+| 🏥 **Hospital Staff (Manipal)** | `manipal@lifepulse.in` | `LifePulse@123` | Kasturba Hospital Manipal dispatch, profile & history console |
 | 🏥 **Hospital Staff (Mangaluru)** | `ajhospital@lifepulse.in` | `LifePulse@123` | AJ Hospital & Research Centre dispatch console |
-| 🩸 **Verified Donor (Rahul)** | `rahul.shetty@gmail.com` | `LifePulse@123` | O+ Screened donor with active alert feeds & journey tracking |
+| 🩸 **Verified Donor (Rahul)** | `rahul.shetty@gmail.com` | `LifePulse@123` | O+ Screened donor (7 donations, 5 emergency responses, Hero Studio) |
 | 🩸 **Verified Donor (Sneha)** | `sneha.rao@gmail.com` | `LifePulse@123` | A+ Screened donor with active alert feeds |
 
-*(All non-admin accounts are provisioned directly in Firebase Auth with matching records in `users.json`)*.
+*(All accounts operate via local offline authentication or Firebase Auth)*.
 
 ---
 
@@ -254,7 +292,7 @@ LifePulse is a medically authoritative, real-time emergency blood coordination s
    ```bash
    npm run build --prefix client
    ```
-   **Output:** `✓ built in 7.69s` (Zero TypeScript or bundling errors).
+   **Output:** `✓ built in 3.02s` (Zero TypeScript or bundling errors).
 
 ---
 
@@ -273,5 +311,6 @@ npm run seed
 
 - **Frontend:** [http://localhost:5173](http://localhost:5173)
 - **Backend Health:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
-- **Public Hero Wall:** [http://localhost:5173/hero-wall](http://localhost:5173/hero-wall)
+- **Public Hero Wall:** [http://localhost:5173/heroes](http://localhost:5173/heroes)
+- **Donor Hero Studio:** [http://localhost:5173/donor/hero-studio](http://localhost:5173/donor/hero-studio)
 - **Pilot Readiness Guide:** See [`PILOT_READINESS.md`](file:///d:/Echelonglobal/Lifepulse/PILOT_READINESS.md) for clinical and operational pre-launch steps.
