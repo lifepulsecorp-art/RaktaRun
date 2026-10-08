@@ -34,6 +34,20 @@ export interface HeroStats {
   lastResponseDate?: string | null;
 }
 
+export interface NotificationPreferences {
+  push: boolean;
+  sms: boolean;
+  whatsapp: boolean;
+  criticalOnly: boolean;
+}
+
+export interface SystemConfig {
+  alertTimeoutSeconds: number; // e.g. 120
+  radiusStepKm: number; // e.g. 5
+  maxRadiusKm: number; // e.g. 50
+  schedulerIntervalSeconds: number; // e.g. 30
+}
+
 export interface Coordinates {
   latitude: number;
   longitude: number;
@@ -62,6 +76,7 @@ export interface Donor {
   preciseLocation?: Coordinates | null;
   preferredRadius: number; // in km
   availabilityStatus: 'available' | 'unavailable' | 'emergency_only';
+  notificationPreferences?: NotificationPreferences;
   publicHeroConsent?: boolean;
   heroStats: HeroStats;
   createdAt: string;

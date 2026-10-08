@@ -327,6 +327,25 @@ router.get('/me/matches/:requestId', authenticate, (req: AuthenticatedRequest, r
   res.json({ match, request: { id: request.id, hospitalName: request.hospitalName, hospitalLocation: request.hospitalLocation, status: request.status } });
 });
 
+router.put('/me/preferences', authenticate, (req: AuthenticatedRequest, res) => {
+  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+  if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
+  const { preferredRadius, notificationPreferences, homeLocality } = req.body;
+  const patch: Partial<Donor> = {};
+  if (preferredRadius != null) patch.preferredRadius = Math.max(5, Math.min(50, Number(preferredRadius) || 15));
+  if (homeLocality) patch.homeLocality = String(homeLocality).trim();
+  if (notificationPreferences && typeof notificationPreferences === 'object') {
+    patch.notificationPreferences = {
+      push: Boolean(notificationPreferences.push),
+      sms: Boolean(notificationPreferences.sms),
+      whatsapp: Boolean(notificationPreferences.whatsapp),
+      criticalOnly: Boolean(notificationPreferences.criticalOnly),
+    };
+  }
+  const updated = update<Donor>('donors', donor.id, patch);
+  res.json({ message: 'Donor preferences updated', donor: updated });
+});
+
 router.put('/me/public-hero-consent', authenticate, (req: AuthenticatedRequest, res) => {
   const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });

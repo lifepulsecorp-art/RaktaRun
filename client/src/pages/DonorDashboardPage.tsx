@@ -1,8 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Award, ShieldCheck, Heart, LogOut, BellRing, UserCheck } from 'lucide-react';
+import { Award, ShieldCheck, Heart, LogOut, BellRing, UserCheck, Sliders, MessageSquare, Smartphone, Bell, Clock, Compass } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+
+const BADGE_MAP: Record<string, { label: string; icon: string }> = {
+  life_pulse_hero: { label: 'LifePulse Hero', icon: '🦸' },
+  rapid_responder: { label: 'Rapid Responder', icon: '⚡' },
+  repeat_hero: { label: 'Repeat Hero', icon: '❤️' },
+  rare_blood_hero: { label: 'Rare Blood Hero', icon: '🏅' },
+  community_champion: { label: 'Community Champion', icon: '🌟' },
+};
 
 export const DonorDashboardPage: React.FC = () => {
   const { profile, roleData, logout } = useAuth();
@@ -11,21 +19,78 @@ export const DonorDashboardPage: React.FC = () => {
   const [busyId, setBusyId] = useState('');
   const [now, setNow] = useState(Date.now());
   const [consent, setConsent] = useState(Boolean(roleData?.publicHeroConsent));
+  
+  // Donor preference states
+  const [preferredRadius, setPreferredRadius] = useState<number>(roleData?.preferredRadius || 15);
+  const [notifPrefs, setNotifPrefs] = useState({
+    push: roleData?.notificationPreferences?.push ?? true,
+    sms: roleData?.notificationPreferences?.sms ?? true,
+    whatsapp: roleData?.notificationPreferences?.whatsapp ?? true,
+    criticalOnly: roleData?.notificationPreferences?.criticalOnly ?? false,
+  });
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [prefNotice, setPrefNotice] = useState('');
+
   const refreshAlerts = useCallback(async () => {
-    try { const { data } = await api.get('/donors/me/alerts'); setAlerts(data.filter((entry: any) => entry.match.status === 'alerted')); }
-    catch { /* keep the last alert snapshot visible while the API reconnects */ }
+    try {
+      const { data } = await api.get('/donors/me/alerts');
+      setAlerts(data.filter((entry: any) => entry.match.status === 'alerted'));
+    } catch {
+      /* Keep last alert snapshot while reconnecting */
+    }
   }, []);
-  useEffect(() => { refreshAlerts(); const poll = setInterval(refreshAlerts, 5000); const clock = setInterval(() => setNow(Date.now()), 1000); return () => { clearInterval(poll); clearInterval(clock); }; }, [refreshAlerts]);
+
+  useEffect(() => {
+    refreshAlerts();
+    const poll = setInterval(refreshAlerts, 5000);
+    const clock = setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      clearInterval(poll);
+      clearInterval(clock);
+    };
+  }, [refreshAlerts]);
+
   const respond = async (matchId: string, response: 'accepted' | 'declined') => {
     setBusyId(matchId);
-    try { await api.post(`/donors/matches/${matchId}/respond`, { response }); setAlerts((current) => current.filter((item) => item.match.id !== matchId)); if (response === 'accepted') navigate(`/live-tracking/${alerts.find((item) => item.match.id === matchId)?.request?.id}`); }
-    catch (error: any) { window.alert(error.response?.data?.error || 'Could not respond to alert.'); await refreshAlerts(); }
-    finally { setBusyId(''); }
+    try {
+      await api.post(`/donors/matches/${matchId}/respond`, { response });
+      setAlerts((current) => current.filter((item) => item.match.id !== matchId));
+      if (response === 'accepted') {
+        const targetReq = alerts.find((item) => item.match.id === matchId)?.request;
+        navigate(`/live-tracking/${targetReq?.id}`);
+      }
+    } catch (error: any) {
+      window.alert(error.response?.data?.error || 'Could not respond to alert.');
+      await refreshAlerts();
+    } finally {
+      setBusyId('');
+    }
   };
+
   const setPublicConsent = async (enabled: boolean) => {
     setConsent(enabled);
-    try { await api.put('/donors/me/public-hero-consent', { enabled }); }
-    catch { setConsent(!enabled); }
+    try {
+      await api.put('/donors/me/public-hero-consent', { enabled });
+    } catch {
+      setConsent(!enabled);
+    }
+  };
+
+  const savePreferences = async () => {
+    setSavingPrefs(true);
+    setPrefNotice('');
+    try {
+      await api.put('/donors/me/preferences', {
+        preferredRadius,
+        notificationPreferences: notifPrefs,
+      });
+      setPrefNotice('Preferences updated successfully!');
+      setTimeout(() => setPrefNotice(''), 3000);
+    } catch (e: any) {
+      setPrefNotice('Failed to update preferences.');
+    } finally {
+      setSavingPrefs(false);
+    }
   };
 
   return (
@@ -38,7 +103,7 @@ export const DonorDashboardPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold leading-none text-white">LifePulse Hero Portal</h1>
-              <span className="text-xs text-rose-400 font-medium">Medically Verified Donor Network</span>
+              <span className="text-xs text-rose-400 font-medium">Udupi & Dakshina Kannada Emergency Network</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -46,7 +111,7 @@ export const DonorDashboardPage: React.FC = () => {
               to="/donor/register"
               className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
             >
-              <UserCheck className="h-3.5 w-3.5 text-rose-400" /> Medical Certificate & Profile (Block H)
+              <UserCheck className="h-3.5 w-3.5 text-rose-400" /> Screening Certificate
             </Link>
             <div className="text-right">
               <p className="text-sm font-medium text-white">{roleData?.fullName || profile?.name || 'Verified Donor'}</p>
@@ -69,7 +134,7 @@ export const DonorDashboardPage: React.FC = () => {
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-white">Emergency Readiness & Hero Status</h2>
             <p className="text-sm text-slate-400">
-              Real-time emergency matching readiness for Udupi & Dakshina Kannada.
+              Ready to respond to hospital emergencies across coastal Karnataka.
             </p>
           </div>
           <Link
@@ -80,7 +145,7 @@ export const DonorDashboardPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* Hero Card */}
+        {/* 3 Status Cards */}
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl">
             <div className="flex items-center gap-3 text-rose-400">
@@ -96,46 +161,283 @@ export const DonorDashboardPage: React.FC = () => {
           <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl">
             <div className="flex items-center gap-3 text-amber-400">
               <Award className="h-6 w-6" />
-              <h3 className="font-bold text-white">Hero Badges</h3>
+              <h3 className="font-bold text-white">Hero Badges & Score</h3>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {(roleData?.heroStats?.badges || []).map((b: string) => (
-                <span key={b} className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-400 border border-amber-500/20">
-                  🏆 {b.replace(/_/g, ' ')}
-                </span>
-              ))}
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {(roleData?.heroStats?.badges || []).map((b: string) => {
+                const info = BADGE_MAP[b] || { label: b.replace(/_/g, ' '), icon: '🏆' };
+                return (
+                  <span key={b} className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-400 border border-amber-500/20">
+                    <span>{info.icon}</span> {info.label}
+                  </span>
+                );
+              })}
             </div>
-            <p className="mt-4 text-xs text-slate-400">Completed donations: {roleData?.heroStats?.totalDonations || 0}</p>
+            <p className="mt-4 text-xs text-slate-400">
+              Completed donations: <strong className="text-white">{roleData?.heroStats?.totalDonations || 0}</strong> · Emergency responses: <strong className="text-white">{roleData?.heroStats?.totalEmergencyResponses || 0}</strong>
+            </p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl">
             <div className="flex items-center gap-3 text-emerald-400">
               <BellRing className="h-6 w-6" />
-              <h3 className="font-bold text-white">Emergency Status</h3>
+              <h3 className="font-bold text-white">Emergency Availability</h3>
             </div>
             <div className="mt-4 flex items-center gap-2">
               <span className="h-3 w-3 rounded-full bg-emerald-500 animate-ping"></span>
               <span className="text-sm font-semibold text-emerald-400 capitalize">
-                {roleData?.availabilityStatus || 'Unavailable'}
+                {roleData?.availabilityStatus || 'Available'}
               </span>
             </div>
             <p className="mt-4 text-xs text-slate-400">
-              Locality: {roleData?.homeLocality || 'Not set'} • Radius: {roleData?.preferredRadius || 15} km
+              Locality: <strong className="text-white">{roleData?.homeLocality || 'Manipal / Mangaluru'}</strong> • Preferred Radius: <strong className="text-white">{preferredRadius} km</strong>
             </p>
           </div>
         </div>
 
-        <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-bold text-white">Public Hero Wall</h3><p className="mt-1 text-sm text-slate-400">Your profile appears only if you opt in. The wall shows your name, district, blood group and donation totals.</p></div><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={consent} onChange={(e) => setPublicConsent(e.target.checked)}/> Show my hero profile</label></div>
-          <Link className="mt-3 inline-block text-sm text-rose-300 hover:text-rose-200" to="/hero-wall">View the Hero Wall →</Link>
+        {/* Preferences & Radius Control Section */}
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Preferred Radius Slider */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+            <div className="flex items-center gap-2.5 text-rose-400">
+              <Compass className="h-5 w-5" />
+              <h3 className="font-bold text-white">Preferred Travel Radius</h3>
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              Only receive emergency broadcasts from hospitals within this distance from your locality.
+            </p>
+
+            <div className="mt-6">
+              <div className="flex items-center justify-between text-sm font-semibold">
+                <span className="text-slate-400">Maximum Distance</span>
+                <span className="text-rose-400 font-mono text-base">{preferredRadius} km</span>
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="50"
+                step="5"
+                value={preferredRadius}
+                onChange={(e) => setPreferredRadius(Number(e.target.value))}
+                className="mt-3 w-full accent-rose-600 cursor-pointer"
+              />
+              <div className="mt-3 flex justify-between text-xs text-slate-500">
+                <span>5 km (Local)</span>
+                <span>15 km (Default)</span>
+                <span>25 km (Regional)</span>
+                <span>50 km (District-wide)</span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              {[5, 10, 15, 25, 50].map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setPreferredRadius(r)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    preferredRadius === r
+                      ? 'bg-rose-600 text-white'
+                      : 'border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  {r} km
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Notification Preferences */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+            <div className="flex items-center gap-2.5 text-sky-400">
+              <Sliders className="h-5 w-5" />
+              <h3 className="font-bold text-white">Alert & Channel Preferences</h3>
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              Choose how and when LifePulse coordinates emergency requests with you.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <label className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
+                <span className="flex items-center gap-2 text-slate-200">
+                  <Bell className="h-4 w-4 text-emerald-400" /> Web Push Notifications
+                </span>
+                <input
+                  type="checkbox"
+                  checked={notifPrefs.push}
+                  onChange={(e) => setNotifPrefs({ ...notifPrefs, push: e.target.checked })}
+                  className="accent-rose-600"
+                />
+              </label>
+
+              <label className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
+                <span className="flex items-center gap-2 text-slate-200">
+                  <Smartphone className="h-4 w-4 text-sky-400" /> SMS Emergency Alerts
+                </span>
+                <input
+                  type="checkbox"
+                  checked={notifPrefs.sms}
+                  onChange={(e) => setNotifPrefs({ ...notifPrefs, sms: e.target.checked })}
+                  className="accent-rose-600"
+                />
+              </label>
+
+              <label className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
+                <span className="flex items-center gap-2 text-slate-200">
+                  <MessageSquare className="h-4 w-4 text-green-400" /> WhatsApp Fallback Broadcasts
+                </span>
+                <input
+                  type="checkbox"
+                  checked={notifPrefs.whatsapp}
+                  onChange={(e) => setNotifPrefs({ ...notifPrefs, whatsapp: e.target.checked })}
+                  className="accent-rose-600"
+                />
+              </label>
+
+              <label className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
+                <span className="flex items-center gap-2 text-slate-200">
+                  <Heart className="h-4 w-4 text-rose-500" /> Critical Trauma Only (Code Red)
+                </span>
+                <input
+                  type="checkbox"
+                  checked={notifPrefs.criticalOnly}
+                  onChange={(e) => setNotifPrefs({ ...notifPrefs, criticalOnly: e.target.checked })}
+                  className="accent-rose-600"
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+              {prefNotice && <span className="text-xs text-emerald-400 font-medium">{prefNotice}</span>}
+              <button
+                onClick={savePreferences}
+                disabled={savingPrefs}
+                className="ml-auto rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-50 transition"
+              >
+                {savingPrefs ? 'Saving…' : 'Save Preferences'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Public Hero Wall Opt-in */}
+        <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 className="font-bold text-white flex items-center gap-2">
+              <Award className="h-5 w-5 text-amber-400" /> Public Hero Wall Recognition
+            </h3>
+            <p className="mt-1 text-sm text-slate-400">
+              Celebrate your life-saving donations publicly. Shows only your first name, district, and blood group. Contact numbers and home coordinates are strictly private.
+            </p>
+            <div className="mt-3 flex items-center gap-4">
+              <Link className="text-xs text-rose-400 font-semibold hover:underline" to="/hero-wall">
+                Visit the Community Hero Wall →
+              </Link>
+            </div>
+          </div>
+          <label className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm font-semibold cursor-pointer">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setPublicConsent(e.target.checked)}
+              className="accent-rose-600 h-4 w-4"
+            />
+            <span>Show my profile on Public Hero Wall</span>
+          </label>
         </section>
       </main>
 
-      {alerts.length > 0 && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm"><div role="dialog" aria-modal="true" className="w-full max-w-lg rounded-2xl border border-rose-500/40 bg-slate-900 p-6 shadow-2xl shadow-rose-950/40">
-        <div className="flex items-center gap-3"><BellRing className="h-7 w-7 text-rose-400"/><div><p className="text-xs font-bold uppercase tracking-widest text-rose-300">Emergency donor alert</p><h2 className="text-xl font-bold">A nearby hospital needs help</h2></div></div>
-        {alerts.map(({ match, request }) => { const seconds = Math.max(0, Math.ceil((Date.parse(match.alertExpiresAt || match.alertedAt) - now) / 1000)); return <article key={match.id} className="mt-5 rounded-xl border border-slate-700 bg-slate-950/70 p-4"><div className="flex items-start justify-between"><div><p className="text-lg font-bold text-white">{request?.bloodGroup} · {request?.component?.replace('_',' ')}</p><p className="mt-1 text-sm text-slate-300">{request?.hospitalName}</p><p className="text-xs text-slate-400">Approx. {match.distance} km away · {request?.urgency}</p></div><span className="rounded-lg bg-amber-500/10 px-3 py-2 font-mono text-sm text-amber-300">{Math.floor(seconds/60)}:{String(seconds%60).padStart(2,'0')}</span></div><div className="mt-4 flex gap-3"><button disabled={!seconds || !!busyId} onClick={() => respond(match.id,'accepted')} className="flex-1 rounded-lg bg-emerald-600 py-2.5 font-semibold text-white disabled:opacity-50">{busyId===match.id?'Sending…':'Accept & share location'}</button><button disabled={!!busyId} onClick={() => respond(match.id,'declined')} className="rounded-lg border border-slate-700 px-5 py-2.5 font-semibold text-slate-300">Decline</button></div></article>; })}
-        <p className="mt-4 text-xs text-slate-500">Precise location sharing starts only after you accept and grant browser location access.</p>
-      </div></div>}
+      {/* High-Impact Emergency Alert Modal (Human-Centric Copy from reduired.md) */}
+      {alerts.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md">
+          <div role="dialog" aria-modal="true" className="w-full max-w-lg rounded-3xl border border-rose-500/50 bg-slate-900 p-7 shadow-2xl shadow-rose-950/60 animate-in fade-in zoom-in-95">
+            {/* Header Badge */}
+            <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white font-bold animate-pulse shadow-lg shadow-rose-600/40">
+                🚨
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-widest text-rose-400">
+                  LIFE PULSE EMERGENCY ALERT
+                </p>
+                <h2 className="text-xl font-extrabold text-white">Someone near you needs your help.</h2>
+              </div>
+            </div>
+
+            {alerts.map(({ match, request }) => {
+              const seconds = Math.max(0, Math.ceil((Date.parse(match.alertExpiresAt || match.alertedAt) - now) / 1000));
+              const etaMinutes = Math.max(3, Math.ceil((match.distance || 5) / 25 * 60));
+
+              return (
+                <article key={match.id} className="mt-5 space-y-4">
+                  {/* Blood Group & Need Overview */}
+                  <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-3xl font-black text-rose-500">{request?.bloodGroup}</span>
+                        <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-300 capitalize">
+                          {request?.component?.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-mono font-bold text-amber-300">
+                        <Clock className="h-3.5 w-3.5 animate-spin" />
+                        <span>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-2 text-sm">
+                      <div className="flex items-center gap-2 text-slate-200">
+                        <span>🏥</span>
+                        <span className="font-semibold">{request?.hospitalName}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-400 text-xs">
+                        <span>📍</span>
+                        <span>Approximately <strong>{match.distance} km</strong> from your registered locality</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-rose-400 text-xs">
+                        <span>⏱</span>
+                        <span>Urgency: <strong className="capitalize">{request?.urgency || 'Critical emergency'}</strong></span>
+                      </div>
+                    </div>
+
+                    {/* Motivational Callout & Prominent Travel Time */}
+                    <div className="mt-5 pt-4 border-t border-slate-800/80">
+                      <p className="text-xs italic text-slate-300">
+                        “You could be the person who gets there in time.”
+                      </p>
+                      <div className="mt-2 flex items-center justify-between rounded-xl bg-rose-950/30 border border-rose-900/40 px-3.5 py-2">
+                        <span className="text-xs text-rose-300 font-medium">Estimated travel time:</span>
+                        <span className="text-sm font-bold text-rose-200 font-mono">{etaMinutes} minutes</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      disabled={!seconds || !!busyId}
+                      onClick={() => respond(match.id, 'accepted')}
+                      className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 font-bold text-white shadow-xl shadow-emerald-950/40 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 transition text-base"
+                    >
+                      {busyId === match.id ? 'Connecting…' : '[ I CAN HELP ]'}
+                    </button>
+                    <button
+                      disabled={!!busyId}
+                      onClick={() => respond(match.id, 'declined')}
+                      className="rounded-2xl border border-slate-700 bg-slate-800/80 px-6 py-3.5 font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition text-sm"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+
+            <p className="mt-4 text-center text-xs text-slate-500">
+              Exact location sharing begins only after you accept and grant browser GPS permission.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

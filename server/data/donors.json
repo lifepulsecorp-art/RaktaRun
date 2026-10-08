@@ -34,18 +34,19 @@
     "preferredRadius": 15,
     "availabilityStatus": "available",
     "heroStats": {
-      "totalEmergencyResponses": 4,
-      "totalDonations": 6,
+      "totalEmergencyResponses": 5,
+      "totalDonations": 7,
       "averageResponseTime": 380,
       "badges": [
         "life_pulse_hero",
         "rapid_responder",
         "repeat_hero"
       ],
-      "lastResponseDate": "2026-09-12T14:20:00.000Z"
+      "lastResponseDate": "2026-10-08T15:59:01.711Z"
     },
     "createdAt": "2026-01-12T00:00:00.000Z",
-    "updatedAt": "2026-09-12T14:20:00.000Z"
+    "updatedAt": "2026-10-08T15:59:01.715Z",
+    "publicHeroConsent": false
   },
   {
     "id": "donor_sneha_02",

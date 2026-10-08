@@ -5,6 +5,7 @@ import { readJson, find, filter, insert, update } from '../utils/db.js';
 import type { Hospital, BloodRequest, Match, Donor, BloodGroup, BloodComponent, User, AuditLog } from '../types.js';
 import { findCandidates } from '../services/matching.js';
 import { completeDonation } from '../services/journey.js';
+import { getSystemConfig } from '../services/configService.js';
 
 const router = Router();
 
@@ -203,27 +204,27 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
 
   const candidates = findCandidates(newRequest, readJson<Donor>('donors'));
   const topMatches = candidates.slice(0, newRequest.unitsRequired * 5);
-
   const createdMatches: Match[] = [];
+  const config = getSystemConfig();
   topMatches.forEach((c, index) => {
-    const match: Match = {
-      id: `match_${uuidv4().substring(0, 8)}`,
-      requestId,
-      donorId: c.donor.id,
-      distance: c.distance,
-      score: c.score,
-      rank: index + 1,
-      status: 'alerted',
-      alertedAt: new Date().toISOString(),
-      respondedAt: null,
-      response: null,
-      alertExpiresAt: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    insert<Match>('matches', match);
-    createdMatches.push(match);
-  });
+      const match: Match = {
+        id: `match_${uuidv4().substring(0, 8)}`,
+        requestId,
+        donorId: c.donor.id,
+        distance: c.distance,
+        score: c.score,
+        rank: index + 1,
+        status: 'alerted',
+        alertedAt: new Date().toISOString(),
+        respondedAt: null,
+        response: null,
+        alertExpiresAt: new Date(Date.now() + config.alertTimeoutSeconds * 1000).toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      insert<Match>('matches', match);
+      createdMatches.push(match);
+    });
 
   audit(req, 'request.dispatched', 'bloodRequest', requestId, { matchedCount: createdMatches.length, radiusKm: searchRadius });
 
@@ -292,6 +293,19 @@ router.post('/:id/requests/:requestId/matches/:matchId/complete', authenticate, 
   if (stillNeeded >= request.unitsRequired) update<BloodRequest>('bloodRequests', request.id, { status: 'fulfilled' });
   audit(req, 'donation.completed', 'match', match.id, { requestId: request.id });
   res.json({ message: 'Donation marked complete; location sharing stopped', match: updated });
+});
+
+router.post('/:id/requests/:requestId/unfulfilled', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
+  const { reason } = req.body;
+  const request = find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  const hospital = find<Hospital>('hospitals', (h) => h.id === request.hospitalId);
+  if (req.user!.role !== 'admin' && req.user!.uid !== hospital?.uid && req.user!.hospitalId !== hospital?.id) return res.status(403).json({ error: 'Forbidden' });
+  if (['fulfilled', 'cancelled', 'unfulfilled'].includes(request.status)) return res.status(409).json({ error: 'Request is already closed' });
+  update<BloodRequest>('bloodRequests', request.id, { status: 'unfulfilled' });
+  readJson<Match>('matches').filter((m) => m.requestId === request.id && !['donated'].includes(m.status)).forEach((m) => update<Match>('matches', m.id, { status: 'expired', donorCurrentLocation: null, etaSeconds: null, distanceRemaining: null }));
+  audit(req, 'request.unfulfilled', 'bloodRequest', request.id, { reason: reason || 'Donor quota not met within time window' });
+  res.json({ message: 'Request recorded as unfulfilled', status: 'unfulfilled' });
 });
 
 export default router;
