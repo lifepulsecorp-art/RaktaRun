@@ -1,8 +1,8 @@
-# 🩸 LifePulse — Phase 1 Complete System Delivery Report
+# 🩸 LifePulse — System Delivery Report (Phases 1–5)
 
 > **Project:** LifePulse — Real-Time Emergency Blood Coordination Network for Coastal Karnataka (Udupi & Dakshina Kannada)  
-> **Status:** **Phase 1: Foundation, Authentication & Medical Accreditation — 100% COMPLETE ✅**  
-> **Date:** October 7, 2026  
+> **Status:** **Phase 1 foundation, Phases 2–4 implementation, and Phase 5 simulation/security work complete. Live district pilot pending.**
+> **Date:** October 8, 2026
 > **Architecture:** React 19 (Vite) + Express (TypeScript) + JSON Data Layer + Firebase Auth  
 
 ---
@@ -14,7 +14,7 @@ Phase 1 established the verified medical foundation of LifePulse. Unlike public 
 - Hospitals must be verified by the District LifePulse Administrator.
 - All authenticated actions are cryptographically verified using Firebase ID tokens and role-based access control (RBAC).
 
-Both the client and server are fully implemented, verified, and operable via a single root command: `npm run dev`.
+The Phase 1 foundation remains in place. Phase 2 adds emergency matching and donor dispatch; Phase 3 adds consent-based live location sharing; Phase 4 adds donor recognition and operational telemetry; Phase 5 adds matching/journey simulations and security hardening. The project starts with the root command `npm run dev`.
 
 ---
 
@@ -246,11 +246,88 @@ npm run seed
 
 ---
 
-## 🔜 Phase 2 Roadmap — Next Deliverables
+## ✅ Phase 2 — Emergency Matching & Dispatch
 
-With Phase 1 complete, the project moves to **Phase 2: Core Emergency Matching**:
-1. **Emergency Dispatch Modal (`/hospital/request/new`)**: Hospital form to trigger emergency alerts for critical trauma cases.
-2. **Real-Time Matching & Scoring Engine Integration**: Hospital UI displaying top ranked donors within specified radius (10–25km).
-3. **Donor Emergency Alert Modal**: Pop-up alert for matched donors with countdown timer and one-click Accept / Decline.
-4. **Escalation Logic**: Automatic radius expansion and alert escalation if insufficient donors respond within 2 minutes.
+Hospitals can create a request at `/hospital/request/new`. The form captures recipient blood group, component, units, urgency, search radius, time needed, ward, and clinician. Requests are available from the hospital dashboard and refresh automatically.
+
+The server filters candidates by the recipient-to-donor compatibility matrix, component eligibility, donation interval, certificate expiry, deferral status, donor availability, preferred radius, and distance. It ranks candidates using distance and response history, then creates up to five alerts per requested unit. Donors see an in-app alert with a two-minute response countdown and can accept or decline. Accepted donor count is limited to the units requested. Unanswered alerts expire, and the server expands the search radius in two-minute steps up to 50 km; requests can also expire at their required-by time.
+
+**Main files:**
+
+- `client/src/pages/hospital/EmergencyRequestPage.tsx` — request creation form and recent dispatches.
+- `client/src/pages/HospitalDashboardPage.tsx` — hospital request list and tracking links.
+- `client/src/pages/DonorDashboardPage.tsx` — polled in-app alert modal and donor response actions.
+- `server/src/services/matching.ts` — compatibility, eligibility filters, distance and ranking.
+- `server/src/services/escalation.ts` — alert expiry, radius expansion, request expiry.
+- `server/src/routes/hospitalRoutes.ts` — request creation, listing, match view, cancel and complete.
+- `server/src/routes/donorRoutes.ts` — donor alert feed and accept/decline actions.
+
+## ✅ Phase 3 — Live Journey Tracking
+
+The `/live-tracking/:requestId` page now loads live request and match records instead of displaying hard-coded sample data. After accepting a match, a donor can explicitly start browser GPS sharing. The API verifies that the update belongs to the authenticated donor and an active accepted match. The requesting hospital can view the donor’s current position, remaining straight-line distance, and approximate ETA.
+
+When the donor is within 150 metres of the hospital, the match changes to `reached`, the stored precise location is cleared, and the browser is told to stop sharing. Cancellation or request expiry also prevents further location writes. Hospital staff can confirm the donation from the tracking view.
+
+**Main files:**
+
+- `client/src/pages/LiveTrackingPage.tsx` — donor and hospital tracking views, location sharing, and approximate position visualization.
+- `server/src/services/journey.ts` — shared response, journey, arrival, and completion state logic.
+- `server/src/routes/donorRoutes.ts` — donor-owned tracking session and GPS endpoint.
+- `server/src/routes/requestRoutes.ts` — access-scoped request details.
+- `server/src/routes/hospitalRoutes.ts` — hospital-owned match details and completion/cancellation actions.
+
+**Mapping limitation:** The visualization and ETA are approximate straight-line estimates (ETA assumes 25 km/h). Google Maps, Leaflet road routing, and a directions provider are not configured.
+
+## ✅ Phase 4 — Hero Recognition & Operations
+
+Hospital-confirmed donations update donor response/donation totals and badges. The badge rules award `life_pulse_hero` after a completed donation, `repeat_hero` after three donations, `rare_blood_hero` to Rh-negative donors, and `rapid_responder` when the recorded average response time is at most ten minutes.
+
+The public `/hero-wall` lists only eligible donors who explicitly opted in and have at least one completed donation. It omits phone numbers and precise location. Donors can download a PNG share card. The admin dashboard reads live aggregate counts, district request totals, and recent audit events.
+
+**Main files:**
+
+- `client/src/pages/HeroWallPage.tsx` — public wall and downloadable share cards.
+- `client/src/pages/DonorDashboardPage.tsx` — public profile consent control.
+- `server/src/routes/heroRoutes.ts` — consent-filtered public hero data.
+- `server/src/routes/adminRoutes.ts` — admin-only telemetry and audit-log APIs.
+- `client/src/pages/AdminDashboardPage.tsx` — live totals, district telemetry, and audit feed.
+- `server/src/routes/hospitalRoutes.ts` and `server/src/routes/donorRoutes.ts` — audit events for operational and verification actions.
+
+## ✅ Phase 5 — Simulation, Security & Pilot Readiness
+
+Seven server tests cover the compatibility matrix, Manipal and Mangaluru local matching scenarios, donor eligibility exclusions, emergency-only availability, alert timeout, and a simulated dispatch journey through acceptance, GPS transit, hospital arrival, donation completion, and badge issuance.
+
+Security changes include Firebase token revocation checks; hospital ownership checks for dispatch, cancellation, matching, and completion; donor ownership checks for alert responses and GPS writes; reduced donor data in hospital registry responses; and removal of role changes from the general auth-sync endpoint. Protected frontend routes also reject signed-in users whose role is absent or unauthorized.
+
+**Main files:**
+
+- `server/src/services/matching.test.ts` — seven matching and journey simulations.
+- `server/src/services/journey.ts` — journey logic used by both routes and simulations.
+- `server/src/middleware/auth.ts` — Firebase token and revocation verification.
+- `server/src/routes/authRoutes.ts` — auth synchronization without general role mutation.
+- `client/src/routes/ProtectedRoute.tsx` — frontend role guard.
+- `server/scripts/test-os-shim.cjs` — compatibility shim for the restricted Windows test runner.
+
+**Verification completed:** `npm test` in `server` (7 passed), server TypeScript typecheck, and `npm run build` in `client` (production build passed; Vite reported a large JavaScript chunk warning).
+
+## 🚧 Live District Pilot — Not Yet Launched
+
+The application work and local simulations do not constitute a live hospital pilot. Before real requests, the deployment still needs production hosting and HTTPS, a durable shared database (the current JSON files are local), configured production donor notifications (currently in-app only), hospital operator approval, clinical workflow validation, privacy/retention review, and supervised drills. The detailed operational checklist is in `PILOT_READINESS.md`.
+
+## 📁 Phase 2–5 File Index
+
+- `client/src/pages/hospital/EmergencyRequestPage.tsx`
+- `client/src/pages/LiveTrackingPage.tsx`
+- `client/src/pages/HeroWallPage.tsx`
+- `client/src/pages/AdminDashboardPage.tsx`
+- `client/src/pages/DonorDashboardPage.tsx`
+- `client/src/routes/AppRoutes.tsx`
+- `client/src/routes/ProtectedRoute.tsx`
+- `server/src/services/matching.ts`
+- `server/src/services/escalation.ts`
+- `server/src/services/journey.ts`
+- `server/src/services/matching.test.ts`
+- `server/src/routes/hospitalRoutes.ts`, `donorRoutes.ts`, `requestRoutes.ts`, `heroRoutes.ts`, `adminRoutes.ts`
+- `server/src/middleware/auth.ts`, `server/src/types.ts`, `server/src/index.ts`
+- `PILOT_READINESS.md`
 
