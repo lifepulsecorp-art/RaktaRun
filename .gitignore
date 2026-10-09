@@ -14,12 +14,18 @@ firebase-debug.*.log*
 # Environment & Credentials (STRICTLY IGNORED)
 .env
 .env.*
-!.env.example
+env
+env.*
+!*.env.example
 client/.env
 client/.env.*
+client/env
+client/env.*
 !client/.env.example
 server/.env
 server/.env.*
+server/env
+server/env.*
 !server/.env.example
 *.local
 

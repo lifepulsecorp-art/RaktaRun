@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 import admin from '../utils/firebaseAdmin.js';
 import { find, insert } from '../utils/db.js';
 import type { User, UserRole } from '../types.js';
+
+export const JWT_SECRET = process.env.JWT_SECRET || 'lifepulse_local_jwt_secret_key_2026';
 
 export interface AuthenticatedRequest extends Request {
   user?: User;
@@ -13,32 +16,47 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
     return res.status(401).json({ error: 'Missing or invalid Authorization header' });
   }
 
-  const idToken = authHeader.split('Bearer ')[1].trim();
+  const token = authHeader.split('Bearer ')[1].trim();
 
+  // 1. Try local JWT token first
   try {
-    const decoded = await admin.auth().verifyIdToken(idToken, true);
-    let user = find<User>('users', (u) => u.uid === decoded.uid);
-
-    if (!user) {
-      // First-time user: check if it's the known admin UID or default to donor
-      const role: UserRole = decoded.uid === '5G6ajWegMiepIzvIyreG7bx82SG2' ? 'admin' : 'donor';
-      user = {
-        uid: decoded.uid,
-        email: decoded.email || '',
-        name: decoded.name || decoded.email?.split('@')[0] || 'LifePulse User',
-        role,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      insert<User>('users', user);
+    const payload = jwt.verify(token, JWT_SECRET) as { uid: string; email?: string; role?: UserRole };
+    let user = find<User>('users', (u) => u.uid === payload.uid || (payload.email && u.email.toLowerCase() === payload.email.toLowerCase()));
+    if (user) {
+      req.user = user;
+      return next();
     }
-
-    req.user = user;
-    next();
-  } catch (error: any) {
-    console.error('Token verification error:', error.message);
-    return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
+  } catch {
+    // If local JWT fails, fallback to Firebase Admin SDK if active
   }
+
+  // 2. Fallback to Firebase Admin SDK
+  try {
+    if (admin && admin.apps && admin.apps.length) {
+      const decoded = await admin.auth().verifyIdToken(token, true);
+      let user = find<User>('users', (u) => u.uid === decoded.uid);
+
+      if (!user) {
+        const role: UserRole = decoded.uid === '5G6ajWegMiepIzvIyreG7bx82SG2' ? 'admin' : 'donor';
+        user = {
+          uid: decoded.uid,
+          email: decoded.email || '',
+          name: decoded.name || decoded.email?.split('@')[0] || 'LifePulse User',
+          role,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        insert<User>('users', user);
+      }
+
+      req.user = user;
+      return next();
+    }
+  } catch (error: any) {
+    // Ignore and proceed to 401
+  }
+
+  return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
 }
 
 export function authorizeRoles(...roles: UserRole[]) {
@@ -55,4 +73,3 @@ export function authorizeRoles(...roles: UserRole[]) {
     next();
   };
 }
-

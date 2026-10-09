@@ -37,6 +37,7 @@ export function completeDonation(match: Match, donor: Donor, now = Date.now()) {
   if (donations >= 3) badges.add('repeat_hero');
   if (donor.bloodGroup.endsWith('-')) badges.add('rare_blood_hero');
   if ((donor.heroStats.averageResponseTime || 9999) <= 600) badges.add('rapid_responder');
+  if (donor.publicHeroConsent || donations >= 2) badges.add('community_champion');
   return {
     matchPatch: { status: 'donated', donationCompletedAt: timestamp, donorCurrentLocation: null, etaSeconds: null, distanceRemaining: null } as Partial<Match>,
     donorPatch: { heroStats: { ...donor.heroStats, totalEmergencyResponses: (donor.heroStats.totalEmergencyResponses || 0) + 1, totalDonations: donations, badges: [...badges], lastResponseDate: timestamp } } as Partial<Donor>,

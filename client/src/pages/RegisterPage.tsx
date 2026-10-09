@@ -1,6 +1,18 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function RegisterPage() {
+  const { role, firebaseUser, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && firebaseUser && role) {
+      if (role === 'admin') navigate('/admin', { replace: true });
+      else if (role === 'hospital') navigate('/hospital', { replace: true });
+      else if (role === 'donor') navigate('/donor', { replace: true });
+    }
+  }, [loading, firebaseUser, role, navigate]);
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
       <div className="max-w-3xl w-full">
@@ -22,12 +34,17 @@ export default function RegisterPage() {
             <p className="text-sm text-slate-400 mb-4">
               You've been medically screened by a hospital and have a valid donor certificate.
             </p>
-            <ul className="text-xs text-slate-500 space-y-1 mb-6">
+            <ul className="text-xs text-slate-500 space-y-1 mb-4">
               <li>✓ Upload your hospital-issued certificate</li>
               <li>✓ Set your location & availability</li>
               <li>✓ Receive emergency alerts</li>
             </ul>
-            <div className="text-red-500 font-semibold text-sm">Continue →</div>
+            <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800/80">
+              <span className="text-red-500 font-semibold text-sm">Continue →</span>
+              <span className="text-[11px] text-amber-400/90 font-medium group-hover:text-amber-300">
+                No certificate? See hospitals →
+              </span>
+            </div>
           </Link>
 
           {/* Hospital Card */}

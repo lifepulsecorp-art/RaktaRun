@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { BloodRequest, Donor, Match } from '../types.js';
 import { find, filter, readJson, update, insert } from '../utils/db.js';
 import { findCandidates } from './matching.js';
+import { getSystemConfig } from './configService.js';
 
 let running = false;
 
@@ -23,8 +24,9 @@ export function escalateUnansweredRequests(now = Date.now()): number {
       const active = matches.filter((match) => ['accepted', 'en_route', 'reached'].includes(match.status)).length;
       if (donated >= request.unitsRequired) { update<BloodRequest>('bloodRequests', request.id, { status: 'fulfilled' }); continue; }
       if (active + donated >= request.unitsRequired) continue;
+      const config = getSystemConfig();
       const lastStep = request.lastEscalatedAt ? Date.parse(request.lastEscalatedAt) : Date.parse(request.createdAt);
-      if (now - lastStep < 2 * 60 * 1000) continue;
+      if (now - lastStep < config.alertTimeoutSeconds * 1000) continue;
 
       // Expire unanswered invitations so stale alerts cannot be accepted later.
       for (const match of matches) {
@@ -32,7 +34,7 @@ export function escalateUnansweredRequests(now = Date.now()): number {
       }
       const refreshed = filter<Match>('matches', (match) => match.requestId === request.id);
       const excludes = new Set(refreshed.map((match) => match.donorId));
-      const expandedRadius = Math.min(50, Math.max(request.radiusKm, (request.escalationLevel || 0) * 5 + request.radiusKm + 5));
+      const expandedRadius = Math.min(config.maxRadiusKm, Math.max(request.radiusKm, (request.escalationLevel || 0) * config.radiusStepKm + request.radiusKm + config.radiusStepKm));
       const candidateRequest = { ...request, radiusKm: expandedRadius };
       const next = findCandidates(candidateRequest, readJson<Donor>('donors'), excludes).slice(0, Math.max(5, (request.unitsRequired - active - donated) * 5));
       const timestamp = new Date(now).toISOString();
@@ -40,9 +42,9 @@ export function escalateUnansweredRequests(now = Date.now()): number {
         id: `match_${uuidv4().slice(0, 8)}`, requestId: request.id, donorId: candidate.donor.id,
         distance: candidate.distance, score: candidate.score, rank: refreshed.length + index + 1,
         status: 'alerted', alertedAt: timestamp, respondedAt: null, response: null,
-        alertExpiresAt: new Date(now + 2 * 60 * 1000).toISOString(), createdAt: timestamp, updatedAt: timestamp,
+        alertExpiresAt: new Date(now + config.alertTimeoutSeconds * 1000).toISOString(), createdAt: timestamp, updatedAt: timestamp,
       }));
-      const status = next.length ? 'searching' : expandedRadius >= 50 ? 'unfulfilled' : request.status;
+      const status = next.length ? 'searching' : expandedRadius >= config.maxRadiusKm ? 'unfulfilled' : request.status;
       update<BloodRequest>('bloodRequests', request.id, {
         status, radiusKm: expandedRadius, escalationLevel: (request.escalationLevel || 0) + 1,
         lastEscalatedAt: timestamp,
