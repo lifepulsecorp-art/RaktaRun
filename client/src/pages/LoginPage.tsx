@@ -48,13 +48,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuickFill = (demoEmail: string, demoPassword?: string) => {
-    setEmail(demoEmail);
-    if (demoPassword) {
-      setPassword(demoPassword);
-    }
-  };
-
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Top Floating Controls */}
@@ -176,38 +169,6 @@ export const LoginPage: React.FC = () => {
             </Button>
           </form>
 
-          {/* Quick Demo Pre-fills */}
-          <div className="border-t border-slate-200 dark:border-slate-800/80 pt-5">
-            <p className="text-xs font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase text-center mb-3">
-              One-Click Demo Sign In (All Roles Active)
-            </p>
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('admin@lifepulse.in')}
-                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-rose-500/50 hover:bg-slate-50 dark:hover:bg-slate-850 hover:text-slate-900 dark:hover:text-white transition shadow-sm"
-              >
-                <span className="font-semibold text-rose-600 dark:text-rose-400">🛡️ Admin</span>
-                <span className="text-slate-500 dark:text-slate-400">admin@lifepulse.in (your console pass)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('manipal@lifepulse.in', 'LifePulse@123')}
-                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-rose-500/50 hover:bg-slate-50 dark:hover:bg-slate-850 hover:text-slate-900 dark:hover:text-white transition shadow-sm"
-              >
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400">🏥 Hospital Staff</span>
-                <span className="text-slate-500 dark:text-slate-400">manipal@lifepulse.in • LifePulse@123</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('rahul.shetty@gmail.com', 'LifePulse@123')}
-                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-rose-500/50 hover:bg-slate-50 dark:hover:bg-slate-850 hover:text-slate-900 dark:hover:text-white transition shadow-sm"
-              >
-                <span className="font-semibold text-rose-600 dark:text-rose-400">🩸 Verified Donor</span>
-                <span className="text-slate-500 dark:text-slate-400">rahul.shetty@gmail.com • LifePulse@123</span>
-              </button>
-            </div>
-          </div>
 
           <div className="text-center text-sm text-slate-600 dark:text-slate-400 pt-2">
             New to LifePulse?{' '}
