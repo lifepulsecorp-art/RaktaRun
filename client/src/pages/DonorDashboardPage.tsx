@@ -23,6 +23,7 @@ import {
   Edit3,
   CheckCircle2,
   Send,
+  Mail,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -90,6 +91,7 @@ export const DonorDashboardPage: React.FC = () => {
     push: roleData?.notificationPreferences?.push ?? true,
     sms: roleData?.notificationPreferences?.sms ?? true,
     whatsapp: roleData?.notificationPreferences?.whatsapp ?? true,
+    email: roleData?.notificationPreferences?.email ?? true,
     criticalOnly: roleData?.notificationPreferences?.criticalOnly ?? false,
   });
   const [savingPrefs, setSavingPrefs] = useState(false);
@@ -158,6 +160,7 @@ export const DonorDashboardPage: React.FC = () => {
         push: roleData.notificationPreferences.push ?? true,
         sms: roleData.notificationPreferences.sms ?? true,
         whatsapp: roleData.notificationPreferences.whatsapp ?? true,
+        email: roleData.notificationPreferences.email ?? true,
         criticalOnly: roleData.notificationPreferences.criticalOnly ?? false,
       });
     }
@@ -818,6 +821,29 @@ export const DonorDashboardPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Email Emergency Dispatch */}
+                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
+                      <Mail className="h-4 w-4 text-violet-400" /> Email Emergency Dispatch
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notifPrefs.email}
+                      onChange={(e) => setNotifPrefs({ ...notifPrefs, email: e.target.checked })}
+                      className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                    <span>Clinical requisition details sent to {roleData?.email || profile?.email || 'registered email'}</span>
+                    <span className={`px-2 py-0.5 rounded-full font-medium ${
+                      notifPrefs.email ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {notifPrefs.email ? '● Brevo Transactional SMTP' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+
                 {/* Critical Trauma Only */}
                 <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -859,7 +885,8 @@ export const DonorDashboardPage: React.FC = () => {
                     </button>
                   </div>
                   <p className="text-[11px] text-slate-300">
-                    Dispatched to {testNotifResult.recipientPhone || roleData?.phone || 'your phone'}:
+                    Dispatched to {testNotifResult.recipientPhone || roleData?.phone || 'Phone'}
+                    {testNotifResult.recipientEmail ? ` & ${testNotifResult.recipientEmail}` : ''}:
                   </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {(testNotifResult.results || []).map((r: any, idx: number) => (

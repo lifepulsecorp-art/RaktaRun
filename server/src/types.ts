@@ -38,6 +38,7 @@ export interface NotificationPreferences {
   push: boolean;
   sms: boolean;
   whatsapp: boolean;
+  email?: boolean;
   criticalOnly: boolean;
 }
 
@@ -58,6 +59,7 @@ export interface Donor {
   uid: string;
   fullName: string;
   phone: string;
+  email?: string;
   aadhaarVerified: boolean;
   bloodGroup: BloodGroup;
   rhType: 'positive' | 'negative';

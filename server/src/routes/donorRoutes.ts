@@ -7,7 +7,7 @@ import { authenticate, authorizeRoles, AuthenticatedRequest } from '../middlewar
 import { readJson, find, filter, insert, update } from '../utils/db.js';
 import type { Donor, Match, BloodRequest, User, AuditLog, Hospital } from '../types.js';
 import { resolveDonorResponse, updateJourney } from '../services/journey.js';
-import { sendSmsAlert, sendWhatsAppAlert } from '../services/notificationService.js';
+import { sendSmsAlert, sendWhatsAppAlert, sendEmailAlert } from '../services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -359,6 +359,7 @@ router.put('/me/preferences', authenticate, (req: AuthenticatedRequest, res) => 
       push: Boolean(notificationPreferences.push),
       sms: Boolean(notificationPreferences.sms),
       whatsapp: Boolean(notificationPreferences.whatsapp),
+      email: notificationPreferences.email !== undefined ? Boolean(notificationPreferences.email) : true,
       criticalOnly: Boolean(notificationPreferences.criticalOnly),
     };
   }
@@ -375,6 +376,7 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
     push: true,
     sms: true,
     whatsapp: true,
+    email: true,
     criticalOnly: false,
   };
 
@@ -401,6 +403,27 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
     results.push(waRes);
   }
 
+  const donorEmail = donor.email || find<User>('users', (u) => u.uid === donor.uid)?.email || req.user?.email;
+  if (prefs.email !== false && donorEmail) {
+    const emailRes = await sendEmailAlert(
+      donorEmail,
+      donor.fullName,
+      `[LifePulse TEST] Emergency Channel Verification`,
+      `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #0f172a; color: #f8fafc; border-radius: 12px; border: 1px solid #1e293b;">
+        <h2 style="color: #f43f5e; margin: 0 0 10px 0;">LifePulse Emergency Network</h2>
+        <p style="font-size: 15px; color: #cbd5e1;">Hello <strong>${donor.fullName}</strong>,</p>
+        <p style="font-size: 14px; color: #cbd5e1;">This is a verification test of your emergency email alert channel powered by Brevo.</p>
+        <div style="background: #1e293b; padding: 14px; border-radius: 8px; margin: 16px 0; border: 1px solid #334155;">
+          <p style="margin: 4px 0; font-size: 13px;"><strong>Status:</strong> Verified Active Responder</p>
+          <p style="margin: 4px 0; font-size: 13px;"><strong>Base Locality:</strong> ${donor.homeLocality || 'Manipal'}</p>
+          <p style="margin: 4px 0; font-size: 13px;"><strong>Delivery Gateway:</strong> Brevo Transactional SMTP</p>
+        </div>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">LifePulse Emergency Dispatch Network • Udupi & Dakshina Kannada</p>
+      </div>`
+    );
+    results.push(emailRes);
+  }
+
   insert<AuditLog>('auditLogs', {
     id: `audit_testnotif_${uuidv4().slice(0, 8)}`,
     actorUid: req.user!.uid,
@@ -410,6 +433,7 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
     entityId: donor.id,
     details: {
       recipientPhone: donor.phone,
+      recipientEmail: donorEmail,
       channelsTested: results.map((r) => `${r.channel}:${r.provider}`),
     },
     createdAt: new Date().toISOString(),
@@ -418,6 +442,7 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
   res.json({
     message: 'Test notification dispatches processed',
     recipientPhone: donor.phone,
+    recipientEmail: donorEmail,
     preferences: prefs,
     results,
   });

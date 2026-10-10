@@ -1,12 +1,12 @@
-import type { BloodRequest, Donor, Match } from '../types.js';
-import { insert } from '../utils/db.js';
+import type { BloodRequest, Donor, Match, User } from '../types.js';
+import { insert, find } from '../utils/db.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface ChannelDispatchResult {
-  channel: 'sms' | 'whatsapp' | 'push';
+  channel: 'sms' | 'whatsapp' | 'push' | 'email';
   recipient: string;
   success: boolean;
-  provider: 'twilio' | 'fast2sms' | 'browser_push' | 'simulator';
+  provider: 'twilio' | 'fast2sms' | 'browser_push' | 'brevo' | 'simulator';
   messageId?: string;
   error?: string;
 }
@@ -194,6 +194,86 @@ export async function sendWhatsAppAlert(toPhone: string, message: string): Promi
 }
 
 /**
+ * Dispatches an email alert via Brevo (Sendinblue) REST API or Simulator fallback
+ */
+export async function sendEmailAlert(
+  toEmail: string,
+  toName: string,
+  subject: string,
+  htmlContent: string
+): Promise<ChannelDispatchResult> {
+  const brevoKey = process.env.BREVO_API_KEY?.trim();
+  const senderEmail = process.env.BREVO_SENDER_EMAIL?.trim() || 'emergency@lifepulse.in';
+  const senderName = process.env.BREVO_SENDER_NAME?.trim() || 'LifePulse Emergency Network';
+
+  if (brevoKey) {
+    try {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': brevoKey,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          sender: {
+            name: senderName,
+            email: senderEmail,
+          },
+          to: [
+            {
+              email: toEmail,
+              name: toName,
+            },
+          ],
+          subject,
+          htmlContent,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || `Brevo HTTP error ${response.status}`);
+      }
+
+      console.log(`[EMAIL BREVO DELIVERED] MessageId: ${data.messageId} -> ${toEmail}`);
+      return {
+        channel: 'email',
+        recipient: toEmail,
+        success: true,
+        provider: 'brevo',
+        messageId: data.messageId,
+      };
+    } catch (err: any) {
+      console.warn(`[EMAIL BREVO FAILED] ${err.message}. Falling back to simulator log.`);
+      return {
+        channel: 'email',
+        recipient: toEmail,
+        success: false,
+        provider: 'brevo',
+        error: err.message,
+      };
+    }
+  }
+
+  // Built-in Simulator Mode
+  console.log(`\n================== [LIFE-PULSE BREVO EMAIL SIMULATOR] ==================`);
+  console.log(`TO:       ${toName} <${toEmail}>`);
+  console.log(`FROM:     ${senderName} <${senderEmail}>`);
+  console.log(`SUBJECT:  ${subject}`);
+  console.log(`STATUS:   DELIVERED (Simulator Active - Add BREVO_API_KEY to activate live Brevo SMTP)`);
+  console.log(`========================================================================\n`);
+
+  return {
+    channel: 'email',
+    recipient: toEmail,
+    success: true,
+    provider: 'simulator',
+    messageId: `sim_email_${Date.now()}`,
+  };
+}
+
+/**
  * Dispatches multi-channel notifications to a matched donor based on their preferences
  */
 export async function dispatchAlertNotifications(
@@ -205,6 +285,7 @@ export async function dispatchAlertNotifications(
     push: true,
     sms: true,
     whatsapp: true,
+    email: true,
     criticalOnly: false,
   };
 
@@ -237,6 +318,33 @@ export async function dispatchAlertNotifications(
     results.push(waResult);
   }
 
+  // 4. Brevo Email Alert
+  const donorEmail = donor.email || find<User>('users', (u) => u.uid === donor.uid)?.email;
+  if (prefs.email !== false && donorEmail) {
+    const emailSubject = `${urgencyLabel}: Emergency Blood Donation Match at ${request.hospitalName}`;
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #0f172a; color: #f8fafc; border-radius: 12px; border: 1px solid #1e293b;">
+        <h1 style="color: #f43f5e; margin: 0 0 8px 0; font-size: 22px;">LifePulse Emergency Network</h1>
+        <p style="font-size: 15px; line-height: 1.5; color: #cbd5e1; margin-top: 12px;">Dear ${donor.fullName},</p>
+        <p style="font-size: 15px; line-height: 1.5; color: #cbd5e1;">A critical blood match has been requested for a patient in your area:</p>
+        <div style="background-color: #1e293b; padding: 18px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
+          <p style="margin: 6px 0; font-size: 14px;"><strong>Hospital:</strong> ${request.hospitalName}</p>
+          <p style="margin: 6px 0; font-size: 14px;"><strong>Blood Group Needed:</strong> <span style="color: #f43f5e; font-size: 18px; font-weight: bold;">${request.bloodGroup}</span> (${request.component.replace('_', ' ')})</p>
+          <p style="margin: 6px 0; font-size: 14px;"><strong>Priority:</strong> <span style="color: #fbbf24; font-weight: bold;">${request.urgency.toUpperCase()}</span></p>
+          <p style="margin: 6px 0; font-size: 14px;"><strong>Distance:</strong> ~${match.distance} km (Est. Drive: ${etaMinutes} mins)</p>
+        </div>
+        <p style="font-size: 14px; color: #94a3b8;">As a verified compatible donor, your immediate response can save a life.</p>
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="https://lifepulse.in/live-tracking/${request.id}" style="background-color: #e11d48; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; display: inline-block;">View Request & Accept Donation</a>
+        </div>
+        <hr style="border: none; border-top: 1px solid #334155; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #64748b; text-align: center; margin: 0;">LifePulse Emergency Dispatch Network • Udupi & Dakshina Kannada</p>
+      </div>
+    `;
+    const emailResult = await sendEmailAlert(donorEmail, donor.fullName, emailSubject, emailHtml);
+    results.push(emailResult);
+  }
+
   // Log dispatch event to audit trail
   insert('auditLogs', {
     id: `audit_notif_${uuidv4().slice(0, 8)}`,
@@ -250,9 +358,11 @@ export async function dispatchAlertNotifications(
       matchId: match.id,
       channelsDispatched: results.map((r) => `${r.channel}:${r.provider}`),
       phone: donor.phone,
+      email: donorEmail,
     },
     createdAt: new Date().toISOString(),
   });
 
   return results;
 }
+
