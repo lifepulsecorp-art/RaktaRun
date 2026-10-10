@@ -43,7 +43,7 @@ export async function sendSmsAlert(toPhone: string, message: string): Promise<Ch
   // 1. Brevo Transactional SMS Gateway
   if (brevoKey) {
     try {
-      const response = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
+      const response = await fetch('https://api.brevo.com/v3/transactionalSMS/send', {
         method: 'POST',
         headers: {
           'api-key': brevoKey,
@@ -52,21 +52,22 @@ export async function sendSmsAlert(toPhone: string, message: string): Promise<Ch
         },
         body: JSON.stringify({
           sender: 'LifePulse',
-          recipient: brevoDigits,
+          recipient: formattedTo,
           content: message,
           type: 'transactional',
+          unicodeEnabled: true,
         }),
       });
 
       const data = await response.json();
-      if (response.ok) {
-        console.log(`[SMS BREVO DELIVERED] Reference: ${data.reference || data.messageId || 'OK'} -> ${brevoDigits}`);
+      if (response.ok && (data.messageId || data.reference)) {
+        console.log(`[SMS BREVO DELIVERED] MessageId: ${data.messageId || data.reference} -> ${formattedTo}`);
         return {
           channel: 'sms',
           recipient: formattedTo,
           success: true,
           provider: 'brevo',
-          messageId: data.reference ? String(data.reference) : String(data.messageId || Date.now()),
+          messageId: String(data.messageId || data.reference || Date.now()),
         };
       } else {
         console.warn(`[SMS BREVO API NOTICE] ${data.message || response.statusText}.`);

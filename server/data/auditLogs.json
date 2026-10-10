@@ -122,5 +122,45 @@
       "email": "lifepulsecorp@gmail.com"
     },
     "createdAt": "2026-10-10T14:31:36.665Z"
+  },
+  {
+    "id": "audit_notif_33ae67e8",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor-test",
+    "details": {
+      "requestId": "req-test",
+      "matchId": "m-1",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:brevo"
+      ],
+      "phone": "+919876543210",
+      "email": "lifepulsecorp@gmail.com"
+    },
+    "createdAt": "2026-10-10T14:36:05.514Z"
+  },
+  {
+    "id": "audit_notif_7c266817",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor-test",
+    "details": {
+      "requestId": "req-test",
+      "matchId": "m-1",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:brevo",
+        "email:brevo"
+      ],
+      "phone": "+919876543210",
+      "email": "lifepulsecorp@gmail.com"
+    },
+    "createdAt": "2026-10-10T15:03:44.192Z"
   }
 ]
