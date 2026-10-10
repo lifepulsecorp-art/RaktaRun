@@ -1,0 +1,6 @@
+{
+  "alertTimeoutSeconds": 120,
+  "radiusStepKm": 5,
+  "maxRadiusKm": 65,
+  "schedulerIntervalSeconds": 30
+}

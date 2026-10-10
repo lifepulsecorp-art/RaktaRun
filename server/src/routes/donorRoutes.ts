@@ -341,10 +341,18 @@ router.get('/me/matches/:requestId', authenticate, (req: AuthenticatedRequest, r
 router.put('/me/preferences', authenticate, (req: AuthenticatedRequest, res) => {
   const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
-  const { preferredRadius, notificationPreferences, homeLocality } = req.body;
+  const { preferredRadius, notificationPreferences, homeLocality, coordinates } = req.body;
   const patch: Partial<Donor> = {};
   if (preferredRadius != null) patch.preferredRadius = Math.max(5, Math.min(50, Number(preferredRadius) || 15));
   if (homeLocality) patch.homeLocality = String(homeLocality).trim();
+  if (coordinates && typeof coordinates.latitude === 'number' && typeof coordinates.longitude === 'number') {
+    if (coordinates.latitude >= -90 && coordinates.latitude <= 90 && coordinates.longitude >= -180 && coordinates.longitude <= 180) {
+      patch.coordinates = {
+        latitude: Math.round(coordinates.latitude * 100000) / 100000,
+        longitude: Math.round(coordinates.longitude * 100000) / 100000,
+      };
+    }
+  }
   if (notificationPreferences && typeof notificationPreferences === 'object') {
     patch.notificationPreferences = {
       push: Boolean(notificationPreferences.push),

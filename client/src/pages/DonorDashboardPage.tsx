@@ -20,9 +20,11 @@ import {
   X,
   MapPin,
   Navigation,
+  Edit3,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import LocationPickerModal from '../components/LocationPickerModal';
 
 const BADGE_MAP: Record<string, { label: string; icon: string }> = {
   life_pulse_hero: { label: 'LifePulse Hero', icon: '🦸' },
@@ -49,6 +51,9 @@ export const DonorDashboardPage: React.FC = () => {
   const [now, setNow] = useState(Date.now());
   const [consent, setConsent] = useState(Boolean(roleData?.publicHeroConsent));
   const [consentNotice, setConsentNotice] = useState('');
+
+  // Location picker modal state
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   // History states
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -571,23 +576,36 @@ export const DonorDashboardPage: React.FC = () => {
               </p>
 
               {/* Default Registered Location Display */}
-              <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 space-y-1">
+              <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 text-rose-400" /> Default Registered Location
                   </span>
-                  <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-                    Verified Base Station
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                      Verified Base Station
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowLocationModal(true)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-2.5 py-1 text-[11px] font-bold text-rose-300 hover:text-white transition active:scale-[0.98]"
+                      title="Click and drag pin on interactive map to update your emergency base location"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      <span>Edit on Map</span>
+                    </button>
+                  </div>
                 </div>
-                <p className="text-sm font-bold text-white pt-1">
-                  {roleData?.homeLocality || 'Manipal (671326)'}
-                </p>
-                {roleData?.coordinates && (
-                  <p className="text-[11px] font-mono text-slate-400">
-                    Base Coordinates: {roleData.coordinates.latitude?.toFixed(4)}° N, {roleData.coordinates.longitude?.toFixed(4)}° E
+                <div>
+                  <p className="text-sm font-bold text-white">
+                    {roleData?.homeLocality || 'Manipal (671326)'}
                   </p>
-                )}
+                  {roleData?.coordinates && (
+                    <p className="text-[11px] font-mono text-slate-400 mt-0.5">
+                      Base Coordinates: {roleData.coordinates.latitude?.toFixed(4)}° N, {roleData.coordinates.longitude?.toFixed(4)}° E
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="mt-6">
@@ -1088,6 +1106,19 @@ export const DonorDashboardPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Interactive Location Picker Modal (Click & Drag Map) */}
+      <LocationPickerModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        initialCoordinates={roleData?.coordinates}
+        initialLocality={roleData?.homeLocality}
+        onSaved={async () => {
+          await refreshProfile();
+          setRadiusNotice('✓ Default location and coordinates updated!');
+          setTimeout(() => setRadiusNotice(''), 3500);
+        }}
+      />
     </div>
   );
 };
