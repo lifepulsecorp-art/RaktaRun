@@ -40,7 +40,7 @@ export function getCompatibilityExplanation(donorBlood?: string, reqBlood?: stri
 }
 
 export const DonorDashboardPage: React.FC = () => {
-  const { profile, roleData, logout } = useAuth();
+  const { profile, roleData, logout, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [allAlerts, setAllAlerts] = useState<any[]>([]);
   const [dismissedModalIds, setDismissedModalIds] = useState<Set<string>>(new Set());
@@ -76,6 +76,9 @@ export const DonorDashboardPage: React.FC = () => {
   
   // Donor preference states
   const [preferredRadius, setPreferredRadius] = useState<number>(roleData?.preferredRadius || 15);
+  const [savingRadius, setSavingRadius] = useState(false);
+  const [radiusNotice, setRadiusNotice] = useState('');
+
   const [notifPrefs, setNotifPrefs] = useState({
     push: roleData?.notificationPreferences?.push ?? true,
     sms: roleData?.notificationPreferences?.sms ?? true,
@@ -84,6 +87,42 @@ export const DonorDashboardPage: React.FC = () => {
   });
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [prefNotice, setPrefNotice] = useState('');
+
+  // Sync preferred radius and notification preferences whenever roleData updates
+  useEffect(() => {
+    if (roleData?.preferredRadius != null) {
+      setPreferredRadius(Number(roleData.preferredRadius));
+    }
+    if (roleData?.notificationPreferences) {
+      setNotifPrefs({
+        push: roleData.notificationPreferences.push ?? true,
+        sms: roleData.notificationPreferences.sms ?? true,
+        whatsapp: roleData.notificationPreferences.whatsapp ?? true,
+        criticalOnly: roleData.notificationPreferences.criticalOnly ?? false,
+      });
+    }
+  }, [roleData?.preferredRadius, roleData?.notificationPreferences]);
+
+  const handleUpdateRadius = async (newRadius: number) => {
+    const validRadius = Math.max(5, Math.min(50, Number(newRadius) || 15));
+    setPreferredRadius(validRadius);
+    setSavingRadius(true);
+    setRadiusNotice('');
+    try {
+      await api.put('/donors/me/preferences', {
+        preferredRadius: validRadius,
+        notificationPreferences: notifPrefs,
+      });
+      await refreshProfile();
+      setRadiusNotice(`✓ Travel radius saved (${validRadius} km)`);
+      setTimeout(() => setRadiusNotice(''), 3500);
+    } catch {
+      setRadiusNotice('Failed to save radius.');
+      setTimeout(() => setRadiusNotice(''), 3500);
+    } finally {
+      setSavingRadius(false);
+    }
+  };
 
   // Emergency status controls
   const [availabilityStatus, setAvailabilityStatus] = useState<'available' | 'unavailable' | 'emergency_only'>(
@@ -204,6 +243,7 @@ export const DonorDashboardPage: React.FC = () => {
         preferredRadius,
         notificationPreferences: notifPrefs,
       });
+      await refreshProfile();
       setPrefNotice('Preferences updated successfully!');
       setTimeout(() => setPrefNotice(''), 3000);
     } catch (e: any) {
@@ -520,51 +560,89 @@ export const DonorDashboardPage: React.FC = () => {
         {/* Preferences & Radius Control Section */}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Preferred Radius Slider */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
-            <div className="flex items-center gap-2.5 text-rose-400">
-              <Compass className="h-5 w-5" />
-              <h3 className="font-bold text-white">Preferred Travel Radius</h3>
-            </div>
-            <p className="mt-1 text-xs text-slate-400">
-              Only receive emergency broadcasts from hospitals within this distance from your locality.
-            </p>
-
-            <div className="mt-6">
-              <div className="flex items-center justify-between text-sm font-semibold">
-                <span className="text-slate-400">Maximum Distance</span>
-                <span className="text-rose-400 font-mono text-base">{preferredRadius} km</span>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2.5 text-rose-400">
+                <Compass className="h-5 w-5" />
+                <h3 className="font-bold text-white">Preferred Travel Radius</h3>
               </div>
-              <input
-                type="range"
-                min="5"
-                max="50"
-                step="5"
-                value={preferredRadius}
-                onChange={(e) => setPreferredRadius(Number(e.target.value))}
-                className="mt-3 w-full accent-rose-600 cursor-pointer"
-              />
-              <div className="mt-3 flex justify-between text-xs text-slate-500">
-                <span>5 km (Local)</span>
-                <span>15 km (Default)</span>
-                <span>25 km (Regional)</span>
-                <span>50 km (District-wide)</span>
+              <p className="mt-1 text-xs text-slate-400">
+                Only receive emergency broadcasts from hospitals within this distance from your locality.
+              </p>
+
+              {/* Default Registered Location Display */}
+              <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-rose-400" /> Default Registered Location
+                  </span>
+                  <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                    Verified Base Station
+                  </span>
+                </div>
+                <p className="text-sm font-bold text-white pt-1">
+                  {roleData?.homeLocality || 'Manipal (671326)'}
+                </p>
+                {roleData?.coordinates && (
+                  <p className="text-[11px] font-mono text-slate-400">
+                    Base Coordinates: {roleData.coordinates.latitude?.toFixed(4)}° N, {roleData.coordinates.longitude?.toFixed(4)}° E
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-6">
+                <div className="flex items-center justify-between text-sm font-semibold">
+                  <span className="text-slate-400">Maximum Distance</span>
+                  <span className="text-rose-400 font-mono text-base font-bold">{preferredRadius} km</span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="50"
+                  step="5"
+                  value={preferredRadius}
+                  onChange={(e) => setPreferredRadius(Number(e.target.value))}
+                  className="mt-3 w-full accent-rose-600 cursor-pointer"
+                />
+                <div className="mt-3 flex justify-between text-xs text-slate-500">
+                  <span>5 km (Local)</span>
+                  <span>15 km (Default)</span>
+                  <span>25 km (Regional)</span>
+                  <span>50 km (District-wide)</span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                {[5, 10, 15, 25, 50].map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => handleUpdateRadius(r)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                      preferredRadius === r
+                        ? 'bg-rose-600 text-white shadow-md'
+                        : 'border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {r} km
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
-              {[5, 10, 15, 25, 50].map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setPreferredRadius(r)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                    preferredRadius === r
-                      ? 'bg-rose-600 text-white'
-                      : 'border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                >
-                  {r} km
-                </button>
-              ))}
+            <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-800/80">
+              {radiusNotice ? (
+                <span className="text-xs text-emerald-400 font-medium animate-in fade-in">{radiusNotice}</span>
+              ) : (
+                <span className="text-xs text-slate-400">Auto-filters hospital alerts within {preferredRadius} km</span>
+              )}
+              <button
+                type="button"
+                onClick={() => handleUpdateRadius(preferredRadius)}
+                disabled={savingRadius}
+                className="rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-950/40 transition disabled:opacity-50 active:scale-[0.98]"
+              >
+                {savingRadius ? 'Saving…' : 'Save Travel Radius'}
+              </button>
             </div>
           </div>
 

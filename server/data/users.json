@@ -44,5 +44,63 @@
     "donorId": "donor_sneha_02",
     "createdAt": "2026-10-07T09:07:25.637Z",
     "updatedAt": "2026-10-07T09:07:25.637Z"
+  },
+  {
+    "uid": "hospital_muller_uid",
+    "email": "fathermuller@lifepulse.in",
+    "role": "hospital",
+    "name": "Father Muller Hospital Staff",
+    "hospitalId": "hosp_father_muller_04",
+    "createdAt": "2026-02-10T10:00:00.000Z",
+    "updatedAt": "2026-02-10T10:00:00.000Z"
+  },
+  {
+    "uid": "hospital_kmc_uid",
+    "email": "kmc.mangaluru@lifepulse.in",
+    "role": "hospital",
+    "name": "KMC Hospital Mangaluru Staff",
+    "hospitalId": "hosp_kmc_mangaluru_05",
+    "createdAt": "2026-02-15T10:00:00.000Z",
+    "updatedAt": "2026-02-15T10:00:00.000Z"
+  },
+  {
+    "uid": "donor_arjun_uid",
+    "email": "arjun.kamath@gmail.com",
+    "role": "donor",
+    "name": "Arjun Kamath",
+    "phone": "+919876543215",
+    "donorId": "donor_arjun_06",
+    "createdAt": "2026-02-01T00:00:00.000Z",
+    "updatedAt": "2026-02-01T00:00:00.000Z"
+  },
+  {
+    "uid": "donor_pooja_uid",
+    "email": "pooja.shetty@gmail.com",
+    "role": "donor",
+    "name": "Pooja Shetty",
+    "phone": "+919876543216",
+    "donorId": "donor_pooja_07",
+    "createdAt": "2026-02-15T00:00:00.000Z",
+    "updatedAt": "2026-02-15T00:00:00.000Z"
+  },
+  {
+    "uid": "donor_mohammed_uid",
+    "email": "mohammed.farooq@gmail.com",
+    "role": "donor",
+    "name": "Mohammed Farooq",
+    "phone": "+919876543214",
+    "donorId": "donor_mohammed_05",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "uid": "donor_meera_uid",
+    "email": "meera.shenoy@gmail.com",
+    "role": "donor",
+    "name": "Meera Shenoy",
+    "phone": "+919876543222",
+    "donorId": "donor_meera_13",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z"
   }
 ]
