@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HeartPulse, Lock, Mail, ShieldAlert, ArrowRight, Activity } from 'lucide-react';
+import { Lock, Mail, ShieldAlert, ArrowRight, Activity, ArrowLeft } from 'lucide-react';
+import { LifePulseLogo } from '../components/LifePulseLogo';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { Button } from '../components/ui/Button';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -53,60 +56,85 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-white">
-      {/* Left Column: Branding / Mission */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between border-r border-slate-900 bg-gradient-to-b from-slate-950 via-slate-900 to-rose-950/40 p-12">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 font-extrabold text-white shadow-xl shadow-rose-600/40">
-            <HeartPulse className="h-7 w-7" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">LifePulse</h1>
-            <p className="text-xs text-rose-400 font-medium">Udupi & Dakshina Kannada Emergency Response</p>
-          </div>
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+      {/* Top Floating Controls */}
+      <div className="absolute top-5 right-5 z-20 flex items-center gap-2">
+        <ThemeToggle />
+      </div>
+
+      {/* Left Column: Branding / Mission (Desktop) */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between border-r border-slate-200 dark:border-slate-800/80 bg-gradient-to-br from-rose-50/60 via-slate-50 to-rose-100/30 dark:from-slate-950 dark:via-slate-900 dark:to-rose-950/40 p-12 relative overflow-hidden">
+        {/* Subtle decorative glow */}
+        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-rose-500/10 dark:bg-rose-500/20 blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex items-center justify-between">
+          <LifePulseLogo size="lg" showSubtitle={true} />
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Home
+          </Link>
         </div>
 
-        <div className="max-w-lg space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3.5 py-1 text-xs font-semibold text-rose-300">
-            <Activity className="h-3.5 w-3.5 text-rose-400 animate-pulse" /> Medically Verified Network Only
+        <div className="relative z-10 max-w-lg space-y-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/20 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 px-3.5 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300 shadow-sm">
+            <Activity className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400 animate-pulse" />
+            Medically Screened Emergency Network
           </div>
-          <h2 className="text-4xl font-extrabold tracking-tight leading-tight text-white">
+          <h2 className="text-4xl font-extrabold tracking-tight leading-tight text-slate-900 dark:text-white">
             Every minute matters. <br />
-            <span className="text-rose-500">Connect. Locate. Respond. Save.</span>
+            <span className="text-rose-600 dark:text-rose-500">Connect. Locate. Respond. Save.</span>
           </h2>
-          <p className="text-sm text-slate-300 leading-relaxed">
+          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
             A real-time emergency blood coordination system connecting hospital-screened donors with emergency care units
             across coastal Karnataka.
           </p>
+
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 p-4 shadow-sm backdrop-blur">
+              <span className="text-2xl font-black text-rose-600 dark:text-rose-400">7.2 min</span>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">Average emergency dispatch response</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 p-4 shadow-sm backdrop-blur">
+              <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">100%</span>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">Hospital-verified medical certificates</p>
+            </div>
+          </div>
         </div>
 
-        <div className="text-xs text-slate-400">
-          LifePulse Emergency Portal • Version 1.0 (Phase 1)
+        <div className="relative z-10 text-xs text-slate-500 dark:text-slate-500">
+          LifePulse Emergency Portal • Coastal Karnataka Trauma Response
         </div>
       </div>
 
       {/* Right Column: Sign In Form */}
       <div className="flex flex-1 items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-6">
           <div className="text-center lg:text-left">
-            <h3 className="text-2xl font-bold tracking-tight text-white">Sign In to LifePulse</h3>
-            <p className="mt-2 text-sm text-slate-400">Enter your credentials to access your medical authority dashboard</p>
+            <div className="lg:hidden flex justify-center mb-6">
+              <LifePulseLogo size="md" showSubtitle={true} />
+            </div>
+            <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sign In to LifePulse</h3>
+            <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
+              Enter your credentials to access your verified medical dashboard
+            </p>
           </div>
 
           {error && (
-            <div className="flex items-center gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
-              <ShieldAlert className="h-5 w-5 shrink-0 text-rose-400" />
+            <div className="flex items-center gap-3 rounded-xl border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 p-4 text-sm text-rose-800 dark:text-rose-300">
+              <ShieldAlert className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400">
                 Email Address
               </label>
-              <div className="relative mt-2">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+              <div className="relative mt-1.5">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
                   <Mail className="h-4 w-4" />
                 </div>
                 <input
@@ -115,17 +143,17 @@ export const LoginPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@lifepulse.in"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-900/80 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 transition"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/80 py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition shadow-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400">
                 Password
               </label>
-              <div className="relative mt-2">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+              <div className="relative mt-1.5">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -134,69 +162,63 @@ export const LoginPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-900/80 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 transition"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/80 py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition shadow-sm"
                 />
               </div>
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 focus:outline-none transition disabled:opacity-50"
+              isLoading={submitting}
+              className="w-full py-3 text-sm font-semibold shadow-lg shadow-rose-600/25"
             >
-              {submitting ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              ) : (
-                <>
-                  Sign In <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
+              Sign In <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
           </form>
 
           {/* Quick Demo Pre-fills */}
-          <div className="border-t border-slate-900 pt-6">
-            <p className="text-xs font-semibold tracking-wider text-slate-400 uppercase text-center mb-3">
+          <div className="border-t border-slate-200 dark:border-slate-800/80 pt-5">
+            <p className="text-xs font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase text-center mb-3">
               One-Click Demo Sign In (All Roles Active)
             </p>
             <div className="flex flex-col gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickFill('admin@lifepulse.in')}
-                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-3.5 py-2 text-xs font-medium text-slate-300 hover:border-rose-500/50 hover:bg-slate-800/80 hover:text-white transition"
+                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-rose-500/50 hover:bg-slate-50 dark:hover:bg-slate-850 hover:text-slate-900 dark:hover:text-white transition shadow-sm"
               >
-                <span className="font-semibold text-rose-400">🛡️ Admin</span>
-                <span className="text-slate-400">admin@lifepulse.in (your console password)</span>
+                <span className="font-semibold text-rose-600 dark:text-rose-400">🛡️ Admin</span>
+                <span className="text-slate-500 dark:text-slate-400">admin@lifepulse.in (your console pass)</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickFill('manipal@lifepulse.in', 'LifePulse@123')}
-                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-3.5 py-2 text-xs font-medium text-slate-300 hover:border-rose-500/50 hover:bg-slate-800/80 hover:text-white transition"
+                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-rose-500/50 hover:bg-slate-50 dark:hover:bg-slate-850 hover:text-slate-900 dark:hover:text-white transition shadow-sm"
               >
-                <span className="font-semibold text-emerald-400">🏥 Hospital Staff</span>
-                <span className="text-slate-400">manipal@lifepulse.in • LifePulse@123</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">🏥 Hospital Staff</span>
+                <span className="text-slate-500 dark:text-slate-400">manipal@lifepulse.in • LifePulse@123</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickFill('rahul.shetty@gmail.com', 'LifePulse@123')}
-                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-3.5 py-2 text-xs font-medium text-slate-300 hover:border-rose-500/50 hover:bg-slate-800/80 hover:text-white transition"
+                className="w-full text-left flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-rose-500/50 hover:bg-slate-50 dark:hover:bg-slate-850 hover:text-slate-900 dark:hover:text-white transition shadow-sm"
               >
-                <span className="font-semibold text-rose-400">🩸 Verified Donor</span>
-                <span className="text-slate-400">rahul.shetty@gmail.com • LifePulse@123</span>
+                <span className="font-semibold text-rose-600 dark:text-rose-400">🩸 Verified Donor</span>
+                <span className="text-slate-500 dark:text-slate-400">rahul.shetty@gmail.com • LifePulse@123</span>
               </button>
             </div>
           </div>
 
-          <div className="mt-6 text-center text-sm text-slate-400">
+          <div className="text-center text-sm text-slate-600 dark:text-slate-400 pt-2">
             New to LifePulse?{' '}
-            <Link to="/register" className="font-semibold text-rose-500 hover:text-rose-400 hover:underline">
+            <Link to="/register" className="font-semibold text-rose-600 dark:text-rose-500 hover:text-rose-500 hover:underline">
               Register here →
             </Link>
           </div>
 
-          <div className="mt-3 text-center">
-            <Link to="/" className="text-xs text-slate-500 hover:text-slate-300">
-              ← Back to home
+          <div className="text-center">
+            <Link to="/" className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 inline-flex items-center gap-1">
+              <ArrowLeft className="h-3 w-3" /> Back to home
             </Link>
           </div>
         </div>

@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import { LifePulseLogo } from '../../components/LifePulseLogo';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
 import {
   Building2,
   Phone,
@@ -10,6 +15,9 @@ import {
   FileQuestion,
   ShieldCheck,
   Info,
+  ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -39,53 +47,33 @@ const DEFAULT_HOSPITALS = [
     address: 'Court Road, Udupi, Karnataka 576101',
     district: 'Udupi',
     phone: '+918202520555',
-    contactPerson: 'Dr. Vasudeva K (District Blood Bank)',
-    timing: '8:00 AM – 6:00 PM (Emergency Desk 24/7)',
+    contactPerson: 'Blood Bank Officer',
+    timing: '8:00 AM - 6:00 PM (Emergency 24/7)',
   },
   {
-    id: 'hosp_wenlock_04',
-    name: 'Wenlock District Hospital, Mangaluru',
-    address: 'Hampankatta, Mangaluru, Karnataka 575001',
+    id: 'hosp_father_muller_04',
+    name: 'Father Muller Medical College Hospital',
+    address: 'Father Muller Road, Kankanady, Mangaluru, Karnataka 575002',
     district: 'Dakshina Kannada',
-    phone: '+918242423333',
-    contactPerson: 'Blood Bank & Clinical Screening Unit',
-    timing: '24/7 Government Blood Bank Service',
+    phone: '+918242238000',
+    contactPerson: 'Transfusion Unit Incharge',
+    timing: '24/7 Transfusion Medicine Services',
   },
 ];
 
+const inputClass = 'w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition shadow-sm';
+
 export default function DonorRegisterPage() {
   const { role } = useAuth();
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [step, setStep] = useState(1);
   const [showHospitalModal, setShowHospitalModal] = useState(false);
-  const [hospitalList, setHospitalList] = useState<any[]>(DEFAULT_HOSPITALS);
-
-  useEffect(() => {
-    api.get('/hospitals')
-      .then((res) => {
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          const formatted = res.data.map((h: any) => ({
-            id: h.id,
-            name: h.name,
-            address: h.address,
-            district: h.district || 'Coastal Karnataka',
-            phone: h.bloodBankContact?.phone || '+918202922761',
-            contactPerson: h.bloodBankContact?.name ? `${h.bloodBankContact.name} (Blood Bank)` : 'Blood Bank Department',
-            timing: '24/7 Transfusion Medicine & Screening Desk',
-          }));
-          setHospitalList(formatted);
-        }
-      })
-      .catch(() => {
-        // Fallback to DEFAULT_HOSPITALS
-      });
-  }, []);
-
+  const [hospitalList, setHospitalList] = useState(DEFAULT_HOSPITALS);
   const [form, setForm] = useState({
-    fullName: '',
     email: '',
     password: '',
+    fullName: '',
     phone: '',
     bloodGroup: 'O+',
     homeLocality: '',
@@ -93,17 +81,42 @@ export default function DonorRegisterPage() {
     lastDonationDate: '',
     certificate: null as File | null,
   });
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get('/hospitals')
+      .then((res) => {
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          const mapped = res.data.map((h: any) => ({
+            id: h.id,
+            name: h.name,
+            address: h.address || 'Karnataka',
+            district: h.district || 'Udupi',
+            phone: h.bloodBankContact?.phone || h.phone || '+918202922761',
+            contactPerson: h.bloodBankContact?.name || 'Blood Bank Officer',
+            timing: 'Authorized LifePulse Screening Station',
+          }));
+          setHospitalList(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const update = (k: string, v: any) => setForm({ ...form, [k]: v });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+
+    if (!form.certificate) {
+      setError('Please select and upload your hospital screening certificate');
+      return;
+    }
 
     try {
-      // 1. Create account & local JWT on backend
+      setLoading(true);
+
       const regRes = await api.post('/auth/register', {
         email: form.email,
         password: form.password,
@@ -115,38 +128,25 @@ export default function DonorRegisterPage() {
         localStorage.setItem('lifepulse_token', regRes.data.token);
       }
 
-      await api.post('/donors/register', {
-        fullName: form.fullName,
-        phone: form.phone,
-        bloodGroup: form.bloodGroup,
-        homeLocality: form.homeLocality,
-        pincode: form.pincode,
-        lastDonationDate: form.lastDonationDate || undefined,
-      });
-
-      // 3. Upload certificate
-      if (form.certificate) {
-        const reader = new FileReader();
-        const base64 = await new Promise<string>((resolve) => {
-          reader.onload = () => {
-            const result = reader.result as string;
-            resolve(result.split(',')[1]);
-          };
-          reader.readAsDataURL(form.certificate!);
-        });
-
-        await api.post(`/donors/certificate`, {
-          fileName: form.certificate.name,
-          fileData: base64,
-          mimeType: form.certificate.type,
-        });
+      const fd = new FormData();
+      fd.append('fullName', form.fullName);
+      fd.append('phone', form.phone);
+      fd.append('bloodGroup', form.bloodGroup);
+      fd.append('homeLocality', form.homeLocality);
+      fd.append('pincode', form.pincode);
+      if (form.lastDonationDate) {
+        fd.append('lastDonationDate', form.lastDonationDate);
       }
+      fd.append('certificate', form.certificate);
+
+      await api.post('/donors/register', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
       setStep(3);
       setTimeout(() => navigate('/donor/pending'), 2000);
     } catch (err: any) {
-      console.error('Registration error:', err);
-      setError(err.message || 'Registration failed');
+      setError(err.response?.data?.error || err.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -154,189 +154,230 @@ export default function DonorRegisterPage() {
 
   if (step === 3) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
-        <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">✅</div>
-          <h1 className="text-2xl font-bold mb-2">Registration Submitted</h1>
-          <p className="text-slate-400">Redirecting to your pending verification screen…</p>
-        </div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex items-center justify-center p-6">
+        <Card className="text-center max-w-md p-8 shadow-xl">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 mb-4">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight mb-2">Registration Submitted</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Redirecting to your pending verification screen…
+          </p>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
-      <div className="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8">
-        <Link to={role === 'donor' ? '/donor' : '/register'} className="text-xs text-slate-500 hover:text-slate-300">← Back</Link>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3 mb-6 bg-slate-950/80 border border-slate-800 p-4 rounded-xl">
-          <div>
-            <h1 className="text-2xl font-bold mb-1">Donor Registration</h1>
-            <p className="text-xs text-slate-400">
-              You must have a hospital-issued medical certificate to register.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowHospitalModal(true)}
-            className="self-start sm:self-auto flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-3.5 py-2 text-xs font-bold text-rose-300 hover:text-white transition shadow-sm"
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between p-6 transition-colors duration-200">
+      {/* Top Header */}
+      <div className="mx-auto w-full max-w-3xl flex items-center justify-between py-2">
+        <LifePulseLogo size="md" />
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            to={role === 'donor' ? '/donor' : '/register'}
+            className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 inline-flex items-center gap-1"
           >
-            <FileQuestion className="h-4 w-4 text-rose-400" />
-            <span>Don't have a certificate?</span>
-          </button>
+            <ArrowLeft className="h-3 w-3" /> Back
+          </Link>
         </div>
+      </div>
 
-        {error && (
-          <div className="bg-red-900/30 border border-red-500/50 text-red-300 text-sm p-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="mx-auto max-w-3xl w-full py-8">
+        <Card className="p-8 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-6 border-b border-slate-200 dark:border-slate-800">
             <div>
-              <label className="text-xs text-slate-400 block mb-1">FULL NAME</label>
-              <input
-                required
-                value={form.fullName}
-                onChange={(e) => update('fullName', e.target.value)}
-                placeholder="Rahul Shetty"
-                className="w-full bg-slate-800 border border-slate-700 p-2 rounded text-sm text-white focus:border-red-500 focus:outline-none"
-              />
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Donor Registration
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+                You must possess an authorized hospital-issued medical certificate to register.
+              </p>
             </div>
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">PHONE</label>
-              <input
-                required
-                value={form.phone}
-                onChange={(e) => update('phone', e.target.value)}
-                placeholder="+919876543210"
-                className="w-full bg-slate-800 border border-slate-700 p-2 rounded text-sm text-white focus:border-red-500 focus:outline-none"
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowHospitalModal(true)}
+              className="self-start sm:self-auto flex items-center gap-1.5 rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 px-3.5 py-2 text-xs font-bold text-rose-700 dark:text-rose-300 transition shadow-sm"
+            >
+              <FileQuestion className="h-4 w-4 text-rose-500" />
+              <span>Don't have a certificate?</span>
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">EMAIL</label>
-              <input
-                required
-                type="email"
-                value={form.email}
-                onChange={(e) => update('email', e.target.value)}
-                placeholder="donor@example.com"
-                className="w-full bg-slate-800 border border-slate-700 p-2 rounded text-sm text-white focus:border-red-500 focus:outline-none"
-              />
+          {error && (
+            <div className="mb-6 flex items-center gap-2.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 p-4 text-sm text-rose-800 dark:text-rose-200">
+              <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
+              <span>{error}</span>
             </div>
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">PASSWORD (min 6)</label>
-              <input
-                required
-                type="password"
-                minLength={6}
-                value={form.password}
-                onChange={(e) => update('password', e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-slate-800 border border-slate-700 p-2 rounded text-sm text-white focus:border-red-500 focus:outline-none"
-              />
-            </div>
-          </div>
+          )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">BLOOD GROUP</label>
-              <select
-                value={form.bloodGroup}
-                onChange={(e) => update('bloodGroup', e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 p-2 rounded text-sm text-white focus:border-red-500 focus:outline-none"
-              >
-                {BLOOD_GROUPS.map((bg) => (
-                  <option key={bg} value={bg}>{bg}</option>
-                ))}
-              </select>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
+                  Full Name
+                </label>
+                <input
+                  required
+                  value={form.fullName}
+                  onChange={(e) => update('fullName', e.target.value)}
+                  placeholder="Rahul Shetty"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
+                  Phone Number
+                </label>
+                <input
+                  required
+                  value={form.phone}
+                  onChange={(e) => update('phone', e.target.value)}
+                  placeholder="+919876543210"
+                  className={inputClass}
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">LOCALITY</label>
-              <input
-                required
-                value={form.homeLocality}
-                onChange={(e) => update('homeLocality', e.target.value)}
-                placeholder="Manipal"
-                className="w-full bg-slate-800 border border-slate-700 p-2 rounded text-sm text-white focus:border-red-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">PINCODE</label>
-              <input
-                required
-                value={form.pincode}
-                onChange={(e) => update('pincode', e.target.value)}
-                placeholder="576104"
-                className="w-full bg-slate-800 border border-slate-700 p-2 rounded text-sm text-white focus:border-red-500 focus:outline-none"
-              />
-            </div>
-          </div>
 
-          <div>
-            <label className="text-xs text-slate-400 block mb-1">LAST DONATION DATE (optional)</label>
-            <input
-              type="date"
-              value={form.lastDonationDate}
-              onChange={(e) => update('lastDonationDate', e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 p-2 rounded text-sm text-white focus:border-red-500 focus:outline-none"
-            />
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
+                  Email Address
+                </label>
+                <input
+                  required
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => update('email', e.target.value)}
+                  placeholder="donor@example.com"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
+                  Password (min 6)
+                </label>
+                <input
+                  required
+                  type="password"
+                  minLength={6}
+                  value={form.password}
+                  onChange={(e) => update('password', e.target.value)}
+                  placeholder="••••••••"
+                  className={inputClass}
+                />
+              </div>
+            </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs text-slate-300 font-semibold flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-rose-400" />
-                HOSPITAL CERTIFICATE (PDF/JPG/PNG)
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
+                  Blood Group
+                </label>
+                <select
+                  value={form.bloodGroup}
+                  onChange={(e) => update('bloodGroup', e.target.value)}
+                  className={inputClass}
+                >
+                  {BLOOD_GROUPS.map((bg) => (
+                    <option key={bg} value={bg}>{bg}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
+                  Home Locality
+                </label>
+                <input
+                  required
+                  value={form.homeLocality}
+                  onChange={(e) => update('homeLocality', e.target.value)}
+                  placeholder="Manipal"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
+                  PIN Code
+                </label>
+                <input
+                  required
+                  value={form.pincode}
+                  onChange={(e) => update('pincode', e.target.value)}
+                  placeholder="576104"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
+                Last Donation Date (optional)
               </label>
-              <button
-                type="button"
-                onClick={() => setShowHospitalModal(true)}
-                className="text-xs font-semibold text-rose-400 hover:text-rose-300 flex items-center gap-1 hover:underline"
-              >
-                <Building2 className="h-3.5 w-3.5" /> Don't have a certificate?
-              </button>
+              <input
+                type="date"
+                value={form.lastDonationDate}
+                onChange={(e) => update('lastDonationDate', e.target.value)}
+                className={inputClass}
+              />
             </div>
-            <input
-              required
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => update('certificate', e.target.files?.[0] || null)}
-              className="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-sm text-white file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-red-600 file:text-white file:text-xs file:font-semibold hover:file:bg-red-700 cursor-pointer"
-            />
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-[11px] text-slate-500">Max size 5MB • Formats: PDF, JPG, PNG</span>
-              <button
-                type="button"
-                onClick={() => setShowHospitalModal(true)}
-                className="text-[11px] text-amber-400 hover:text-amber-300 font-medium hover:underline flex items-center gap-1"
-              >
-                Find available hospitals to visit →
-              </button>
-            </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 p-3 rounded-xl font-semibold transition mt-2 shadow-lg shadow-red-600/30"
-          >
-            {loading ? 'Creating account…' : 'Register as Donor'}
-          </button>
-        </form>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4 text-rose-500" />
+                  Hospital Medical Certificate (PDF/JPG/PNG)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowHospitalModal(true)}
+                  className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
+                >
+                  <Building2 className="h-3.5 w-3.5" /> Don't have a certificate?
+                </button>
+              </div>
+              <input
+                required
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => update('certificate', e.target.files?.[0] || null)}
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-xs text-slate-900 dark:text-white file:mr-3 file:py-1.5 file:px-3.5 file:rounded-lg file:border-0 file:bg-rose-600 file:text-white file:text-xs file:font-semibold hover:file:bg-rose-500 cursor-pointer shadow-sm"
+              />
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[11px] text-slate-500">Max size 5MB • Formats: PDF, JPG, PNG</span>
+                <button
+                  type="button"
+                  onClick={() => setShowHospitalModal(true)}
+                  className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold hover:underline flex items-center gap-1"
+                >
+                  Find partner hospitals →
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <Button
+                type="submit"
+                disabled={loading}
+                isLoading={loading}
+                className="w-full py-3.5 text-sm font-bold shadow-lg shadow-rose-600/25"
+              >
+                Register as Verified Donor
+              </Button>
+            </div>
+          </form>
+        </Card>
       </div>
 
       {/* Modal: Don't Have a Certificate */}
       {showHospitalModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="relative w-full max-w-2xl rounded-3xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 my-8">
+          <Card className="relative w-full max-w-2xl p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 my-8">
             <button
               type="button"
               onClick={() => setShowHospitalModal(false)}
-              className="absolute top-5 right-5 rounded-xl border border-slate-800 bg-slate-950 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className="absolute top-5 right-5 rounded-xl border border-slate-200 dark:border-slate-800 p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition"
               title="Close"
             >
               <X className="h-4 w-4" />
@@ -344,40 +385,37 @@ export default function DonorRegisterPage() {
 
             {/* Modal Header */}
             <div className="flex items-start gap-4 pr-10">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400">
                 <Building2 className="h-6 w-6" />
               </div>
               <div>
-                <span className="inline-block rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">
+                <Badge variant="warning" className="mb-1">
                   Medical Screening Requirement
-                </span>
-                <h2 className="text-xl font-bold text-white">How to Get Your Donor Medical Certificate</h2>
+                </Badge>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">How to Get Your Donor Medical Certificate</h2>
               </div>
             </div>
 
             {/* Instructional Note */}
-            <div className="mt-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-slate-300 leading-relaxed space-y-2">
-              <p className="font-semibold text-amber-300 flex items-center gap-1.5 text-sm">
+            <div className="mt-5 rounded-2xl border border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/5 p-4 text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-2">
+              <p className="font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5 text-sm">
                 <Info className="h-4 w-4" /> Note for prospective donors:
               </p>
               <p>
                 LifePulse is a medically screened network. To protect patient lives and ensure you are safe to donate, you must obtain a quick, authorized health screening before registering.
               </p>
-              <div className="rounded-xl bg-slate-950/70 p-3.5 border border-slate-800/80 space-y-2 text-slate-300">
-                <p className="font-bold text-white text-xs">Steps to join LifePulse:</p>
-                <div className="space-y-1.5 pl-1">
-                  <p>1. <strong>Visit any authorized hospital</strong> from the list below in Udupi or Dakshina Kannada.</p>
-                  <p>2. Ask the Blood Bank or Transfusion Medicine Department for a <strong>Free Donor Health Screening & Medical Certificate</strong> (takes ~10–15 mins for vitals, hemoglobin & blood grouping).</p>
-                  <p>3. <strong>Collect your certificate</strong> (digital copy or photo of the paper screening certificate).</p>
-                  <p className="text-rose-400 font-bold">4. Come back to this portal, upload your certificate, and complete your registration to start saving lives!</p>
-                </div>
+              <div className="space-y-1.5 pl-2 pt-1 border-t border-amber-200 dark:border-amber-500/20">
+                <p>1. <strong>Visit any authorized hospital</strong> from the list below in Udupi or Mangaluru.</p>
+                <p>2. Ask the Blood Bank or Transfusion Medicine Department for a <strong>Free Donor Health Screening & Medical Certificate</strong> (takes ~10–15 mins for vitals, hemoglobin & blood grouping).</p>
+                <p>3. <strong>Collect your certificate</strong> (digital copy or photo of the paper screening certificate).</p>
+                <p className="text-rose-600 dark:text-rose-400 font-bold">4. Come back to this portal, upload your certificate, and complete your registration to start saving lives!</p>
               </div>
             </div>
 
             {/* List of Available Hospitals */}
             <div className="mt-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Authorized Partner Hospitals & Blood Banks ({hospitalList.length})
                 </h3>
                 <span className="text-[11px] text-slate-500">Udupi & Dakshina Kannada</span>
@@ -387,28 +425,28 @@ export default function DonorRegisterPage() {
                 {hospitalList.map((hosp) => (
                   <div
                     key={hosp.id}
-                    className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 hover:border-slate-700 transition"
+                    className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 p-4 hover:border-rose-400 transition"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-white text-sm">{hosp.name}</h4>
-                          <span className="rounded-md bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-300">
+                          <h4 className="font-bold text-slate-900 dark:text-white text-sm">{hosp.name}</h4>
+                          <span className="rounded-md bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:text-rose-300">
                             {hosp.district}
                           </span>
                         </div>
-                        <p className="mt-1 text-xs text-slate-400 flex items-start gap-1">
-                          <MapPin className="h-3.5 w-3.5 text-slate-500 shrink-0 mt-0.5" />
+                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-400 flex items-start gap-1">
+                          <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                           <span>{hosp.address}</span>
                         </p>
-                        <p className="mt-1 text-[11px] text-slate-400">
-                          Contact: <span className="text-slate-300 font-medium">{hosp.contactPerson}</span> · {hosp.timing}
+                        <p className="mt-1 text-[11px] text-slate-500">
+                          Contact: <span className="text-slate-700 dark:text-slate-300 font-medium">{hosp.contactPerson}</span> · {hosp.timing}
                         </p>
                       </div>
 
                       <a
                         href={`tel:${hosp.phone}`}
-                        className="shrink-0 flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition"
+                        className="shrink-0 flex items-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition"
                         title="Call hospital blood bank"
                       >
                         <Phone className="h-3.5 w-3.5" />
@@ -421,25 +459,28 @@ export default function DonorRegisterPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
               <Link
                 to="/"
-                className="text-xs text-slate-500 hover:text-slate-300 order-2 sm:order-1"
+                className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 order-2 sm:order-1"
               >
                 ← Return to LifePulse Home
               </Link>
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowHospitalModal(false)}
-                className="w-full sm:w-auto rounded-xl bg-rose-600 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition order-1 sm:order-2"
+                className="w-full sm:w-auto text-xs font-bold order-1 sm:order-2"
               >
                 Got it, I'll visit a hospital and come back
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
       )}
+
+      <div className="mx-auto w-full max-w-3xl py-4 text-center text-xs text-slate-500">
+        LifePulse Emergency Medical Network • Udupi & Dakshina Kannada
+      </div>
     </div>
   );
 }
-

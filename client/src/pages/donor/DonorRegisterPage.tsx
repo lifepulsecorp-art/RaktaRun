@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import {
-  Heart,
   Upload,
   ArrowLeft,
   ShieldCheck,
@@ -12,7 +11,12 @@ import {
   Activity,
   CheckCircle2,
   AlertCircle,
+  Award,
 } from 'lucide-react';
+import AppLayout from '../../components/AppLayout';
+import { Button } from '../../components/ui/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
 
 export const DonorRegisterPage: React.FC = () => {
   const { profile, roleData, refreshProfile } = useAuth();
@@ -116,47 +120,36 @@ export const DonorRegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Top Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-10">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/donor')}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white transition"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-600 font-bold text-white shadow-lg shadow-rose-600/30">
-                <Heart className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold leading-none text-white">Donor Verification & Onboarding</h1>
-                <span className="text-xs text-rose-400 font-medium">Block H • Hospital Screened Network</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Form */}
-      <main className="mx-auto max-w-4xl px-6 py-8">
-        <div className="mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-5">
+    <AppLayout
+      title="Donor Medical Profile"
+      subtitle="Hospital Screened Verification & Clinical Parameters"
+      badge={<Badge variant="destructive">Screened Network</Badge>}
+      withSidebar={true}
+      actions={
+        <Button variant="outline" size="sm" onClick={() => navigate('/donor')}>
+          <ArrowLeft className="h-4 w-4 mr-1.5" /> Back to Dashboard
+        </Button>
+      }
+    >
+      <div className="mx-auto max-w-4xl space-y-6">
+        {/* Verification banner */}
+        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-5 dark:bg-rose-950/20">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="h-6 w-6 text-rose-400 shrink-0 mt-0.5" />
+            <ShieldCheck className="h-6 w-6 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
             <div>
-              <h2 className="text-base font-bold text-white">Medically Screened Network Only</h2>
-              <p className="text-xs text-rose-200/80 mt-1">
-                LifePulse is an emergency network reserved for hospital-verified donors. Please upload the digital screening certificate
-                issued to you during your blood bank evaluation in Udupi or Dakshina Kannada.
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                Hospital Screened Blood Network
+              </h2>
+              <p className="text-xs text-slate-600 dark:text-rose-200/80 mt-1 leading-relaxed">
+                LifePulse is an emergency dispatch network reserved for hospital-verified donors. Please upload the digital screening certificate
+                issued during your clinical evaluation in Udupi or Dakshina Kannada.
               </p>
             </div>
           </div>
         </div>
 
         {errorMessage && (
-          <div className="mb-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300 flex items-center gap-2">
+          <div className="rounded-xl border border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 p-4 text-sm text-rose-700 dark:text-rose-300 flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
@@ -164,209 +157,221 @@ export const DonorRegisterPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section 1: Donor Personal & Contact Details */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md shadow-xl">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 mb-4">
-              <User className="h-4 w-4 text-rose-500" /> Donor Information
-            </h2>
+          <Card className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm">
+            <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800/80">
+              <CardTitle className="text-base flex items-center gap-2">
+                <User className="h-4 w-4 text-rose-500" /> Donor Identity & Coordinates
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Full Name (as on Aadhaar) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Rahul Shetty"
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none transition"
+                  />
+                </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Full Name (as on Aadhaar) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Rahul Shetty"
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition"
-                />
-              </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+919876543210"
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none transition font-mono"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+919876543210"
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition font-mono"
-                />
-              </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Home Locality (Base Area) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={homeLocality}
+                    onChange={(e) => setHomeLocality(e.target.value)}
+                    placeholder="e.g. Manipal, Kadri, Brahmavar, Surathkal"
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none transition"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Home Locality (Approximate) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={homeLocality}
-                  onChange={(e) => setHomeLocality(e.target.value)}
-                  placeholder="e.g. Manipal, Kadri, Brahmavar, Surathkal"
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition"
-                />
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Emergency Travel Radius (km) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={preferredRadius}
+                    onChange={(e) => setPreferredRadius(parseInt(e.target.value))}
+                    min={5}
+                    max={50}
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:border-rose-500 focus:outline-none transition font-mono"
+                  />
+                </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Emergency Travel Radius (km) *
-                </label>
-                <input
-                  type="number"
-                  required
-                  value={preferredRadius}
-                  onChange={(e) => setPreferredRadius(parseInt(e.target.value))}
-                  min={5}
-                  max={50}
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition font-mono"
-                />
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Section 2: Medical Typing & Eligibility */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md shadow-xl">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 mb-4">
-              <Activity className="h-4 w-4 text-rose-500" /> Medical Typing & Health Vitals
-            </h2>
+          <Card className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm">
+            <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800/80">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Activity className="h-4 w-4 text-rose-500" /> Medical Typing & Health Vitals
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-5">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Blood Group *
+                  </label>
+                  <select
+                    value={bloodGroup}
+                    onChange={(e) => setBloodGroup(e.target.value as any)}
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm font-bold text-rose-600 dark:text-rose-400 focus:border-rose-500 focus:outline-none transition"
+                  >
+                    <option value="O+">O Positive (O+)</option>
+                    <option value="O-">O Negative (O-) [Universal]</option>
+                    <option value="A+">A Positive (A+)</option>
+                    <option value="A-">A Negative (A-)</option>
+                    <option value="B+">B Positive (B+)</option>
+                    <option value="B-">B Negative (B-)</option>
+                    <option value="AB+">AB Positive (AB+)</option>
+                    <option value="AB-">AB Negative (AB-)</option>
+                  </select>
+                </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Blood Group *
-                </label>
-                <select
-                  value={bloodGroup}
-                  onChange={(e) => setBloodGroup(e.target.value as any)}
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm font-bold text-rose-400 focus:border-rose-500 focus:outline-none transition"
-                >
-                  <option value="O+">O Positive (O+)</option>
-                  <option value="O-">O Negative (O-) [Universal]</option>
-                  <option value="A+">A Positive (A+)</option>
-                  <option value="A-">A Negative (A-)</option>
-                  <option value="B+">B Positive (B+)</option>
-                  <option value="B-">B Negative (B-)</option>
-                  <option value="AB+">AB Positive (AB+)</option>
-                  <option value="AB-">AB Negative (AB-)</option>
-                </select>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Hemoglobin Level (g/dL) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    required
+                    value={hemoglobinLevel}
+                    onChange={(e) => setHemoglobinLevel(parseFloat(e.target.value))}
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:border-rose-500 focus:outline-none transition font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Weight (kg) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={weight}
+                    onChange={(e) => setWeight(parseFloat(e.target.value))}
+                    min={45}
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:border-rose-500 focus:outline-none transition font-mono"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Hemoglobin Level (g/dL) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  required
-                  value={hemoglobinLevel}
-                  onChange={(e) => setHemoglobinLevel(parseFloat(e.target.value))}
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Weight (kg) *
-                </label>
-                <input
-                  type="number"
-                  required
-                  value={weight}
-                  onChange={(e) => setWeight(parseFloat(e.target.value))}
-                  min={45}
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition font-mono"
-                />
-              </div>
-
-              <div className="md:col-span-3">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                   Screened Component Eligibility
                 </label>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2.5">
                   {[
                     { id: 'whole_blood', label: 'Whole Blood' },
                     { id: 'RBC', label: 'Red Blood Cells (RBC)' },
                     { id: 'platelets', label: 'Platelets (Single Donor)' },
                     { id: 'plasma', label: 'Plasma (FFP)' },
-                  ].map((comp) => (
-                    <button
-                      type="button"
-                      key={comp.id}
-                      onClick={() => toggleComponent(comp.id)}
-                      className={`rounded-xl px-4 py-2 text-xs font-semibold border transition ${
-                        components.includes(comp.id)
-                          ? 'border-rose-500 bg-rose-500/20 text-rose-300'
-                          : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700'
-                      }`}
-                    >
-                      {components.includes(comp.id) && '✓ '}
-                      {comp.label}
-                    </button>
-                  ))}
+                  ].map((comp) => {
+                    const isSelected = components.includes(comp.id);
+                    return (
+                      <button
+                        type="button"
+                        key={comp.id}
+                        onClick={() => toggleComponent(comp.id)}
+                        className={`rounded-xl px-4 py-2 text-xs font-semibold border transition ${
+                          isSelected
+                            ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 dark:bg-rose-500/20 shadow-sm'
+                            : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        {isSelected && '✓ '}
+                        {comp.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Section 3: Hospital Certificate Verification Upload */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md shadow-xl">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 mb-4">
-              <FileText className="h-4 w-4 text-rose-500" /> Hospital Digital Screening Certificate
-            </h2>
+          <Card className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm">
+            <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800/80">
+              <CardTitle className="text-base flex items-center gap-2">
+                <FileText className="h-4 w-4 text-rose-500" /> Hospital Digital Screening Certificate
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-5">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Screening Hospital *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={hospitalName}
+                    onChange={(e) => setHospitalName(e.target.value)}
+                    placeholder="Kasturba Hospital, Manipal"
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none transition"
+                  />
+                </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Screening Hospital *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={hospitalName}
-                  onChange={(e) => setHospitalName(e.target.value)}
-                  placeholder="Kasturba Hospital, Manipal"
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition"
-                />
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Certificate Serial ID *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={certificateId}
+                    onChange={(e) => setCertificateId(e.target.value)}
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white focus:border-rose-500 focus:outline-none transition font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Verified By Doctor *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={verifiedBy}
+                    onChange={(e) => setVerifiedBy(e.target.value)}
+                    placeholder="Dr. Screening Officer"
+                    className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none transition"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Certificate Serial ID *
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                  Upload Digital Certificate (PDF / Scanned Image)
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={certificateId}
-                  onChange={(e) => setCertificateId(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Verified By Doctor *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={verifiedBy}
-                  onChange={(e) => setVerifiedBy(e.target.value)}
-                  placeholder="Dr. Anand Kumar"
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 px-4 text-sm text-white focus:border-rose-500 focus:outline-none transition"
-                />
-              </div>
-
-              <div className="md:col-span-3">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  Upload Digital Certificate (PDF / Scanned Photo)
-                </label>
-                <div className="relative border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center hover:border-rose-500/50 transition bg-slate-950/40">
+                <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center hover:border-rose-500/50 transition bg-slate-50/50 dark:bg-slate-950/40">
                   <input
                     type="file"
                     accept=".pdf,.png,.jpg,.jpeg,.txt"
@@ -375,49 +380,46 @@ export const DonorRegisterPage: React.FC = () => {
                   />
                   <Upload className="mx-auto h-8 w-8 text-rose-500" />
                   {certificateFileName ? (
-                    <p className="mt-2 text-sm font-semibold text-emerald-400">
-                      Selected: {certificateFileName}
-                    </p>
+                    <div className="mt-2 flex items-center justify-center gap-2">
+                      <Award className="h-4 w-4 text-emerald-500" />
+                      <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                        Selected: {certificateFileName}
+                      </p>
+                    </div>
                   ) : (
                     <>
-                      <p className="mt-2 text-sm font-medium text-slate-300">
+                      <p className="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                         Click or drag file here to attach certificate
                       </p>
-                      <p className="text-xs text-slate-500 mt-1">PDF, JPG, PNG or TXT up to 5MB</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">PDF, JPG, PNG up to 5MB</p>
                     </>
                   )}
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="flex justify-end gap-4 pt-4">
-            <button
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button
               type="button"
+              variant="outline"
               onClick={() => navigate('/donor')}
-              className="rounded-xl border border-slate-800 bg-slate-900 px-6 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 rounded-xl bg-rose-600 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition disabled:opacity-50"
+              loading={loading}
+              className="gap-2 px-6"
             >
-              {loading ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              ) : (
-                <>
-                  <CheckCircle2 className="h-4 w-4" /> Submit for Verification
-                </>
-              )}
-            </button>
+              <CheckCircle2 className="h-4 w-4" /> Save & Update Profile
+            </Button>
           </div>
         </form>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
 export default DonorRegisterPage;
-

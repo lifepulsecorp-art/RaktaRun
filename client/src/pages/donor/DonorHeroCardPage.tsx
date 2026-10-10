@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Download, Camera, Share2, Sparkles } from 'lucide-react';
+import { Download, Camera, Share2, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
+import { AppLayout } from '../../components/AppLayout';
 
 const BADGE_DESCRIPTIONS: Record<string, { label: string; icon: string; desc: string }> = {
   life_pulse_hero: { label: 'LifePulse Hero', icon: '🦸', desc: 'Responded to your first verified hospital emergency dispatch.' },
@@ -178,29 +179,20 @@ export const DonorHeroCardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800 bg-slate-900/60 px-6 py-4 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/donor" className="rounded-lg border border-slate-700 p-2 text-slate-300 hover:text-white transition">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-            <div>
-              <h1 className="font-bold text-white text-lg">My Hero Recognition Portal</h1>
-              <p className="text-xs text-rose-400">Preview & download your verified life-saving contribution cards</p>
-            </div>
-          </div>
-          <Link
-            to="/hero-wall"
-            className="flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 transition"
-          >
-            <Sparkles className="h-3.5 w-3.5" /> Public Hero Wall →
-          </Link>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
+    <AppLayout
+      title="My Hero Recognition Studio"
+      subtitle="Preview & download your verified life-saving contribution cards"
+      actions={
+        <Link
+          to="/hero-wall"
+          className="flex items-center gap-1.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition shadow-sm"
+        >
+          <Sparkles className="h-3.5 w-3.5" /> Public Hero Wall →
+        </Link>
+      }
+      withSidebar={true}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
           {/* Card Preview Column */}
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl flex flex-col items-center">
             <div className="w-full flex items-center justify-between mb-4">
@@ -333,8 +325,7 @@ export const DonorHeroCardPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </AppLayout>
   );
 };
 

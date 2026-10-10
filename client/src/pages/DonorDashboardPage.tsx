@@ -4,7 +4,6 @@ import {
   Award,
   ShieldCheck,
   Heart,
-  LogOut,
   BellRing,
   UserCheck,
   Sliders,
@@ -28,6 +27,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import LocationPickerModal from '../components/LocationPickerModal';
+import { AppLayout } from '../components/AppLayout';
 
 const BADGE_MAP: Record<string, { label: string; icon: string }> = {
   life_pulse_hero: { label: 'LifePulse Hero', icon: '🦸' },
@@ -45,7 +45,7 @@ export function getCompatibilityExplanation(donorBlood?: string, reqBlood?: stri
 }
 
 export const DonorDashboardPage: React.FC = () => {
-  const { profile, roleData, logout, refreshProfile } = useAuth();
+  const { profile, roleData, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [allAlerts, setAllAlerts] = useState<any[]>([]);
   const [dismissedModalIds, setDismissedModalIds] = useState<Set<string>>(new Set());
@@ -317,48 +317,17 @@ export const DonorDashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-600 font-bold text-white shadow-lg shadow-rose-600/30">
-              <Heart className="h-6 w-6" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold leading-none text-white">LifePulse Hero Portal</h1>
-              <span className="text-xs text-rose-400 font-medium">Udupi & Dakshina Kannada Emergency Network</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-white">{roleData?.fullName || profile?.name || 'Verified Donor'}</p>
-              <span className="inline-block rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-500/30">
-                Blood Group: {roleData?.bloodGroup || '—'} Verified
-              </span>
-            </div>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition shadow-sm"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Sign Out
-            </button>
-          </div>
+    <AppLayout
+      title="Emergency Readiness & Hero Status"
+      subtitle="Active volunteer responder across the Udupi & Dakshina Kannada trauma emergency network."
+      actions={
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 px-3.5 py-2 rounded-xl shadow-sm backdrop-blur-sm">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Network Status: <strong className="text-slate-900 dark:text-white">Live Connected</strong></span>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-6 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-white">Emergency Readiness & Hero Status</h2>
-            <p className="text-sm text-slate-400">
-              Active volunteer responder across the Udupi & Dakshina Kannada trauma emergency network.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 border border-slate-800 px-3.5 py-2 rounded-xl">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Network Status: <strong>Live Connected</strong></span>
-          </div>
-        </div>
+      }
+    >
+      <div className="mx-auto max-w-7xl space-y-8">
 
         {/* Active Donation Missions (En Route / In Transit) */}
         {activeMissions.length > 0 && (
@@ -984,7 +953,7 @@ export const DonorDashboardPage: React.FC = () => {
             )}
           </div>
         </section>
-      </main>
+      </div>
 
       {/* High-Impact Emergency Alert Modal */}
       {pendingAlerts.filter((item) => !dismissedModalIds.has(item.match.id)).length > 0 && (
@@ -1305,7 +1274,7 @@ export const DonorDashboardPage: React.FC = () => {
           setTimeout(() => setRadiusNotice(''), 3500);
         }}
       />
-    </div>
+    </AppLayout>
   );
 };
 

@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '../../utils/api';
-import { useAuth } from '../../context/AuthContext';
 import {
   Heart,
   CheckCircle2,
   XCircle,
   Clock,
-  ArrowLeft,
   ShieldCheck,
   FileText,
   Search,
   RefreshCw,
   ExternalLink,
 } from 'lucide-react';
+import { AppLayout } from '../../components/AppLayout';
+import { Badge } from '../../components/ui/Badge';
 
 interface Donor {
   id: string;
@@ -39,9 +39,6 @@ interface Donor {
 }
 
 export const AdminDonorsPage: React.FC = () => {
-  const { profile } = useAuth();
-  const navigate = useNavigate();
-
   const [donors, setDonors] = useState<Donor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,47 +97,28 @@ export const AdminDonorsPage: React.FC = () => {
     return matchesGroup && matchesStatus && matchesSearch;
   });
 
+  const headerActions = (
+    <div className="flex items-center gap-3">
+      <Link
+        to="/admin/hospitals"
+        className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition shadow-sm"
+      >
+        Go to Hospital Accreditation (Block F) →
+      </Link>
+      <Badge variant="outline" className="border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400">
+        Live Audit Mode
+      </Badge>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Top Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/admin')}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white transition"
-              title="Back to Admin Dashboard"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-600 font-bold text-white shadow-lg shadow-rose-600/30">
-                <Heart className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold leading-none text-white">Donor Certificate Audit Portal</h1>
-                <span className="text-xs text-rose-400 font-medium">Block I • Medical Screening Verification</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link
-              to="/admin/hospitals"
-              className="rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
-            >
-              Go to Hospital Accreditation (Block F) →
-            </Link>
-            <div className="text-right">
-              <p className="text-xs font-medium text-white">{profile?.name || 'Administrator'}</p>
-              <span className="text-xs text-emerald-400 font-medium">Live Audit Mode</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-6 py-8">
+    <AppLayout
+      title="Donor Certificate Audit Portal"
+      subtitle="LifePulse Medical Authority • Block I Medical Screening Verification"
+      actions={headerActions}
+      withSidebar={true}
+    >
+      <div className="space-y-6">
         {message && (
           <div
             className={`mb-6 rounded-xl border p-4 text-sm flex items-center justify-between ${
@@ -349,8 +327,8 @@ export const AdminDonorsPage: React.FC = () => {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

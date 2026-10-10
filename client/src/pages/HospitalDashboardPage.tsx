@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { HeartPulse, Send, LogOut, Settings, Building2, History, X, Calendar, Users } from 'lucide-react';
+import { Send, History, X, Building2, Calendar, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import { AppLayout } from '../components/AppLayout';
 
 export const HospitalDashboardPage: React.FC = () => {
-  const { profile, roleData, logout } = useAuth();
+  const { roleData } = useAuth();
   const [requests, setRequests] = useState<any[]>([]);
   const hospitalId = roleData?.id;
 
@@ -51,63 +52,30 @@ export const HospitalDashboardPage: React.FC = () => {
   }, [refresh]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-600 text-white shadow-lg shadow-rose-600/30">
-              <HeartPulse className="h-6 w-6" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white leading-none">Hospital Emergency Blood Portal</h1>
-              <span className="text-xs text-rose-400 mt-1 block">{roleData?.name || 'Hospital accreditation required'}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/hospital/profile"
-              className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition shadow-sm"
-            >
-              <Settings className="h-3.5 w-3.5 text-rose-400" /> Hospital Profile
-            </Link>
-            <div className="text-right hidden sm:block">
-              <p className="text-xs font-medium text-white">{profile?.name || 'Hospital staff'}</p>
-              <span className="text-[11px] text-emerald-400 font-semibold">{roleData?.verificationStatus || 'profile pending'}</span>
-            </div>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition shadow-sm"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Sign Out
-            </button>
-          </div>
+    <AppLayout
+      title="Emergency Dispatches"
+      subtitle={roleData?.name ? `${roleData.name} • Clinical Blood Bank Operations` : 'Create emergency requests and monitor donor responses.'}
+      actions={
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowHistoryModal(true)}
+            className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition shadow-sm active:scale-95"
+          >
+            <History className="h-3.5 w-3.5 text-rose-500" />
+            <span>Archive</span>
+          </button>
+          <Link
+            to="/hospital/request/new"
+            className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-950/20 hover:bg-rose-500 transition active:scale-95"
+          >
+            <Send className="h-3.5 w-3.5" />
+            <span>New Emergency Request</span>
+          </Link>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-6 py-8">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-white">Emergency Dispatches</h2>
-            <p className="text-sm text-slate-400">
-              Create emergency requests and monitor donor responses. Exact donor location appears only after acceptance.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 self-start sm:self-auto">
-            <button
-              type="button"
-              onClick={() => setShowHistoryModal(true)}
-              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition shadow-sm active:scale-[0.98]"
-            >
-              <History className="h-4 w-4 text-rose-400" /> Dispatch History
-            </button>
-            <Link
-              to="/hospital/request/new"
-              className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:bg-rose-500 transition active:scale-[0.98]"
-            >
-              <Send className="h-4 w-4" /> New Emergency Request
-            </Link>
-          </div>
-        </div>
+      }
+    >
+      <div className="mx-auto max-w-7xl space-y-6">
 
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between">
@@ -157,7 +125,7 @@ export const HospitalDashboardPage: React.FC = () => {
           </Link>
           <span className="text-slate-500">LifePulse Emergency Network · Coastal Karnataka</span>
         </div>
-      </main>
+      </div>
 
       {/* Hospital Dispatch History Modal */}
       {showHistoryModal && (
@@ -343,7 +311,7 @@ export const HospitalDashboardPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </AppLayout>
   );
 };
 

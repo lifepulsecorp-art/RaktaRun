@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '../../utils/api';
-import { useAuth } from '../../context/AuthContext';
 import {
   Building2,
   CheckCircle2,
   XCircle,
   Clock,
-  ArrowLeft,
   ShieldCheck,
   Phone,
   Mail,
@@ -15,6 +13,8 @@ import {
   RefreshCw,
   Search,
 } from 'lucide-react';
+import { AppLayout } from '../../components/AppLayout';
+import { Badge } from '../../components/ui/Badge';
 
 interface Hospital {
   id: string;
@@ -35,9 +35,6 @@ interface Hospital {
 }
 
 export const AdminHospitalsPage: React.FC = () => {
-  const { profile } = useAuth();
-  const navigate = useNavigate();
-
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterDistrict, setFilterDistrict] = useState<string>('All');
@@ -91,47 +88,28 @@ export const AdminHospitalsPage: React.FC = () => {
     return matchesDistrict && matchesStatus && matchesSearch;
   });
 
+  const headerActions = (
+    <div className="flex items-center gap-3">
+      <Link
+        to="/admin/donors"
+        className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition shadow-sm"
+      >
+        Go to Donor Verification (Block I) →
+      </Link>
+      <Badge variant="outline" className="border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400">
+        Live Audit Mode
+      </Badge>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Top Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/admin')}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white transition"
-              title="Back to Admin Dashboard"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-600 font-bold text-white shadow-lg shadow-rose-600/30">
-                <Building2 className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold leading-none text-white">Hospital Accreditation Auditing</h1>
-                <span className="text-xs text-rose-400 font-medium">Block F • LifePulse Medical Authority</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link
-              to="/admin/donors"
-              className="rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
-            >
-              Go to Donor Verification (Block I) →
-            </Link>
-            <div className="text-right">
-              <p className="text-xs font-medium text-white">{profile?.name || 'Administrator'}</p>
-              <span className="text-xs text-emerald-400 font-medium">Live Audit Mode</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-6 py-8">
+    <AppLayout
+      title="Hospital Accreditation Auditing"
+      subtitle="LifePulse Medical Authority • Block F Clinical Verification"
+      actions={headerActions}
+      withSidebar={true}
+    >
+      <div className="space-y-6">
         {message && (
           <div
             className={`mb-6 rounded-xl border p-4 text-sm flex items-center justify-between ${
@@ -318,8 +296,8 @@ export const AdminHospitalsPage: React.FC = () => {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
