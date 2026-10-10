@@ -1,8 +1,19 @@
 import axios from 'axios';
 import { auth } from '../config/firebase';
 
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined') {
+    const isRemote = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    if (isRemote && (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+      return '/api';
+    }
+  }
+  return envUrl || '/api';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
