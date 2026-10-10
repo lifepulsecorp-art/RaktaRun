@@ -32,20 +32,22 @@
     },
     "locationSharingEnabled": false,
     "preferredRadius": 15,
-    "availabilityStatus": "available",
+    "availabilityStatus": "emergency_only",
     "heroStats": {
-      "totalEmergencyResponses": 5,
-      "totalDonations": 7,
+      "totalEmergencyResponses": 6,
+      "totalDonations": 8,
       "averageResponseTime": 380,
       "badges": [
         "life_pulse_hero",
         "rapid_responder",
-        "repeat_hero"
+        "repeat_hero",
+        "rare_blood_hero",
+        "community_champion"
       ],
-      "lastResponseDate": "2026-10-08T15:59:01.711Z"
+      "lastResponseDate": "2026-10-10T11:50:47.747Z"
     },
     "createdAt": "2026-01-12T00:00:00.000Z",
-    "updatedAt": "2026-10-08T17:59:10.759Z",
+    "updatedAt": "2026-10-10T11:50:47.753Z",
     "publicHeroConsent": true,
     "deferralReason": null,
     "deferralUntil": null
@@ -387,7 +389,7 @@
       "plasma"
     ],
     "lastDonationDate": "2026-06-01T00:00:00.000Z",
-    "hemoglobinLevel": 13.0,
+    "hemoglobinLevel": 13,
     "weight": 56,
     "eligibilityStatus": "eligible",
     "verification": {

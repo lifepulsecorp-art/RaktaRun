@@ -21,6 +21,8 @@ import {
   MapPin,
   Navigation,
   Edit3,
+  CheckCircle2,
+  Send,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -92,6 +94,59 @@ export const DonorDashboardPage: React.FC = () => {
   });
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [prefNotice, setPrefNotice] = useState('');
+
+  const [browserPushPermission, setBrowserPushPermission] = useState<NotificationPermission | 'unsupported'>(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      return Notification.permission;
+    }
+    return 'unsupported';
+  });
+  const [testingNotif, setTestingNotif] = useState(false);
+  const [testNotifResult, setTestNotifResult] = useState<any>(null);
+
+  const handleTogglePush = async (checked: boolean) => {
+    setNotifPrefs((prev) => ({ ...prev, push: checked }));
+    if (checked && typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        try {
+          const permission = await Notification.requestPermission();
+          setBrowserPushPermission(permission);
+          if (permission === 'granted') {
+            new Notification('🔔 LifePulse Web Push Enabled', {
+              body: 'You are now ready to receive real-time emergency blood requests on this device.',
+              icon: '/favicon.ico',
+            });
+          }
+        } catch {
+          // ignore permission errors
+        }
+      } else {
+        setBrowserPushPermission(Notification.permission);
+      }
+    }
+  };
+
+  const handleTestNotifications = async () => {
+    setTestingNotif(true);
+    setTestNotifResult(null);
+    try {
+      const res = await api.post('/donors/me/test-notifications');
+      setTestNotifResult(res.data);
+
+      if (notifPrefs.push && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification('🚨 LifePulse Test Emergency Alert', {
+          body: `Emergency dispatch test for ${roleData?.fullName || 'Donor'}. Priority: CODE RED Trauma.`,
+          icon: '/favicon.ico',
+        });
+      }
+    } catch (err: any) {
+      setTestNotifResult({
+        error: err.response?.data?.error || err.message || 'Failed to dispatch test notification',
+      });
+    } finally {
+      setTestingNotif(false);
+    }
+  };
 
   // Sync preferred radius and notification preferences whenever roleData updates
   useEffect(() => {
@@ -665,71 +720,175 @@ export const DonorDashboardPage: React.FC = () => {
           </div>
 
           {/* Notification Preferences */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
-            <div className="flex items-center gap-2.5 text-sky-400">
-              <Sliders className="h-5 w-5" />
-              <h3 className="font-bold text-white">Alert & Channel Preferences</h3>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 text-sky-400">
+                  <Sliders className="h-5 w-5" />
+                  <h3 className="font-bold text-white">Alert & Channel Preferences</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleTestNotifications}
+                  disabled={testingNotif}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 px-3 py-1.5 text-xs font-bold text-sky-300 hover:text-white transition active:scale-[0.98] disabled:opacity-50"
+                  title="Dispatch simulated test alerts across your enabled channels"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  <span>{testingNotif ? 'Dispatching…' : 'Test Channels'}</span>
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-slate-400">
+                Choose how and when LifePulse coordinates emergency requests with you.
+              </p>
+
+              <div className="mt-4 space-y-3">
+                {/* Web Push */}
+                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
+                      <Bell className="h-4 w-4 text-emerald-400" /> Web Push Notifications
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notifPrefs.push}
+                      onChange={(e) => handleTogglePush(e.target.checked)}
+                      className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                    <span>Instant desktop & browser alert banners</span>
+                    <span className={`px-2 py-0.5 rounded-full font-medium ${
+                      !notifPrefs.push ? 'bg-slate-800 text-slate-400' :
+                      browserPushPermission === 'granted' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                      browserPushPermission === 'denied' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                      'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                    }`}>
+                      {!notifPrefs.push ? 'Disabled' :
+                       browserPushPermission === 'granted' ? '● Browser Permitted' :
+                       browserPushPermission === 'denied' ? '⚠ Blocked by Browser' :
+                       '● Permission Pending'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* SMS Alerts */}
+                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
+                      <Smartphone className="h-4 w-4 text-sky-400" /> SMS Emergency Alerts
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notifPrefs.sms}
+                      onChange={(e) => setNotifPrefs({ ...notifPrefs, sms: e.target.checked })}
+                      className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                    <span>Immediate cellular SMS dispatched to {roleData?.phone || 'registered phone'}</span>
+                    <span className={`px-2 py-0.5 rounded-full font-medium ${
+                      notifPrefs.sms ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {notifPrefs.sms ? '● Twilio / Fast2SMS Carrier' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* WhatsApp */}
+                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
+                      <MessageSquare className="h-4 w-4 text-green-400" /> WhatsApp Fallback Broadcasts
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notifPrefs.whatsapp}
+                      onChange={(e) => setNotifPrefs({ ...notifPrefs, whatsapp: e.target.checked })}
+                      className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                    <span>Direct WhatsApp message with 1-tap navigation link</span>
+                    <span className={`px-2 py-0.5 rounded-full font-medium ${
+                      notifPrefs.whatsapp ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {notifPrefs.whatsapp ? '● Twilio WA Business API' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Critical Trauma Only */}
+                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
+                      <Heart className="h-4 w-4 text-rose-500" /> Critical Trauma Only (Code Red)
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notifPrefs.criticalOnly}
+                      onChange={(e) => setNotifPrefs({ ...notifPrefs, criticalOnly: e.target.checked })}
+                      className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                    <span>Filter out standard inventory requests; wake only for life-or-death emergencies</span>
+                    <span className={`px-2 py-0.5 rounded-full font-medium ${
+                      notifPrefs.criticalOnly ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {notifPrefs.criticalOnly ? '⚡ Code Red Only' : 'All Urgencies'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Test Results Banner */}
+              {testNotifResult && (
+                <div className="mt-3 rounded-xl border border-sky-500/30 bg-sky-950/40 p-3 text-xs space-y-1.5 animate-in fade-in">
+                  <div className="flex items-center justify-between text-sky-300 font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                      Test Dispatches Completed
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setTestNotifResult(null)}
+                      className="text-slate-400 hover:text-white"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    Dispatched to {testNotifResult.recipientPhone || roleData?.phone || 'your phone'}:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {(testNotifResult.results || []).map((r: any, idx: number) => (
+                      <span
+                        key={idx}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ${
+                          r.success
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                        }`}
+                      >
+                        {r.channel.toUpperCase()}: {r.provider} {r.success ? '✓' : '✗'}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <p className="mt-1 text-xs text-slate-400">
-              Choose how and when LifePulse coordinates emergency requests with you.
-            </p>
 
-            <div className="mt-4 space-y-3">
-              <label className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
-                <span className="flex items-center gap-2 text-slate-200">
-                  <Bell className="h-4 w-4 text-emerald-400" /> Web Push Notifications
-                </span>
-                <input
-                  type="checkbox"
-                  checked={notifPrefs.push}
-                  onChange={(e) => setNotifPrefs({ ...notifPrefs, push: e.target.checked })}
-                  className="accent-rose-600"
-                />
-              </label>
-
-              <label className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
-                <span className="flex items-center gap-2 text-slate-200">
-                  <Smartphone className="h-4 w-4 text-sky-400" /> SMS Emergency Alerts
-                </span>
-                <input
-                  type="checkbox"
-                  checked={notifPrefs.sms}
-                  onChange={(e) => setNotifPrefs({ ...notifPrefs, sms: e.target.checked })}
-                  className="accent-rose-600"
-                />
-              </label>
-
-              <label className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
-                <span className="flex items-center gap-2 text-slate-200">
-                  <MessageSquare className="h-4 w-4 text-green-400" /> WhatsApp Fallback Broadcasts
-                </span>
-                <input
-                  type="checkbox"
-                  checked={notifPrefs.whatsapp}
-                  onChange={(e) => setNotifPrefs({ ...notifPrefs, whatsapp: e.target.checked })}
-                  className="accent-rose-600"
-                />
-              </label>
-
-              <label className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs">
-                <span className="flex items-center gap-2 text-slate-200">
-                  <Heart className="h-4 w-4 text-rose-500" /> Critical Trauma Only (Code Red)
-                </span>
-                <input
-                  type="checkbox"
-                  checked={notifPrefs.criticalOnly}
-                  onChange={(e) => setNotifPrefs({ ...notifPrefs, criticalOnly: e.target.checked })}
-                  className="accent-rose-600"
-                />
-              </label>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between">
-              {prefNotice && <span className="text-xs text-emerald-400 font-medium">{prefNotice}</span>}
+            <div className="mt-4 flex items-center justify-between pt-4 border-t border-slate-800/80">
+              {prefNotice ? (
+                <span className="text-xs text-emerald-400 font-medium animate-in fade-in">{prefNotice}</span>
+              ) : (
+                <span className="text-xs text-slate-400">Settings sync across mobile & web</span>
+              )}
               <button
                 onClick={savePreferences}
                 disabled={savingPrefs}
-                className="ml-auto rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-50 transition"
+                className="rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-50 transition active:scale-[0.98]"
               >
                 {savingPrefs ? 'Saving…' : 'Save Preferences'}
               </button>

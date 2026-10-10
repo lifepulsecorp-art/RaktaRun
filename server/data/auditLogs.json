@@ -34,5 +34,17 @@
       "eligibilityStatus": "eligible"
     },
     "createdAt": "2026-10-08T17:24:57.733Z"
+  },
+  {
+    "id": "audit_bccb6c64-8",
+    "actorUid": "hospital_manipal_uid",
+    "actorRole": "hospital",
+    "action": "donation.completed",
+    "entityType": "match",
+    "entityId": "match_002_rahul",
+    "details": {
+      "requestId": "req_emergency_002"
+    },
+    "createdAt": "2026-10-10T11:50:47.756Z"
   }
 ]

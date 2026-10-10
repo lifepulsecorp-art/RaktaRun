@@ -67,6 +67,13 @@ test('emergency-only availability is included for critical requests only', () =>
   assert.equal(findCandidates(request({ urgency: 'standard' }), [emergencyOnly]).length, 0);
 });
 
+test('critical-only notification preference excludes non-critical requests', () => {
+  const criticalDonor = donor({ notificationPreferences: { push: true, sms: true, whatsapp: true, criticalOnly: true } });
+  assert.equal(findCandidates(request({ urgency: 'critical' }), [criticalDonor]).length, 1);
+  assert.equal(findCandidates(request({ urgency: 'urgent' }), [criticalDonor]).length, 0);
+  assert.equal(findCandidates(request({ urgency: 'standard' }), [criticalDonor]).length, 0);
+});
+
 test('trauma journey simulation dispatches, accepts, tracks, arrives, completes and awards badges', () => {
   const hospitalRequest = request({ unitsRequired: 1 });
   const candidate = findCandidates(hospitalRequest, [donor()])[0];

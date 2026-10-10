@@ -6,6 +6,7 @@ import type { Hospital, BloodRequest, Match, Donor, BloodGroup, BloodComponent, 
 import { findCandidates } from '../services/matching.js';
 import { completeDonation } from '../services/journey.js';
 import { getSystemConfig } from '../services/configService.js';
+import { dispatchAlertNotifications } from '../services/notificationService.js';
 
 const router = Router();
 
@@ -224,6 +225,9 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
       };
       insert<Match>('matches', match);
       createdMatches.push(match);
+      void dispatchAlertNotifications(c.donor, newRequest, match).catch((err) => {
+        console.warn(`[NOTIF DISPATCH ERROR] donor ${c.donor.id}:`, err);
+      });
     });
 
   audit(req, 'request.dispatched', 'bloodRequest', requestId, { matchedCount: createdMatches.length, radiusKm: searchRadius });

@@ -7,6 +7,7 @@ import { authenticate, authorizeRoles, AuthenticatedRequest } from '../middlewar
 import { readJson, find, filter, insert, update } from '../utils/db.js';
 import type { Donor, Match, BloodRequest, User, AuditLog, Hospital } from '../types.js';
 import { resolveDonorResponse, updateJourney } from '../services/journey.js';
+import { sendSmsAlert, sendWhatsAppAlert } from '../services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -363,6 +364,63 @@ router.put('/me/preferences', authenticate, (req: AuthenticatedRequest, res) => 
   }
   const updated = update<Donor>('donors', donor.id, patch);
   res.json({ message: 'Donor preferences updated', donor: updated });
+});
+
+// POST /api/donors/me/test-notifications - Dispatch a test alert across donor's active channels
+router.post('/me/test-notifications', authenticate, async (req: AuthenticatedRequest, res) => {
+  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+  if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
+
+  const prefs = donor.notificationPreferences || {
+    push: true,
+    sms: true,
+    whatsapp: true,
+    criticalOnly: false,
+  };
+
+  const results: any[] = [];
+  const testMessage = `[LifePulse Emergency Broadcast Test]\nHello ${donor.fullName}! Your emergency alert routing is operational.\nPriority: CODE RED (Trauma)\nBase: ${donor.homeLocality || 'Manipal'}\nStatus: Verified Responder`;
+
+  if (prefs.push) {
+    results.push({
+      channel: 'push',
+      recipient: donor.id,
+      success: true,
+      provider: 'browser_push',
+      message: 'In-browser desktop push alert trigger ready',
+    });
+  }
+
+  if (prefs.sms && donor.phone) {
+    const smsRes = await sendSmsAlert(donor.phone, testMessage);
+    results.push(smsRes);
+  }
+
+  if (prefs.whatsapp && donor.phone) {
+    const waRes = await sendWhatsAppAlert(donor.phone, testMessage);
+    results.push(waRes);
+  }
+
+  insert<AuditLog>('auditLogs', {
+    id: `audit_testnotif_${uuidv4().slice(0, 8)}`,
+    actorUid: req.user!.uid,
+    actorRole: req.user!.role,
+    action: 'donor.notification_channels_tested',
+    entityType: 'donor',
+    entityId: donor.id,
+    details: {
+      recipientPhone: donor.phone,
+      channelsTested: results.map((r) => `${r.channel}:${r.provider}`),
+    },
+    createdAt: new Date().toISOString(),
+  });
+
+  res.json({
+    message: 'Test notification dispatches processed',
+    recipientPhone: donor.phone,
+    preferences: prefs,
+    results,
+  });
 });
 
 router.put('/me/public-hero-consent', authenticate, (req: AuthenticatedRequest, res) => {

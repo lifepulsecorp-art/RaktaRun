@@ -42,18 +42,18 @@
     "distance": 0.6,
     "score": 145,
     "rank": 1,
-    "status": "alerted",
+    "status": "donated",
     "alertedAt": "2026-10-10T16:00:00.000Z",
     "alertExpiresAt": "2027-10-11T16:00:00.000Z",
-    "respondedAt": null,
-    "response": null,
+    "respondedAt": "2026-10-10T11:49:53.766Z",
+    "response": "accepted",
     "donorCurrentLocation": null,
     "etaSeconds": null,
     "distanceRemaining": null,
     "reachedAt": null,
-    "donationCompletedAt": null,
+    "donationCompletedAt": "2026-10-10T11:50:47.747Z",
     "createdAt": "2026-10-10T16:00:00.000Z",
-    "updatedAt": "2026-10-10T16:00:00.000Z"
+    "updatedAt": "2026-10-10T11:50:47.748Z"
   },
   {
     "id": "match_002_ananya",

@@ -3,6 +3,7 @@ import type { BloodRequest, Donor, Match } from '../types.js';
 import { find, filter, readJson, update, insert } from '../utils/db.js';
 import { findCandidates } from './matching.js';
 import { getSystemConfig } from './configService.js';
+import { dispatchAlertNotifications } from './notificationService.js';
 
 let running = false;
 
@@ -38,12 +39,27 @@ export function escalateUnansweredRequests(now = Date.now()): number {
       const candidateRequest = { ...request, radiusKm: expandedRadius };
       const next = findCandidates(candidateRequest, readJson<Donor>('donors'), excludes).slice(0, Math.max(5, (request.unitsRequired - active - donated) * 5));
       const timestamp = new Date(now).toISOString();
-      next.forEach((candidate, index) => insert<Match>('matches', {
-        id: `match_${uuidv4().slice(0, 8)}`, requestId: request.id, donorId: candidate.donor.id,
-        distance: candidate.distance, score: candidate.score, rank: refreshed.length + index + 1,
-        status: 'alerted', alertedAt: timestamp, respondedAt: null, response: null,
-        alertExpiresAt: new Date(now + config.alertTimeoutSeconds * 1000).toISOString(), createdAt: timestamp, updatedAt: timestamp,
-      }));
+      next.forEach((candidate, index) => {
+        const match: Match = {
+          id: `match_${uuidv4().slice(0, 8)}`,
+          requestId: request.id,
+          donorId: candidate.donor.id,
+          distance: candidate.distance,
+          score: candidate.score,
+          rank: refreshed.length + index + 1,
+          status: 'alerted',
+          alertedAt: timestamp,
+          respondedAt: null,
+          response: null,
+          alertExpiresAt: new Date(now + config.alertTimeoutSeconds * 1000).toISOString(),
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        };
+        insert<Match>('matches', match);
+        void dispatchAlertNotifications(candidate.donor, request, match).catch((err) => {
+          console.warn(`[ESCALATION NOTIF DISPATCH ERROR] donor ${candidate.donor.id}:`, err);
+        });
+      });
       const status = next.length ? 'searching' : expandedRadius >= config.maxRadiusKm ? 'unfulfilled' : request.status;
       update<BloodRequest>('bloodRequests', request.id, {
         status, radiusKm: expandedRadius, escalationLevel: (request.escalationLevel || 0) + 1,

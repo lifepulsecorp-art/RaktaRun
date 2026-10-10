@@ -30,7 +30,10 @@ export function findCandidates(request: BloodRequest, donors: Donor[], excludedI
   const now = Date.now();
   return donors.flatMap((donor) => {
     if (excludedIds.has(donor.id) || donor.eligibilityStatus !== 'eligible') return [];
-    if (donor.availabilityStatus === 'unavailable' || (donor.availabilityStatus === 'emergency_only' && request.urgency !== 'critical')) return [];
+    if (
+      donor.availabilityStatus === 'unavailable' ||
+      ((donor.availabilityStatus === 'emergency_only' || donor.notificationPreferences?.criticalOnly) && request.urgency !== 'critical')
+    ) return [];
     if (!groups.includes(donor.bloodGroup) || !donor.bloodComponentEligibility.includes(request.component)) return [];
     const certificateExpiry = Date.parse(donor.verification?.expiryDate || '');
     if (!Number.isFinite(certificateExpiry) || certificateExpiry <= now) return [];
