@@ -182,5 +182,85 @@
       "email": "lifepulsecorp@gmail.com"
     },
     "createdAt": "2026-10-10T15:24:47.640Z"
+  },
+  {
+    "id": "audit_notif_648c2ccb",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_emergency_005",
+      "matchId": "match_3463d9b8",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:brevo",
+        "email:brevo"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-10T16:17:56.618Z"
+  },
+  {
+    "id": "audit_notif_8b6154dc",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_mohammed_05",
+    "details": {
+      "requestId": "req_emergency_003",
+      "matchId": "match_636a82eb",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:brevo",
+        "email:brevo"
+      ],
+      "phone": "+919876543214",
+      "email": "mohammed.farooq@gmail.com"
+    },
+    "createdAt": "2026-10-10T16:17:57.019Z"
+  },
+  {
+    "id": "audit_notif_f002dd20",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_pooja_07",
+    "details": {
+      "requestId": "req_emergency_003",
+      "matchId": "match_709c0db3",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:brevo",
+        "email:brevo"
+      ],
+      "phone": "+919876543216",
+      "email": "pooja.shetty@gmail.com"
+    },
+    "createdAt": "2026-10-10T16:17:57.034Z"
+  },
+  {
+    "id": "audit_notif_4a442d05",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor-test",
+    "details": {
+      "requestId": "req-test",
+      "matchId": "m-1",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:brevo",
+        "email:brevo"
+      ],
+      "phone": "+919876543210",
+      "email": "lifepulsecorp@gmail.com"
+    },
+    "createdAt": "2026-10-10T16:22:10.621Z"
   }
 ]
