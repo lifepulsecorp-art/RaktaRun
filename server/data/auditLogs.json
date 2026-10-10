@@ -46,5 +46,41 @@
       "requestId": "req_emergency_002"
     },
     "createdAt": "2026-10-10T11:50:47.756Z"
+  },
+  {
+    "id": "audit_93e00d02-3",
+    "actorUid": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "actorRole": "admin",
+    "action": "hospital.accreditation_updated",
+    "entityType": "hospital",
+    "entityId": "hosp_4355bc93",
+    "details": {
+      "status": "verified"
+    },
+    "createdAt": "2026-10-10T13:50:50.658Z"
+  },
+  {
+    "id": "audit_1a52be99-9",
+    "actorUid": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "actorRole": "admin",
+    "action": "hospital.accreditation_updated",
+    "entityType": "hospital",
+    "entityId": "hosp_4355bc93",
+    "details": {
+      "status": "rejected"
+    },
+    "createdAt": "2026-10-10T13:50:52.567Z"
+  },
+  {
+    "id": "audit_4203838b-5",
+    "actorUid": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "actorRole": "admin",
+    "action": "hospital.accreditation_updated",
+    "entityType": "hospital",
+    "entityId": "hosp_4355bc93",
+    "details": {
+      "status": "verified"
+    },
+    "createdAt": "2026-10-10T13:50:53.454Z"
   }
 ]

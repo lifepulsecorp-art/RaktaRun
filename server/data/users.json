@@ -102,13 +102,5 @@
     "donorId": "donor_meera_13",
     "createdAt": "2026-01-18T00:00:00.000Z",
     "updatedAt": "2026-01-18T00:00:00.000Z"
-  },
-  {
-    "uid": "user_c7c401de",
-    "email": "vinayakrishnanc@gmail.com",
-    "role": "donor",
-    "name": " Vinayakrishnan C",
-    "createdAt": "2026-10-10T13:46:52.653Z",
-    "updatedAt": "2026-10-10T13:49:00.590Z"
   }
 ]
