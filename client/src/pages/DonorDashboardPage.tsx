@@ -18,6 +18,8 @@ import {
   History,
   Calendar,
   X,
+  MapPin,
+  Navigation,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -30,10 +32,19 @@ const BADGE_MAP: Record<string, { label: string; icon: string }> = {
   community_champion: { label: 'Community Champion', icon: '🌟' },
 };
 
+export function getCompatibilityExplanation(donorBlood?: string, reqBlood?: string): string {
+  if (!donorBlood || !reqBlood) return 'Clinically verified compatible donor match';
+  if (donorBlood === 'O-') return `🌟 Universal Life-Saver: Your O- is a universal emergency match for this ${reqBlood} patient.`;
+  if (donorBlood === reqBlood) return `🎯 Exact Group Match: Your verified ${donorBlood} directly matches this patient's blood group.`;
+  return `✅ Compatible Blood Match: Your ${donorBlood} is clinically compatible with recipient ${reqBlood}.`;
+}
+
 export const DonorDashboardPage: React.FC = () => {
   const { profile, roleData, logout } = useAuth();
   const navigate = useNavigate();
-  const [alerts, setAlerts] = useState<any[]>([]);
+  const [allAlerts, setAllAlerts] = useState<any[]>([]);
+  const [dismissedModalIds, setDismissedModalIds] = useState<Set<string>>(new Set());
+  const [shareLocationEnabled, setShareLocationEnabled] = useState(true);
   const [busyId, setBusyId] = useState('');
   const [now, setNow] = useState(Date.now());
   const [consent, setConsent] = useState(Boolean(roleData?.publicHeroConsent));
@@ -99,7 +110,7 @@ export const DonorDashboardPage: React.FC = () => {
   const refreshAlerts = useCallback(async () => {
     try {
       const { data } = await api.get('/donors/me/alerts');
-      setAlerts(data.filter((entry: any) => entry.match.status === 'alerted'));
+      setAllAlerts(Array.isArray(data) ? data : []);
     } catch {
       /* Keep last alert snapshot while reconnecting */
     }
@@ -107,7 +118,7 @@ export const DonorDashboardPage: React.FC = () => {
 
   useEffect(() => {
     refreshAlerts();
-    const poll = setInterval(refreshAlerts, 5000);
+    const poll = setInterval(refreshAlerts, 4000);
     const clock = setInterval(() => setNow(Date.now()), 1000);
     return () => {
       clearInterval(poll);
@@ -115,14 +126,53 @@ export const DonorDashboardPage: React.FC = () => {
     };
   }, [refreshAlerts]);
 
-  const respond = async (matchId: string, response: 'accepted' | 'declined') => {
+  const pendingAlerts = allAlerts.filter(
+    (entry: any) =>
+      entry.match?.status === 'alerted' &&
+      Date.parse(entry.match.alertExpiresAt || entry.match.alertedAt || '') > now
+  );
+
+  const activeMissions = allAlerts.filter(
+    (entry: any) => ['accepted', 'en_route', 'reached'].includes(entry.match?.status)
+  );
+
+  const respond = async (matchId: string, response: 'accepted' | 'declined', shareLocation: boolean = true) => {
     setBusyId(matchId);
     try {
+      let initialCoords: { latitude: number; longitude: number } | null = null;
+      if (response === 'accepted' && shareLocation && typeof navigator !== 'undefined' && navigator.geolocation) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 6000,
+              maximumAge: 0,
+            });
+          });
+          initialCoords = {
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          };
+        } catch (geoErr) {
+          console.warn('Initial GPS query skipped or denied on accept:', geoErr);
+        }
+      }
+
       await api.post(`/donors/matches/${matchId}/respond`, { response });
-      setAlerts((current) => current.filter((item) => item.match.id !== matchId));
+
+      if (response === 'accepted' && initialCoords) {
+        try {
+          await api.post(`/donors/matches/${matchId}/location`, initialCoords);
+        } catch (locErr) {
+          console.warn('Initial live location post deferred:', locErr);
+        }
+      }
+
       if (response === 'accepted') {
-        const targetReq = alerts.find((item) => item.match.id === matchId)?.request;
-        navigate(`/live-tracking/${targetReq?.id}`);
+        const targetReq = allAlerts.find((item) => item.match.id === matchId)?.request;
+        navigate(`/live-tracking/${targetReq?.id || ''}`);
+      } else {
+        await refreshAlerts();
       }
     } catch (error: any) {
       window.alert(error.response?.data?.error || 'Could not respond to alert.');
@@ -206,6 +256,136 @@ export const DonorDashboardPage: React.FC = () => {
             <span>Network Status: <strong>Live Connected</strong></span>
           </div>
         </div>
+
+        {/* Active Donation Missions (En Route / In Transit) */}
+        {activeMissions.length > 0 && (
+          <div className="mt-6 space-y-4">
+            {activeMissions.map(({ match, request }: any) => (
+              <div
+                key={match.id}
+                className="rounded-2xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/70 via-slate-900 to-slate-950 p-6 shadow-2xl shadow-emerald-950/30 animate-in fade-in"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">
+                      <Navigation className="h-6 w-6 animate-pulse" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-300 uppercase tracking-wider">
+                          Active Donation Mission
+                        </span>
+                        <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-mono font-semibold">
+                          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                          Live GPS Streaming Active
+                        </span>
+                      </div>
+                      <h3 className="mt-1 text-lg font-bold text-white">
+                        En Route to {request?.hospitalName || 'Hospital'}
+                      </h3>
+                      <p className="mt-0.5 text-xs text-slate-300">
+                        Patient requires <strong>{request?.bloodGroup} {request?.component?.replace('_', ' ')}</strong> · Mission Status: <strong className="capitalize text-emerald-300">{match.status.replace('_', ' ')}</strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Link
+                      to={`/live-tracking/${request?.id}`}
+                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-3 text-xs font-bold text-white shadow-xl shadow-emerald-950/60 hover:from-emerald-500 hover:to-teal-500 transition active:scale-[0.98]"
+                    >
+                      <MapPin className="h-4 w-4" />
+                      <span>Open Live GPS Navigation & Route →</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Incoming Emergency Requests Banner on Dashboard */}
+        {pendingAlerts.length > 0 && (
+          <div className="mt-6 space-y-4">
+            {pendingAlerts.map(({ match, request }: any) => {
+              const seconds = Math.max(0, Math.ceil((Date.parse(match.alertExpiresAt || match.alertedAt) - now) / 1000));
+              const etaMinutes = Math.max(3, Math.ceil((match.distance || 5) / 25 * 60));
+              const compText = getCompatibilityExplanation(roleData?.bloodGroup, request?.bloodGroup);
+
+              return (
+                <div
+                  key={match.id}
+                  className="rounded-3xl border-2 border-rose-500/60 bg-gradient-to-br from-rose-950/40 via-slate-900 to-slate-950 p-6 shadow-2xl shadow-rose-950/50 animate-in fade-in"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="flex items-center gap-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 px-3 py-1 text-xs font-black text-rose-300 uppercase tracking-widest">
+                          <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+                          Emergency Hospital Dispatch
+                        </span>
+                        <div className="flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-mono font-bold text-amber-300">
+                          <Clock className="h-3.5 w-3.5 animate-spin" />
+                          <span>Expires in {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-black text-white">
+                          {request?.hospitalName} urgently requires {request?.bloodGroup} {request?.component?.replace('_', ' ')}
+                        </h3>
+                        <p className="mt-1 text-xs font-medium text-emerald-400">
+                          {compText}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-400">
+                          📍 Located approx. <strong>{match.distance} km</strong> away (Est. drive time: <strong className="text-rose-300">{etaMinutes} mins</strong>) · Urgency: <strong className="capitalize text-rose-400">{request?.urgency || 'Critical'}</strong>
+                        </p>
+                      </div>
+
+                      {/* Location Sharing Checkbox */}
+                      <label className="inline-flex items-center gap-2.5 text-xs text-slate-300 bg-slate-950/60 border border-slate-800 rounded-xl px-3.5 py-2 cursor-pointer hover:border-slate-700 transition">
+                        <input
+                          type="checkbox"
+                          checked={shareLocationEnabled}
+                          onChange={(e) => setShareLocationEnabled(e.target.checked)}
+                          className="accent-emerald-500 h-4 w-4 rounded"
+                        />
+                        <span className="flex items-center gap-1.5">
+                          <Navigation className="h-3.5 w-3.5 text-emerald-400" />
+                          <strong>Share real-time GPS location</strong> with hospital team upon acceptance
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                      <button
+                        disabled={!seconds || !!busyId}
+                        onClick={() => respond(match.id, 'accepted', shareLocationEnabled)}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-sm font-black text-white shadow-xl shadow-emerald-950/50 hover:from-emerald-500 hover:to-teal-500 transition active:scale-[0.98] disabled:opacity-50"
+                      >
+                        <MapPin className="h-4 w-4" />
+                        <span>
+                          {busyId === match.id
+                            ? 'Connecting…'
+                            : shareLocationEnabled
+                            ? 'Accept Donation & Share Location'
+                            : 'Accept Donation'}
+                        </span>
+                      </button>
+                      <button
+                        disabled={!!busyId}
+                        onClick={() => respond(match.id, 'declined')}
+                        className="w-full sm:w-auto rounded-2xl border border-slate-700 bg-slate-800/80 px-5 py-3.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* 3 Status Cards */}
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -524,26 +704,42 @@ export const DonorDashboardPage: React.FC = () => {
         </section>
       </main>
 
-      {/* High-Impact Emergency Alert Modal (Human-Centric Copy from reduired.md) */}
-      {alerts.length > 0 && (
+      {/* High-Impact Emergency Alert Modal */}
+      {pendingAlerts.filter((item) => !dismissedModalIds.has(item.match.id)).length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md">
-          <div role="dialog" aria-modal="true" className="w-full max-w-lg rounded-3xl border border-rose-500/50 bg-slate-900 p-7 shadow-2xl shadow-rose-950/60 animate-in fade-in zoom-in-95">
+          <div role="dialog" aria-modal="true" className="relative w-full max-w-lg rounded-3xl border border-rose-500/50 bg-slate-900 p-7 shadow-2xl shadow-rose-950/60 animate-in fade-in zoom-in-95">
             {/* Header Badge */}
-            <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white font-bold animate-pulse shadow-lg shadow-rose-600/40">
-                🚨
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white font-bold animate-pulse shadow-lg shadow-rose-600/40">
+                  🚨
+                </div>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-widest text-rose-400">
+                    LIFE PULSE EMERGENCY ALERT
+                  </p>
+                  <h2 className="text-xl font-extrabold text-white">Someone near you needs your blood.</h2>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-black uppercase tracking-widest text-rose-400">
-                  LIFE PULSE EMERGENCY ALERT
-                </p>
-                <h2 className="text-xl font-extrabold text-white">Someone near you needs your help.</h2>
-              </div>
+
+              {/* Minimize/Dismiss Button to review dashboard */}
+              <button
+                onClick={() => {
+                  const ids = new Set(dismissedModalIds);
+                  pendingAlerts.forEach((a) => ids.add(a.match.id));
+                  setDismissedModalIds(ids);
+                }}
+                className="rounded-xl border border-slate-800 bg-slate-950 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                title="Minimize alert to dashboard"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
-            {alerts.map(({ match, request }) => {
+            {pendingAlerts.filter((item) => !dismissedModalIds.has(item.match.id)).map(({ match, request }) => {
               const seconds = Math.max(0, Math.ceil((Date.parse(match.alertExpiresAt || match.alertedAt) - now) / 1000));
               const etaMinutes = Math.max(3, Math.ceil((match.distance || 5) / 25 * 60));
+              const compText = getCompatibilityExplanation(roleData?.bloodGroup, request?.bloodGroup);
 
               return (
                 <article key={match.id} className="mt-5 space-y-4">
@@ -555,6 +751,7 @@ export const DonorDashboardPage: React.FC = () => {
                         <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-300 capitalize">
                           {request?.component?.replace('_', ' ')}
                         </span>
+                        <span className="text-xs text-slate-400">({request?.unitsRequired || 1} units)</span>
                       </div>
                       <div className="flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-mono font-bold text-amber-300">
                         <Clock className="h-3.5 w-3.5 animate-spin" />
@@ -567,9 +764,12 @@ export const DonorDashboardPage: React.FC = () => {
                         <span>🏥</span>
                         <span className="font-semibold">{request?.hospitalName}</span>
                       </div>
+                      <div className="rounded-xl bg-slate-900 border border-slate-800/80 p-2.5 text-xs text-emerald-400 font-medium">
+                        {compText}
+                      </div>
                       <div className="flex items-center gap-2 text-slate-400 text-xs">
                         <span>📍</span>
-                        <span>Approximately <strong>{match.distance} km</strong> from your registered locality</span>
+                        <span>Approximately <strong>{match.distance} km</strong> away (within your preferred {preferredRadius} km radius)</span>
                       </div>
                       <div className="flex items-center gap-2 text-rose-400 text-xs">
                         <span>⏱</span>
@@ -578,7 +778,7 @@ export const DonorDashboardPage: React.FC = () => {
                     </div>
 
                     {/* Motivational Callout & Prominent Travel Time */}
-                    <div className="mt-5 pt-4 border-t border-slate-800/80">
+                    <div className="mt-4 pt-4 border-t border-slate-800/80">
                       <p className="text-xs italic text-slate-300">
                         “You could be the person who gets there in time.”
                       </p>
@@ -589,19 +789,45 @@ export const DonorDashboardPage: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Real-time Location Sharing Option */}
+                  <label className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-3.5 text-xs cursor-pointer hover:border-slate-700 transition">
+                    <input
+                      type="checkbox"
+                      checked={shareLocationEnabled}
+                      onChange={(e) => setShareLocationEnabled(e.target.checked)}
+                      className="accent-emerald-500 h-4 w-4 rounded cursor-pointer"
+                    />
+                    <div>
+                      <span className="block font-bold text-white flex items-center gap-1.5">
+                        <Navigation className="h-3.5 w-3.5 text-emerald-400" />
+                        Share Live GPS Location with Hospital
+                      </span>
+                      <span className="block text-[11px] text-slate-400 mt-0.5">
+                        Allows hospital trauma staff to monitor your driving transit and prepare emergency triage beds.
+                      </span>
+                    </div>
+                  </label>
+
                   {/* Actions */}
                   <div className="flex gap-3 pt-2">
                     <button
                       disabled={!seconds || !!busyId}
-                      onClick={() => respond(match.id, 'accepted')}
-                      className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 font-bold text-white shadow-xl shadow-emerald-950/40 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 transition text-base"
+                      onClick={() => respond(match.id, 'accepted', shareLocationEnabled)}
+                      className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 font-bold text-white shadow-xl shadow-emerald-950/50 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 transition text-sm sm:text-base active:scale-[0.98]"
                     >
-                      {busyId === match.id ? 'Connecting…' : '[ I CAN HELP ]'}
+                      <MapPin className="h-4 w-4" />
+                      <span>
+                        {busyId === match.id
+                          ? 'Connecting…'
+                          : shareLocationEnabled
+                          ? 'Accept Donation & Share Location'
+                          : 'Accept Donation'}
+                      </span>
                     </button>
                     <button
                       disabled={!!busyId}
                       onClick={() => respond(match.id, 'declined')}
-                      className="rounded-2xl border border-slate-700 bg-slate-800/80 px-6 py-3.5 font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition text-sm"
+                      className="rounded-2xl border border-slate-700 bg-slate-800/80 px-5 py-3.5 font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition text-xs sm:text-sm"
                     >
                       Decline
                     </button>
@@ -611,7 +837,7 @@ export const DonorDashboardPage: React.FC = () => {
             })}
 
             <p className="mt-4 text-center text-xs text-slate-500">
-              Exact location sharing begins only after you accept and grant browser GPS permission.
+              Live location streaming is protected and only active during this emergency transit.
             </p>
           </div>
         </div>

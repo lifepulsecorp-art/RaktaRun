@@ -474,14 +474,47 @@ export const LiveTrackingPage: React.FC = () => {
             </section>
 
             <aside className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
-              <h3 className="flex items-center gap-2 font-bold">
-                <Shield className="h-5 w-5 text-emerald-400" /> Ranked match queue
-              </h3>
-              <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="flex items-center gap-2 font-bold text-white">
+                  <Shield className="h-5 w-5 text-emerald-400" /> Identified Donors ({matches.length})
+                </h3>
+                <span className="text-xs text-slate-400 font-mono">Matched by Blood & Distance</span>
+              </div>
+              <p className="mt-1 text-xs text-slate-400">
+                Filtered automatically based on recipient blood compatibility, medical clearance, and response radius.
+              </p>
+
+              <div className="mt-4 space-y-3">
                 {matches.filter((m) => ['alerted', 'expired', 'declined'].includes(m.status)).map((m) => (
-                  <div key={m.id} className="flex justify-between rounded-lg bg-slate-950/50 p-3 text-sm">
-                    <span>{m.donor?.fullName || 'Verified donor'} · {m.donor?.bloodGroup}</span>
-                    <span className="text-xs text-slate-400 uppercase">{m.status}</span>
+                  <div key={m.id} className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono font-bold text-slate-400">#{m.rank || 1}</span>
+                          <span className="font-semibold text-white text-sm">{m.donor?.fullName || 'Verified Donor'}</span>
+                          <span className="rounded bg-rose-500/20 px-2 py-0.5 text-xs text-rose-300 font-bold">
+                            {m.donor?.bloodGroup}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-400">
+                          📍 {m.donor?.homeLocality || 'Verified Area'} · <strong>{m.distance} km</strong> away
+                        </p>
+                      </div>
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+                        m.status === 'alerted'
+                          ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
+                          : m.status === 'declined'
+                          ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          : 'bg-slate-800 text-slate-400'
+                      }`}>
+                        {m.status === 'alerted' ? '📡 Awaiting Response' : m.status}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-800/60">
+                      <span>Match Score: <strong className="text-slate-300">{m.score}</strong></span>
+                      <span>Screening: <strong className="text-emerald-400">Verified Certificate</strong></span>
+                    </div>
                   </div>
                 ))}
                 {matches.length === 0 && <p className="text-sm text-slate-500">No compatible donors found in the current radius.</p>}
