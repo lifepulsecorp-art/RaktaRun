@@ -193,138 +193,138 @@ export const DonorHeroCardPage: React.FC = () => {
       withSidebar={true}
     >
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
-          {/* Card Preview Column */}
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl flex flex-col items-center">
-            <div className="w-full flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Camera className="h-4 w-4 text-rose-400" /> Live Card Preview
-              </h2>
-              <div className="flex rounded-xl bg-slate-950 p-1 border border-slate-800 text-xs font-semibold">
-                <button
-                  onClick={() => setFormat('story')}
-                  className={`rounded-lg px-3 py-1.5 transition ${format === 'story' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Instagram Story (9:16)
-                </button>
-                <button
-                  onClick={() => setFormat('landscape')}
-                  className={`rounded-lg px-3 py-1.5 transition ${format === 'landscape' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Banner (Landscape)
-                </button>
-              </div>
-            </div>
-
-            {/* Canvas Container with scale */}
-            <div className="w-full flex justify-center bg-slate-950/80 rounded-2xl border border-slate-800/80 p-4 overflow-hidden">
-              <canvas
-                ref={canvasRef}
-                className="rounded-xl shadow-2xl border border-slate-800"
-                style={{
-                  maxHeight: format === 'story' ? '540px' : '260px',
-                  width: 'auto',
-                  objectFit: 'contain',
-                }}
-              />
-            </div>
-
-            <div className="mt-6 w-full flex flex-col sm:flex-row gap-3">
+        {/* Card Preview Column */}
+        <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 p-6 shadow-sm dark:shadow-2xl flex flex-col items-center">
+          <div className="w-full flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Camera className="h-4 w-4 text-rose-500 dark:text-rose-400" /> Live Card Preview
+            </h2>
+            <div className="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800 text-xs font-semibold">
               <button
-                onClick={downloadCard}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 py-3 text-sm font-bold text-white shadow-lg shadow-rose-600/30 hover:from-rose-500 hover:to-pink-500 transition"
+                onClick={() => setFormat('story')}
+                className={`rounded-lg px-3 py-1.5 transition ${format === 'story' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
               >
-                <Download className="h-4 w-4" /> Download High-Res PNG ({format === 'story' ? '1080×1920' : '1200×630'})
+                Instagram Story (9:16)
+              </button>
+              <button
+                onClick={() => setFormat('landscape')}
+                className={`rounded-lg px-3 py-1.5 transition ${format === 'landscape' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+              >
+                Banner (Landscape)
               </button>
             </div>
-            <p className="mt-3 text-xs text-slate-500 text-center">
-              Watermarked and certified by LifePulse Emergency Network for Udupi & Dakshina Kannada.
-            </p>
           </div>
 
-          {/* Donor Stats & Consent Column */}
-          <div className="space-y-6">
-            {/* Identity & Badges Card */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold text-xl">
-                  {bloodGroup}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">{heroName}</h3>
-                  <p className="text-xs text-slate-400">{district} District • Verified Donor</p>
-                </div>
-              </div>
+          {/* Canvas Container with scale */}
+          <div className="w-full flex justify-center bg-slate-100 dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800/80 p-4 overflow-hidden">
+            <canvas
+              ref={canvasRef}
+              className="rounded-xl shadow-md dark:shadow-2xl border border-slate-200 dark:border-slate-800"
+              style={{
+                maxHeight: format === 'story' ? '540px' : '260px',
+                width: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+          </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3 text-center">
-                <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                  <span className="text-3xl font-extrabold text-emerald-400">{totalDonations}</span>
-                  <p className="text-xs text-slate-400 mt-1">Verified Donations</p>
-                </div>
-                <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                  <span className="text-3xl font-extrabold text-sky-400">{totalResponses}</span>
-                  <p className="text-xs text-slate-400 mt-1">Dispatches Answered</p>
-                </div>
-              </div>
+          <div className="mt-6 w-full flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={downloadCard}
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 py-3 text-sm font-bold text-white shadow-lg shadow-rose-600/30 hover:from-rose-500 hover:to-pink-500 transition"
+            >
+              <Download className="h-4 w-4" /> Download High-Res PNG ({format === 'story' ? '1080×1920' : '1200×630'})
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
+            Watermarked and certified by LifePulse Emergency Network for Udupi & Dakshina Kannada.
+          </p>
+        </div>
 
-              <div className="mt-6">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Earned Hero Badges</h4>
-                <div className="space-y-2">
-                  {badges.map((b: string) => {
-                    const info = BADGE_DESCRIPTIONS[b] || { label: b.replace(/_/g, ' '), icon: '🏆', desc: 'Verified emergency contribution.' };
-                    return (
-                      <div key={b} className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                        <span className="text-xl">{info.icon}</span>
-                        <div>
-                          <p className="text-xs font-bold text-amber-300">{info.label}</p>
-                          <p className="text-[11px] text-slate-400">{info.desc}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+        {/* Donor Stats & Consent Column */}
+        <div className="space-y-6">
+          {/* Identity & Badges Card */}
+          <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 p-6 shadow-sm dark:shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 font-bold text-xl">
+                {bloodGroup}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{heroName}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{district} District • Verified Donor</p>
               </div>
             </div>
 
-            {/* Public Hero Wall Opt-in */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Share2 className="h-4 w-4 text-rose-400" /> Public Hero Wall Setting
-                </h4>
-                {consentNotice && <span className="text-xs text-emerald-400 font-semibold">{consentNotice}</span>}
+            <div className="mt-6 grid grid-cols-2 gap-3 text-center">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+                <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{totalDonations}</span>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Verified Donations</p>
               </div>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                When enabled, your first name, blood group, and completed donation count appear on the public LifePulse Hero Wall. Exact home location and phone numbers remain strictly confidential.
-              </p>
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+                <span className="text-3xl font-extrabold text-sky-600 dark:text-sky-400">{totalResponses}</span>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Dispatches Answered</p>
+              </div>
+            </div>
 
-              <div className="mt-4 flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-inner">
-                <div>
-                  <span className="block text-xs font-bold text-white">Feature my profile on the Public Hero Wall</span>
-                  <span className="block text-[11px] text-slate-400 mt-0.5">
-                    {consent ? '🟢 Visible to community' : '⚪ Kept private'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={consent}
-                  onClick={() => toggleConsent(!consent)}
-                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-slate-950 ${
-                    consent ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/20' : 'bg-slate-700'
-                  }`}
-                  title="Toggle public recognition on hero wall"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                      consent ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
+            <div className="mt-6">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Earned Hero Badges</h4>
+              <div className="space-y-2">
+                {badges.map((b: string) => {
+                  const info = BADGE_DESCRIPTIONS[b] || { label: b.replace(/_/g, ' '), icon: '🏆', desc: 'Verified emergency contribution.' };
+                  return (
+                    <div key={b} className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3">
+                      <span className="text-xl">{info.icon}</span>
+                      <div>
+                        <p className="text-xs font-bold text-amber-800 dark:text-amber-300">{info.label}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">{info.desc}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+            </div>
+          </div>
+
+          {/* Public Hero Wall Opt-in */}
+          <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 p-6 shadow-sm dark:shadow-xl">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Share2 className="h-4 w-4 text-rose-500 dark:text-rose-400" /> Public Hero Wall Setting
+              </h4>
+              {consentNotice && <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{consentNotice}</span>}
+            </div>
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              When enabled, your first name, blood group, and completed donation count appear on the public LifePulse Hero Wall. Exact home location and phone numbers remain strictly confidential.
+            </p>
+
+            <div className="mt-4 flex items-center justify-between rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-inner">
+              <div>
+                <span className="block text-xs font-bold text-slate-900 dark:text-white">Feature my profile on the Public Hero Wall</span>
+                <span className="block text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  {consent ? '🟢 Visible to community' : '⚪ Kept private'}
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={consent}
+                onClick={() => toggleConsent(!consent)}
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-slate-950 ${
+                  consent ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/20' : 'bg-slate-300 dark:bg-slate-700'
+                }`}
+                title="Toggle public recognition on hero wall"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    consent ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
           </div>
         </div>
+      </div>
     </AppLayout>
   );
 };

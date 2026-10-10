@@ -31,8 +31,8 @@
       "longitude": 74.792
     },
     "locationSharingEnabled": false,
-    "preferredRadius": 15,
-    "availabilityStatus": "emergency_only",
+    "preferredRadius": 50,
+    "availabilityStatus": "available",
     "heroStats": {
       "totalEmergencyResponses": 6,
       "totalDonations": 8,
@@ -47,10 +47,17 @@
       "lastResponseDate": "2026-10-10T11:50:47.747Z"
     },
     "createdAt": "2026-01-12T00:00:00.000Z",
-    "updatedAt": "2026-10-10T11:50:47.753Z",
+    "updatedAt": "2026-10-10T13:30:44.451Z",
     "publicHeroConsent": true,
     "deferralReason": null,
-    "deferralUntil": null
+    "deferralUntil": null,
+    "notificationPreferences": {
+      "push": true,
+      "sms": true,
+      "whatsapp": true,
+      "email": true,
+      "criticalOnly": false
+    }
   },
   {
     "id": "donor_sneha_02",

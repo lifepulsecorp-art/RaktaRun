@@ -415,7 +415,7 @@ export const DonorDashboardPage: React.FC = () => {
                       </div>
 
                       {/* Location Sharing Checkbox */}
-                      <label className="inline-flex items-center gap-2.5 text-xs text-slate-300 bg-slate-950/60 border border-slate-800 rounded-xl px-3.5 py-2 cursor-pointer hover:border-slate-700 transition">
+                      <label className="inline-flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 transition">
                         <input
                           type="checkbox"
                           checked={shareLocationEnabled}
@@ -423,7 +423,7 @@ export const DonorDashboardPage: React.FC = () => {
                           className="accent-emerald-500 h-4 w-4 rounded"
                         />
                         <span className="flex items-center gap-1.5">
-                          <Navigation className="h-3.5 w-3.5 text-emerald-400" />
+                          <Navigation className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                           <strong>Share real-time GPS location</strong> with hospital team upon acceptance
                         </span>
                       </label>
@@ -433,7 +433,7 @@ export const DonorDashboardPage: React.FC = () => {
                       <button
                         disabled={!seconds || !!busyId}
                         onClick={() => respond(match.id, 'accepted', shareLocationEnabled)}
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-sm font-black text-white shadow-xl shadow-emerald-950/50 hover:from-emerald-500 hover:to-teal-500 transition active:scale-[0.98] disabled:opacity-50"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-sm font-black text-white shadow-xl shadow-emerald-950/20 hover:from-emerald-500 hover:to-teal-500 transition active:scale-[0.98] disabled:opacity-50"
                       >
                         <MapPin className="h-4 w-4" />
                         <span>
@@ -447,7 +447,7 @@ export const DonorDashboardPage: React.FC = () => {
                       <button
                         disabled={!!busyId}
                         onClick={() => respond(match.id, 'declined')}
-                        className="w-full sm:w-auto rounded-2xl border border-slate-700 bg-slate-800/80 px-5 py-3.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition"
+                        className="w-full sm:w-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 px-5 py-3.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition"
                       >
                         Decline
                       </button>
@@ -461,21 +461,21 @@ export const DonorDashboardPage: React.FC = () => {
 
         {/* 3 Status Cards */}
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-6 shadow-sm dark:shadow-xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-3 text-rose-400">
+              <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
                 <ShieldCheck className="h-6 w-6" />
-                <h3 className="font-bold text-white">Hospital Certificate</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white">Hospital Certificate</h3>
               </div>
-              <p className="mt-4 text-xs font-semibold tracking-wider text-slate-400 uppercase">Certificate ID</p>
-              <p className="font-mono text-sm font-bold text-white">{roleData?.verification?.certificateId || 'Awaiting verification'}</p>
-              <p className="mt-3 text-xs text-slate-400">Verified by: <strong className="text-white">{roleData?.verification?.hospitalName || '—'}</strong></p>
+              <p className="mt-4 text-xs font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase">Certificate ID</p>
+              <p className="font-mono text-sm font-bold text-slate-900 dark:text-white">{roleData?.verification?.certificateId || 'Awaiting verification'}</p>
+              <p className="mt-3 text-xs text-slate-600 dark:text-slate-400">Verified by: <strong className="text-slate-900 dark:text-white">{roleData?.verification?.hospitalName || '—'}</strong></p>
               <p className="text-xs text-slate-500 mt-1">Medical Officer: {roleData?.verification?.verifiedBy || '—'}</p>
             </div>
-            <div className="mt-5 pt-3 border-t border-slate-800/80">
+            <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
               <Link
                 to="/donor/register"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400 hover:text-rose-300 transition"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-500 transition"
               >
                 <UserCheck className="h-3.5 w-3.5" />
                 <span>Update Screening Certificate →</span>
@@ -483,55 +483,55 @@ export const DonorDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-6 shadow-sm dark:shadow-xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-3 text-amber-400">
+              <div className="flex items-center gap-3 text-amber-500 dark:text-amber-400">
                 <Award className="h-6 w-6" />
-                <h3 className="font-bold text-white">Hero Badges & Score</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white">Hero Badges & Score</h3>
               </div>
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {(roleData?.heroStats?.badges || []).map((b: string) => {
                   const info = BADGE_MAP[b] || { label: b.replace(/_/g, ' '), icon: '🏆' };
                   return (
-                    <span key={b} className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-400 border border-amber-500/20">
+                    <span key={b} className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 border border-amber-500/20">
                       <span>{info.icon}</span> {info.label}
                     </span>
                   );
                 })}
               </div>
-              <p className="mt-4 text-xs text-slate-400">
-                Completed donations: <strong className="text-white">{roleData?.heroStats?.totalDonations || 0}</strong> · Emergency responses: <strong className="text-white">{roleData?.heroStats?.totalEmergencyResponses || 0}</strong>
+              <p className="mt-4 text-xs text-slate-600 dark:text-slate-400">
+                Completed donations: <strong className="text-slate-900 dark:text-white">{roleData?.heroStats?.totalDonations || 0}</strong> · Emergency responses: <strong className="text-slate-900 dark:text-white">{roleData?.heroStats?.totalEmergencyResponses || 0}</strong>
               </p>
             </div>
-            <div className="mt-5 pt-3 border-t border-slate-800/80">
+            <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
               <button
                 type="button"
                 onClick={() => setShowHistoryModal(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-3.5 py-2 text-xs font-bold text-rose-300 hover:text-white transition shadow-sm active:scale-[0.98]"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 px-3.5 py-2 text-xs font-bold text-rose-700 dark:text-rose-300 hover:text-rose-900 dark:hover:text-white transition shadow-sm active:scale-[0.98]"
               >
-                <History className="h-3.5 w-3.5 text-rose-400" />
+                <History className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
                 <span>View Donation History ({roleData?.heroStats?.totalDonations || 0}) →</span>
               </button>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-xl flex flex-col justify-between">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 p-6 shadow-sm dark:shadow-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 text-emerald-400">
+                <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
                   <BellRing className="h-6 w-6" />
-                  <h3 className="font-bold text-white">Emergency Status</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-white">Emergency Status</h3>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`h-3 w-3 rounded-full ${
                     availabilityStatus === 'available' ? 'bg-emerald-500 animate-ping' :
                     availabilityStatus === 'emergency_only' ? 'bg-amber-500 animate-ping' :
-                    'bg-slate-500'
+                    'bg-slate-400 dark:bg-slate-500'
                   }`} />
                   <span className={`text-xs font-bold uppercase ${
-                    availabilityStatus === 'available' ? 'text-emerald-400' :
-                    availabilityStatus === 'emergency_only' ? 'text-amber-400' :
-                    'text-slate-400'
+                    availabilityStatus === 'available' ? 'text-emerald-600 dark:text-emerald-400' :
+                    availabilityStatus === 'emergency_only' ? 'text-amber-600 dark:text-amber-400' :
+                    'text-slate-500 dark:text-slate-400'
                   }`}>
                     {availabilityStatus === 'emergency_only' ? 'Trauma Only' : availabilityStatus}
                   </span>
@@ -539,15 +539,15 @@ export const DonorDashboardPage: React.FC = () => {
               </div>
 
               {/* Status Selector Pills */}
-              <div className="mt-4 grid grid-cols-3 gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs font-semibold">
+              <div className="mt-4 grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold">
                 <button
                   type="button"
                   disabled={statusUpdating}
                   onClick={() => updateEmergencyStatus('available')}
                   className={`py-2 rounded-lg transition text-center ${
                     availabilityStatus === 'available'
-                      ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
                   🟢 Ready
@@ -558,8 +558,8 @@ export const DonorDashboardPage: React.FC = () => {
                   onClick={() => updateEmergencyStatus('emergency_only')}
                   className={`py-2 rounded-lg transition text-center ${
                     availabilityStatus === 'emergency_only'
-                      ? 'bg-amber-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-amber-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
                   🟡 Trauma
@@ -570,8 +570,8 @@ export const DonorDashboardPage: React.FC = () => {
                   onClick={() => updateEmergencyStatus('unavailable')}
                   className={`py-2 rounded-lg transition text-center ${
                     availabilityStatus === 'unavailable'
-                      ? 'bg-slate-700 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-slate-700 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
                   🔴 Pause
@@ -579,12 +579,12 @@ export const DonorDashboardPage: React.FC = () => {
               </div>
 
               {statusNotice && (
-                <p className="mt-2 text-[11px] text-emerald-400 font-medium">{statusNotice}</p>
+                <p className="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">{statusNotice}</p>
               )}
             </div>
 
-            <p className="mt-4 text-xs text-slate-400 pt-3 border-t border-slate-800/80">
-              Locality: <strong className="text-white">{roleData?.homeLocality || 'Manipal / Mangaluru'}</strong> • Radius: <strong className="text-white">{preferredRadius} km</strong>
+            <p className="mt-4 text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+              Locality: <strong className="text-slate-900 dark:text-white">{roleData?.homeLocality || 'Manipal / Mangaluru'}</strong> • Radius: <strong className="text-slate-900 dark:text-white">{preferredRadius} km</strong>
             </p>
           </div>
         </div>
@@ -592,30 +592,30 @@ export const DonorDashboardPage: React.FC = () => {
         {/* Preferences & Radius Control Section */}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Preferred Radius Slider */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 flex flex-col justify-between">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 p-6 shadow-sm dark:shadow-xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2.5 text-rose-400">
+              <div className="flex items-center gap-2.5 text-rose-600 dark:text-rose-400">
                 <Compass className="h-5 w-5" />
-                <h3 className="font-bold text-white">Preferred Travel Radius</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white">Preferred Travel Radius</h3>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Only receive emergency broadcasts from hospitals within this distance from your locality.
               </p>
 
               {/* Default Registered Location Display */}
-              <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 space-y-2">
+              <div className="mt-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 p-3.5 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 text-rose-400" /> Default Registered Location
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" /> Default Registered Location
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                    <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
                       Verified Base Station
                     </span>
                     <button
                       type="button"
                       onClick={() => setShowLocationModal(true)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-2.5 py-1 text-[11px] font-bold text-rose-300 hover:text-white transition active:scale-[0.98]"
+                      className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 px-2.5 py-1 text-[11px] font-bold text-rose-700 dark:text-rose-300 hover:text-rose-900 dark:hover:text-white transition active:scale-[0.98]"
                       title="Click and drag pin on interactive map to update your emergency base location"
                     >
                       <Edit3 className="h-3 w-3" />
@@ -624,11 +624,11 @@ export const DonorDashboardPage: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
                     {roleData?.homeLocality || 'Manipal (671326)'}
                   </p>
                   {roleData?.coordinates && (
-                    <p className="text-[11px] font-mono text-slate-400 mt-0.5">
+                    <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
                       Base Coordinates: {roleData.coordinates.latitude?.toFixed(4)}° N, {roleData.coordinates.longitude?.toFixed(4)}° E
                     </p>
                   )}
@@ -637,8 +637,8 @@ export const DonorDashboardPage: React.FC = () => {
 
               <div className="mt-6">
                 <div className="flex items-center justify-between text-sm font-semibold">
-                  <span className="text-slate-400">Maximum Distance</span>
-                  <span className="text-rose-400 font-mono text-base font-bold">{preferredRadius} km</span>
+                  <span className="text-slate-600 dark:text-slate-400">Maximum Distance</span>
+                  <span className="text-rose-600 dark:text-rose-400 font-mono text-base font-bold">{preferredRadius} km</span>
                 </div>
                 <input
                   type="range"
@@ -664,8 +664,8 @@ export const DonorDashboardPage: React.FC = () => {
                     onClick={() => handleUpdateRadius(r)}
                     className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                       preferredRadius === r
-                        ? 'bg-rose-600 text-white shadow-md'
-                        : 'border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
+                        ? 'bg-rose-600 text-white shadow-sm'
+                        : 'border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
                     {r} km
@@ -674,17 +674,17 @@ export const DonorDashboardPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-800/80">
+            <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/80">
               {radiusNotice ? (
-                <span className="text-xs text-emerald-400 font-medium animate-in fade-in">{radiusNotice}</span>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium animate-in fade-in">{radiusNotice}</span>
               ) : (
-                <span className="text-xs text-slate-400">Auto-filters hospital alerts within {preferredRadius} km</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">Auto-filters hospital alerts within {preferredRadius} km</span>
               )}
               <button
                 type="button"
                 onClick={() => handleUpdateRadius(preferredRadius)}
                 disabled={savingRadius}
-                className="rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-950/40 transition disabled:opacity-50 active:scale-[0.98]"
+                className="rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-rose-950/20 transition disabled:opacity-50 active:scale-[0.98]"
               >
                 {savingRadius ? 'Saving…' : 'Save Travel Radius'}
               </button>
@@ -692,34 +692,34 @@ export const DonorDashboardPage: React.FC = () => {
           </div>
 
           {/* Notification Preferences */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 flex flex-col justify-between">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 p-6 shadow-sm dark:shadow-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 text-sky-400">
+                <div className="flex items-center gap-2.5 text-sky-600 dark:text-sky-400">
                   <Sliders className="h-5 w-5" />
-                  <h3 className="font-bold text-white">Alert & Channel Preferences</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-white">Alert & Channel Preferences</h3>
                 </div>
                 <button
                   type="button"
                   onClick={handleTestNotifications}
                   disabled={testingNotif}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 px-3 py-1.5 text-xs font-bold text-sky-300 hover:text-white transition active:scale-[0.98] disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-sky-500/30 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 px-3 py-1.5 text-xs font-bold text-sky-700 dark:text-sky-300 hover:text-sky-900 dark:hover:text-white transition active:scale-[0.98] disabled:opacity-50"
                   title="Dispatch simulated test alerts across your enabled channels"
                 >
                   <Send className="h-3.5 w-3.5" />
                   <span>{testingNotif ? 'Dispatching…' : 'Test Channels'}</span>
                 </button>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Choose how and when LifePulse coordinates emergency requests with you.
               </p>
 
               <div className="mt-4 space-y-3">
                 {/* Web Push */}
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
-                      <Bell className="h-4 w-4 text-emerald-400" /> Web Push Notifications
+                    <span className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-semibold">
+                      <Bell className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> Web Push Notifications
                     </span>
                     <input
                       type="checkbox"
@@ -728,13 +728,13 @@ export const DonorDashboardPage: React.FC = () => {
                       className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
                     />
                   </div>
-                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-500 dark:text-slate-400">
                     <span>Instant desktop & browser alert banners</span>
                     <span className={`px-2 py-0.5 rounded-full font-medium ${
-                      !notifPrefs.push ? 'bg-slate-800 text-slate-400' :
-                      browserPushPermission === 'granted' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                      browserPushPermission === 'denied' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
-                      'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      !notifPrefs.push ? 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400' :
+                      browserPushPermission === 'granted' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20' :
+                      browserPushPermission === 'denied' ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20' :
+                      'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20'
                     }`}>
                       {!notifPrefs.push ? 'Disabled' :
                        browserPushPermission === 'granted' ? '● Browser Permitted' :
@@ -745,10 +745,10 @@ export const DonorDashboardPage: React.FC = () => {
                 </div>
 
                 {/* SMS Alerts */}
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
-                      <Smartphone className="h-4 w-4 text-sky-400" /> SMS Emergency Alerts
+                    <span className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-semibold">
+                      <Smartphone className="h-4 w-4 text-sky-600 dark:text-sky-400" /> SMS Emergency Alerts
                     </span>
                     <input
                       type="checkbox"
@@ -757,10 +757,10 @@ export const DonorDashboardPage: React.FC = () => {
                       className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
                     />
                   </div>
-                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-500 dark:text-slate-400">
                     <span>Immediate cellular SMS dispatched to {roleData?.phone || 'registered phone'}</span>
                     <span className={`px-2 py-0.5 rounded-full font-medium ${
-                      notifPrefs.sms ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' : 'bg-slate-800 text-slate-400'
+                      notifPrefs.sms ? 'bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                     }`}>
                       {notifPrefs.sms ? '● Twilio / Fast2SMS Carrier' : 'Disabled'}
                     </span>
@@ -768,10 +768,10 @@ export const DonorDashboardPage: React.FC = () => {
                 </div>
 
                 {/* WhatsApp */}
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
-                      <MessageSquare className="h-4 w-4 text-green-400" /> WhatsApp Fallback Broadcasts
+                    <span className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-semibold">
+                      <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" /> WhatsApp Fallback Broadcasts
                     </span>
                     <input
                       type="checkbox"
@@ -780,10 +780,10 @@ export const DonorDashboardPage: React.FC = () => {
                       className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
                     />
                   </div>
-                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-500 dark:text-slate-400">
                     <span>Direct WhatsApp message with 1-tap navigation link</span>
                     <span className={`px-2 py-0.5 rounded-full font-medium ${
-                      notifPrefs.whatsapp ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-slate-800 text-slate-400'
+                      notifPrefs.whatsapp ? 'bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                     }`}>
                       {notifPrefs.whatsapp ? '● Twilio WA Business API' : 'Disabled'}
                     </span>
@@ -791,10 +791,10 @@ export const DonorDashboardPage: React.FC = () => {
                 </div>
 
                 {/* Email Emergency Dispatch */}
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
-                      <Mail className="h-4 w-4 text-violet-400" /> Email Emergency Dispatch
+                    <span className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-semibold">
+                      <Mail className="h-4 w-4 text-violet-600 dark:text-violet-400" /> Email Emergency Dispatch
                     </span>
                     <input
                       type="checkbox"
@@ -803,10 +803,10 @@ export const DonorDashboardPage: React.FC = () => {
                       className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
                     />
                   </div>
-                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-500 dark:text-slate-400">
                     <span>Clinical requisition details sent to {roleData?.email || profile?.email || 'registered email'}</span>
                     <span className={`px-2 py-0.5 rounded-full font-medium ${
-                      notifPrefs.email ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'bg-slate-800 text-slate-400'
+                      notifPrefs.email ? 'bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-500/20' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                     }`}>
                       {notifPrefs.email ? '● Brevo Transactional SMTP' : 'Disabled'}
                     </span>
@@ -814,10 +814,10 @@ export const DonorDashboardPage: React.FC = () => {
                 </div>
 
                 {/* Critical Trauma Only */}
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-xs space-y-1.5">
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-slate-200 font-semibold">
-                      <Heart className="h-4 w-4 text-rose-500" /> Critical Trauma Only (Code Red)
+                    <span className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-semibold">
+                      <Heart className="h-4 w-4 text-rose-600" /> Critical Trauma Only (Code Red)
                     </span>
                     <input
                       type="checkbox"
@@ -826,10 +826,10 @@ export const DonorDashboardPage: React.FC = () => {
                       className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
                     />
                   </div>
-                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-400">
+                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-500 dark:text-slate-400">
                     <span>Filter out standard inventory requests; wake only for life-or-death emergencies</span>
                     <span className={`px-2 py-0.5 rounded-full font-medium ${
-                      notifPrefs.criticalOnly ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-slate-800 text-slate-400'
+                      notifPrefs.criticalOnly ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                     }`}>
                       {notifPrefs.criticalOnly ? '⚡ Code Red Only' : 'All Urgencies'}
                     </span>
@@ -839,21 +839,21 @@ export const DonorDashboardPage: React.FC = () => {
 
               {/* Test Results Banner */}
               {testNotifResult && (
-                <div className="mt-3 rounded-xl border border-sky-500/30 bg-sky-950/40 p-3 text-xs space-y-1.5 animate-in fade-in">
-                  <div className="flex items-center justify-between text-sky-300 font-bold">
+                <div className="mt-3 rounded-xl border border-sky-500/30 bg-sky-50 dark:bg-sky-950/40 p-3 text-xs space-y-1.5 animate-in fade-in">
+                  <div className="flex items-center justify-between text-sky-800 dark:text-sky-300 font-bold">
                     <span className="flex items-center gap-1.5">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       Test Dispatches Completed
                     </span>
                     <button
                       type="button"
                       onClick={() => setTestNotifResult(null)}
-                      className="text-slate-400 hover:text-white"
+                      className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-300">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
                     Dispatched to {testNotifResult.recipientPhone || roleData?.phone || 'Phone'}
                     {testNotifResult.recipientEmail ? ` & ${testNotifResult.recipientEmail}` : ''}:
                   </p>
@@ -863,8 +863,8 @@ export const DonorDashboardPage: React.FC = () => {
                         key={idx}
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ${
                           r.success
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                            : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30'
                         }`}
                       >
                         {r.channel.toUpperCase()}: {r.provider} {r.success ? '✓' : '✗'}
@@ -875,16 +875,16 @@ export const DonorDashboardPage: React.FC = () => {
               )}
             </div>
 
-            <div className="mt-4 flex items-center justify-between pt-4 border-t border-slate-800/80">
+            <div className="mt-4 flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/80">
               {prefNotice ? (
-                <span className="text-xs text-emerald-400 font-medium animate-in fade-in">{prefNotice}</span>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium animate-in fade-in">{prefNotice}</span>
               ) : (
-                <span className="text-xs text-slate-400">Settings sync across mobile & web</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">Settings sync across mobile & web</span>
               )}
               <button
                 onClick={savePreferences}
                 disabled={savingPrefs}
-                className="rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-50 transition active:scale-[0.98]"
+                className="rounded-xl border border-slate-200 bg-slate-100 text-slate-800 hover:bg-slate-200 px-4 py-2 text-xs font-semibold disabled:opacity-50 transition active:scale-[0.98] dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:hover:bg-slate-700"
               >
                 {savingPrefs ? 'Saving…' : 'Save Preferences'}
               </button>
@@ -893,13 +893,13 @@ export const DonorDashboardPage: React.FC = () => {
         </div>
 
         {/* Public Hero Wall Opt-in */}
-        <section className="mt-8 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <section className="mt-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 p-6 shadow-sm dark:shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-amber-400">
+            <div className="flex items-center gap-2 text-amber-500 dark:text-amber-400">
               <Award className="h-5 w-5" />
-              <h3 className="font-bold text-white text-base">Community Hero Recognition & Shareables</h3>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Community Hero Recognition & Shareables</h3>
             </div>
-            <p className="mt-1 text-sm text-slate-400 leading-relaxed">
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               Celebrate your life-saving donations publicly on the LifePulse Community Wall. Displays only your first name, blood group, and verified district. Contact numbers and home coordinates remain strictly confidential.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -912,19 +912,19 @@ export const DonorDashboardPage: React.FC = () => {
               </Link>
               <Link
                 to="/hero-wall"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-800/80 hover:bg-slate-750 hover:border-slate-600 text-slate-200 hover:text-white px-4 py-2.5 text-xs font-bold transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 px-4 py-2.5 text-xs font-bold transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] dark:border-slate-700/80 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-750"
               >
-                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                <Sparkles className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
                 <span>Visit Community Hero Wall →</span>
               </Link>
             </div>
           </div>
 
           <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
-            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-3.5 shadow-inner">
+            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80 px-4 py-3.5 shadow-inner">
               <div className="text-left md:text-right">
-                <span className="block text-xs font-bold text-white">Show My Hero Profile</span>
-                <span className="block text-[11px] text-slate-400">
+                <span className="block text-xs font-bold text-slate-900 dark:text-white">Show My Hero Profile</span>
+                <span className="block text-[11px] text-slate-500 dark:text-slate-400">
                   {consent ? '🟢 Public on Wall' : '⚪ Hidden from Wall'}
                 </span>
               </div>
@@ -933,8 +933,8 @@ export const DonorDashboardPage: React.FC = () => {
                 role="switch"
                 aria-checked={consent}
                 onClick={() => setPublicConsent(!consent)}
-                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-slate-950 ${
-                  consent ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/20' : 'bg-slate-700'
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 ${
+                  consent ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/20' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
                 title="Toggle public recognition on hero wall"
               >
@@ -947,7 +947,7 @@ export const DonorDashboardPage: React.FC = () => {
               </button>
             </div>
             {consentNotice && (
-              <span className="text-xs font-medium text-emerald-400 animate-in fade-in">
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 animate-in fade-in">
                 {consentNotice}
               </span>
             )}
@@ -957,19 +957,19 @@ export const DonorDashboardPage: React.FC = () => {
 
       {/* High-Impact Emergency Alert Modal */}
       {pendingAlerts.filter((item) => !dismissedModalIds.has(item.match.id)).length > 0 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md">
-          <div role="dialog" aria-modal="true" className="relative w-full max-w-lg rounded-3xl border border-rose-500/50 bg-slate-900 p-7 shadow-2xl shadow-rose-950/60 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 dark:bg-slate-950/90 p-4 backdrop-blur-md">
+          <div role="dialog" aria-modal="true" className="relative w-full max-w-lg rounded-3xl border border-rose-500/40 bg-white text-slate-900 dark:bg-slate-900 dark:text-white p-7 shadow-2xl dark:shadow-rose-950/60 animate-in fade-in zoom-in-95">
             {/* Header Badge */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white font-bold animate-pulse shadow-lg shadow-rose-600/40">
                   🚨
                 </div>
                 <div>
-                  <p className="text-xs font-black uppercase tracking-widest text-rose-400">
+                  <p className="text-xs font-black uppercase tracking-widest text-rose-600 dark:text-rose-400">
                     LIFE PULSE EMERGENCY ALERT
                   </p>
-                  <h2 className="text-xl font-extrabold text-white">Someone near you needs your blood.</h2>
+                  <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Someone near you needs your blood.</h2>
                 </div>
               </div>
 
@@ -980,7 +980,7 @@ export const DonorDashboardPage: React.FC = () => {
                   pendingAlerts.forEach((a) => ids.add(a.match.id));
                   setDismissedModalIds(ids);
                 }}
-                className="rounded-xl border border-slate-800 bg-slate-950 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                className="rounded-xl border border-slate-200 bg-slate-50 p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800"
                 title="Minimize alert to dashboard"
               >
                 <X className="h-4 w-4" />
@@ -995,53 +995,53 @@ export const DonorDashboardPage: React.FC = () => {
               return (
                 <article key={match.id} className="mt-5 space-y-4">
                   {/* Blood Group & Need Overview */}
-                  <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950/80">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-3xl font-black text-rose-500">{request?.bloodGroup}</span>
-                        <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-300 capitalize">
+                        <span className="text-3xl font-black text-rose-600 dark:text-rose-500">{request?.bloodGroup}</span>
+                        <span className="rounded-full bg-rose-500/15 px-2.5 py-0.5 text-xs font-semibold text-rose-700 dark:text-rose-300 capitalize">
                           {request?.component?.replace('_', ' ')}
                         </span>
-                        <span className="text-xs text-slate-400">({request?.unitsRequired || 1} units)</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">({request?.unitsRequired || 1} units)</span>
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-mono font-bold text-amber-300">
+                      <div className="flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-mono font-bold text-amber-700 dark:text-amber-300">
                         <Clock className="h-3.5 w-3.5 animate-spin" />
                         <span>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span>
                       </div>
                     </div>
 
                     <div className="mt-4 space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-slate-200">
+                      <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
                         <span>🏥</span>
                         <span className="font-semibold">{request?.hospitalName}</span>
                       </div>
-                      <div className="rounded-xl bg-slate-900 border border-slate-800/80 p-2.5 text-xs text-emerald-400 font-medium">
+                      <div className="rounded-xl bg-white border border-slate-200 p-2.5 text-xs text-emerald-700 dark:bg-slate-900 dark:border-slate-800/80 dark:text-emerald-400 font-medium">
                         {compText}
                       </div>
-                      <div className="flex items-center gap-2 text-slate-400 text-xs">
+                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs">
                         <span>📍</span>
                         <span>Approximately <strong>{match.distance} km</strong> away (within your preferred {preferredRadius} km radius)</span>
                       </div>
-                      <div className="flex items-center gap-2 text-rose-400 text-xs">
+                      <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs">
                         <span>⏱</span>
                         <span>Urgency: <strong className="capitalize">{request?.urgency || 'Critical emergency'}</strong></span>
                       </div>
                     </div>
 
                     {/* Motivational Callout & Prominent Travel Time */}
-                    <div className="mt-4 pt-4 border-t border-slate-800/80">
-                      <p className="text-xs italic text-slate-300">
+                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800/80">
+                      <p className="text-xs italic text-slate-600 dark:text-slate-300">
                         “You could be the person who gets there in time.”
                       </p>
-                      <div className="mt-2 flex items-center justify-between rounded-xl bg-rose-950/30 border border-rose-900/40 px-3.5 py-2">
-                        <span className="text-xs text-rose-300 font-medium">Estimated travel time:</span>
-                        <span className="text-sm font-bold text-rose-200 font-mono">{etaMinutes} minutes</span>
+                      <div className="mt-2 flex items-center justify-between rounded-xl bg-rose-50 border border-rose-200 dark:bg-rose-950/30 dark:border-rose-900/40 px-3.5 py-2">
+                        <span className="text-xs text-rose-700 dark:text-rose-300 font-medium">Estimated travel time:</span>
+                        <span className="text-sm font-bold text-rose-800 dark:text-rose-200 font-mono">{etaMinutes} minutes</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Real-time Location Sharing Option */}
-                  <label className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-3.5 text-xs cursor-pointer hover:border-slate-700 transition">
+                  <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 text-xs cursor-pointer hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/70 dark:hover:border-slate-700 transition">
                     <input
                       type="checkbox"
                       checked={shareLocationEnabled}
@@ -1049,11 +1049,11 @@ export const DonorDashboardPage: React.FC = () => {
                       className="accent-emerald-500 h-4 w-4 rounded cursor-pointer"
                     />
                     <div>
-                      <span className="block font-bold text-white flex items-center gap-1.5">
-                        <Navigation className="h-3.5 w-3.5 text-emerald-400" />
+                      <span className="block font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <Navigation className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                         Share Live GPS Location with Hospital
                       </span>
-                      <span className="block text-[11px] text-slate-400 mt-0.5">
+                      <span className="block text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                         Allows hospital trauma staff to monitor your driving transit and prepare emergency triage beds.
                       </span>
                     </div>
@@ -1064,7 +1064,7 @@ export const DonorDashboardPage: React.FC = () => {
                     <button
                       disabled={!seconds || !!busyId}
                       onClick={() => respond(match.id, 'accepted', shareLocationEnabled)}
-                      className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 font-bold text-white shadow-xl shadow-emerald-950/50 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 transition text-sm sm:text-base active:scale-[0.98]"
+                      className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 font-bold text-white shadow-xl shadow-emerald-950/20 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 transition text-sm sm:text-base active:scale-[0.98]"
                     >
                       <MapPin className="h-4 w-4" />
                       <span>
@@ -1078,7 +1078,7 @@ export const DonorDashboardPage: React.FC = () => {
                     <button
                       disabled={!!busyId}
                       onClick={() => respond(match.id, 'declined')}
-                      className="rounded-2xl border border-slate-700 bg-slate-800/80 px-5 py-3.5 font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition text-xs sm:text-sm"
+                      className="rounded-2xl border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 px-5 py-3.5 font-semibold transition text-xs sm:text-sm dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                     >
                       Decline
                     </button>
@@ -1096,11 +1096,11 @@ export const DonorDashboardPage: React.FC = () => {
 
       {/* Donor Contribution & History Modal */}
       {showHistoryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="relative w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 dark:bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="relative w-full max-w-3xl rounded-3xl border border-slate-200 bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-white p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 my-8">
             <button
               onClick={() => setShowHistoryModal(false)}
-              className="absolute top-5 right-5 rounded-xl border border-slate-800 bg-slate-950 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className="absolute top-5 right-5 rounded-xl border border-slate-200 bg-slate-50 p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800"
               title="Close history modal"
             >
               <X className="h-4 w-4" />
@@ -1108,15 +1108,15 @@ export const DonorDashboardPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex items-start gap-4 pr-10">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400">
                 <History className="h-6 w-6" />
               </div>
               <div>
-                <span className="inline-block rounded-full bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 text-[11px] font-bold text-rose-300 uppercase tracking-wider mb-1">
+                <span className="inline-block rounded-full bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 text-[11px] font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider mb-1">
                   Verified Contribution Log
                 </span>
-                <h2 className="text-xl font-bold text-white">Donation & Emergency Response History</h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Donation & Emergency Response History</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Complete record of your hospital screenings, emergency alert dispatches, and life-saving donations.
                 </p>
               </div>
@@ -1124,52 +1124,52 @@ export const DonorDashboardPage: React.FC = () => {
 
             {/* Metric Summary Cards */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                <div className="flex items-center gap-2 text-rose-400 mb-1">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mb-1">
                   <Heart className="h-4 w-4" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Donations</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Donations</span>
                 </div>
-                <p className="text-2xl font-black text-white">{historyData.summary?.totalDonations ?? roleData?.heroStats?.totalDonations ?? 0}</p>
-                <p className="text-[11px] text-emerald-400 font-medium mt-1">Verified hospital transfusions</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">{historyData.summary?.totalDonations ?? roleData?.heroStats?.totalDonations ?? 0}</p>
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">Verified hospital transfusions</p>
               </div>
 
-              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                <div className="flex items-center gap-2 text-rose-400 mb-1">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mb-1">
                   <BellRing className="h-4 w-4" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Dispatches Answered</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dispatches Answered</span>
                 </div>
-                <p className="text-2xl font-black text-white">{historyData.summary?.totalEmergencyResponses ?? roleData?.heroStats?.totalEmergencyResponses ?? 0}</p>
-                <p className="text-[11px] text-amber-300 font-medium mt-1">Coastal Karnataka trauma alerts</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">{historyData.summary?.totalEmergencyResponses ?? roleData?.heroStats?.totalEmergencyResponses ?? 0}</p>
+                <p className="text-[11px] text-amber-600 dark:text-amber-300 font-medium mt-1">Coastal Karnataka trauma alerts</p>
               </div>
 
-              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                <div className="flex items-center gap-2 text-sky-400 mb-1">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+                <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400 mb-1">
                   <ShieldCheck className="h-4 w-4" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Screening Center</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Screening Center</span>
                 </div>
-                <p className="text-sm font-bold text-white truncate">{historyData.summary?.hospitalName || roleData?.verification?.hospitalName || 'Kasturba Hospital, Manipal'}</p>
-                <p className="text-[11px] font-mono text-slate-400 mt-1 truncate">{historyData.summary?.certificateId || roleData?.verification?.certificateId || 'Screened Network'}</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{historyData.summary?.hospitalName || roleData?.verification?.hospitalName || 'Kasturba Hospital, Manipal'}</p>
+                <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-1 truncate">{historyData.summary?.certificateId || roleData?.verification?.certificateId || 'Screened Network'}</p>
               </div>
             </div>
 
             {/* Filter Pills */}
-            <div className="mt-6 flex items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div className="mt-6 flex items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-xs font-semibold">
                 <button
                   onClick={() => setHistoryFilter('all')}
-                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'all' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'all' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-200 bg-slate-100 text-slate-600 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white'}`}
                 >
                   All Entries ({historyData.history.length})
                 </button>
                 <button
                   onClick={() => setHistoryFilter('donations')}
-                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'donations' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'donations' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-200 bg-slate-100 text-slate-600 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white'}`}
                 >
                   Completed Donations ({historyData.history.filter((h: any) => h.matchStatus === 'donated').length})
                 </button>
                 <button
                   onClick={() => setHistoryFilter('alerts')}
-                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'alerts' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-800 bg-slate-950 text-slate-400 hover:text-white'}`}
+                  className={`rounded-lg px-3 py-1.5 transition ${historyFilter === 'alerts' ? 'bg-rose-600 text-white shadow-sm' : 'border border-slate-200 bg-slate-100 text-slate-600 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white'}`}
                 >
                   Emergency Responses ({historyData.history.filter((h: any) => h.response === 'accepted' || h.type?.includes('Emergency')).length})
                 </button>
@@ -1183,11 +1183,11 @@ export const DonorDashboardPage: React.FC = () => {
             {/* History List */}
             <div className="mt-4 space-y-3 max-h-80 overflow-y-auto pr-1">
               {loadingHistory && (
-                <div className="py-8 text-center text-xs text-slate-400">Loading verified contribution history…</div>
+                <div className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">Loading verified contribution history…</div>
               )}
 
               {!loadingHistory && historyData.history.length === 0 && (
-                <div className="rounded-2xl border border-slate-800 bg-slate-950 p-8 text-center text-xs text-slate-400">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
                   No previous donations or responses logged yet. When you answer hospital alerts and donate, your verified history will be displayed here.
                 </div>
               )}
@@ -1205,34 +1205,34 @@ export const DonorDashboardPage: React.FC = () => {
                   return (
                     <article
                       key={item.id || idx}
-                      className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 hover:border-slate-700 transition"
+                      className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 hover:border-slate-300 transition dark:border-slate-800 dark:bg-slate-950/70 dark:hover:border-slate-700"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="flex items-start gap-3">
                           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-bold ${
-                            item.matchStatus === 'donated' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+                            item.matchStatus === 'donated' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400'
                           }`}>
                             {item.matchStatus === 'donated' ? '🩸' : '🚨'}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-white text-sm">{item.hospitalName}</h4>
-                              <span className="rounded-md bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-300">
+                              <h4 className="font-bold text-slate-900 dark:text-white text-sm">{item.hospitalName}</h4>
+                              <span className="rounded-md bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:text-rose-300">
                                 {item.bloodGroup} · {item.component?.replace('_', ' ')}
                               </span>
                             </div>
-                            <p className="mt-0.5 text-xs text-slate-400 flex items-center gap-1.5">
-                              <Calendar className="h-3 w-3 text-slate-500" />
+                            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                              <Calendar className="h-3 w-3 text-slate-400" />
                               <span>{dateFormatted}</span>
-                              <span className="text-slate-600">·</span>
+                              <span className="text-slate-300 dark:text-slate-600">·</span>
                               <span>{item.type || 'Verified Blood Donation'}</span>
                             </p>
                           </div>
                         </div>
 
-                        <div className="sm:text-right flex sm:flex-col items-center sm:items-end justify-between gap-1 pt-2 sm:pt-0 border-t sm:border-0 border-slate-800/80">
+                        <div className="sm:text-right flex sm:flex-col items-center sm:items-end justify-between gap-1 pt-2 sm:pt-0 border-t sm:border-0 border-slate-200 dark:border-slate-800/80">
                           <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                            item.matchStatus === 'donated' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
+                            item.matchStatus === 'donated' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20'
                           }`}>
                             {item.matchStatus === 'donated' ? '✓ Donation Fulfilled' : 'Alert Answered'}
                           </span>
@@ -1247,13 +1247,13 @@ export const DonorDashboardPage: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <span className="text-xs text-slate-500">
                 LifePulse Emergency Health Network • Coastal Karnataka
               </span>
               <button
                 onClick={() => setShowHistoryModal(false)}
-                className="rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 transition border border-slate-700"
+                className="rounded-xl border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 text-xs font-semibold px-4 py-2 transition dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white dark:border-slate-700"
               >
                 Close History
               </button>

@@ -201,39 +201,39 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-md animate-in fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 dark:bg-slate-950/85 p-4 backdrop-blur-md animate-in fade-in">
       <div
         role="dialog"
         aria-modal="true"
-        className="relative flex flex-col w-full max-w-2xl max-h-[92vh] rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden"
+        className="relative flex flex-col w-full max-w-2xl max-h-[92vh] rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-2xl overflow-hidden dark:border-slate-800 dark:bg-slate-900 dark:text-white"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4 bg-slate-950/60">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-950/60">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400">
               <MapPin className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Set Default Base Station</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Set Default Base Station</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Click anywhere on the map or drag the pin marker to pin your emergency location
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-xl border border-slate-800 bg-slate-900 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Map Container & Interactive Surface */}
-        <div className="relative h-72 sm:h-80 w-full bg-slate-950 border-b border-slate-800">
+        <div className="relative h-72 sm:h-80 w-full bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
           <div ref={mapElement} className="h-full w-full" />
 
           {loadingMap && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm text-slate-400 gap-2">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-100/90 dark:bg-slate-950/80 backdrop-blur-sm text-slate-600 dark:text-slate-400 gap-2">
               <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
               <span className="text-xs font-semibold">Loading interactive Google Map…</span>
             </div>
@@ -244,19 +244,19 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
             type="button"
             onClick={handleSnapToDeviceGps}
             disabled={locatingDevice}
-            className="absolute top-3 right-3 z-10 flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/95 px-3 py-2 text-xs font-bold text-white shadow-lg hover:bg-slate-800 transition active:scale-[0.98] disabled:opacity-50"
+            className="absolute top-3 right-3 z-10 flex items-center gap-2 rounded-xl border border-slate-200 bg-white/95 px-3 py-2 text-xs font-bold text-slate-800 shadow-md hover:bg-slate-50 transition active:scale-[0.98] disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900/95 dark:text-white dark:hover:bg-slate-800"
             title="Snap pin to your device's exact GPS coordinates"
           >
             {locatingDevice ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-rose-400" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-rose-500 dark:text-rose-400" />
             ) : (
-              <Navigation className="h-3.5 w-3.5 text-rose-400" />
+              <Navigation className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
             )}
             <span>Use Current GPS</span>
           </button>
 
           {/* Pin drag hint badge */}
-          <div className="absolute bottom-3 left-3 z-10 pointer-events-none rounded-lg bg-slate-950/90 border border-slate-800 px-2.5 py-1 text-[11px] font-mono text-slate-300 backdrop-blur-sm">
+          <div className="absolute bottom-3 left-3 z-10 pointer-events-none rounded-lg bg-white/95 border border-slate-200 px-2.5 py-1 text-[11px] font-mono text-slate-700 shadow-sm backdrop-blur-sm dark:bg-slate-950/90 dark:border-slate-800 dark:text-slate-300">
             💡 Click map or drag the red pin to adjust
           </div>
         </div>
@@ -264,21 +264,21 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
         {/* Form Controls & Location Summary */}
         <div className="p-6 space-y-4 overflow-y-auto">
           {notice && (
-            <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2 text-xs font-medium text-emerald-400 flex items-center gap-2">
+            <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 shrink-0" />
               <span>{notice}</span>
             </div>
           )}
 
           {error && (
-            <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 text-xs font-medium text-rose-400">
+            <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 text-xs font-medium text-rose-600 dark:text-rose-400">
               {error}
             </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                 Home Locality / Area Name
               </label>
               <input
@@ -286,18 +286,18 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                 value={locality}
                 onChange={(e) => setLocality(e.target.value)}
                 placeholder="e.g. Manipal (576104) or Kadri, Mangaluru"
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-rose-500 focus:outline-none"
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-rose-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-500"
               />
               <span className="block mt-1 text-[11px] text-slate-500">
                 Shown to hospitals as your approximate base district.
               </span>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 flex flex-col justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col justify-between dark:border-slate-800 dark:bg-slate-950/60">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Active Pin Coordinates
               </span>
-              <p className="text-sm font-mono font-bold text-rose-300 mt-1">
+              <p className="text-sm font-mono font-bold text-rose-600 dark:text-rose-300 mt-1">
                 {coords.latitude.toFixed(5)}° N, {coords.longitude.toFixed(5)}° E
               </p>
               <span className="text-[11px] text-slate-500 mt-1">
@@ -308,12 +308,12 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-4 bg-slate-950/50">
+        <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-950/50">
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
           >
             Cancel
           </button>
@@ -321,7 +321,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
             type="button"
             onClick={handleSave}
             disabled={saving || !locality.trim()}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-950/50 transition active:scale-[0.98] disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-950/30 transition active:scale-[0.98] disabled:opacity-50"
           >
             {saving ? (
               <>

@@ -74,11 +74,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-16 bottom-0 left-0 z-40 w-64 border-r border-slate-200/80 bg-white/95 backdrop-blur-xl p-4 transition-transform duration-300 ease-in-out dark:border-slate-800/80 dark:bg-slate-950/95 lg:static lg:translate-x-0 ${
+        className={`fixed top-16 bottom-0 left-0 z-40 w-64 shrink-0 overflow-y-auto border-r border-slate-200/80 bg-white/95 backdrop-blur-xl p-4 transition-transform duration-300 ease-in-out dark:border-slate-800/80 dark:bg-slate-950/95 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${className}`}
       >
-        <div className="flex h-full flex-col justify-between">
+        <div className="flex min-h-full flex-col justify-between gap-6">
           <div>
             {/* Context Header */}
             <div className="mb-4 rounded-xl border border-slate-100 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-900/60">
