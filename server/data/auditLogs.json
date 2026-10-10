@@ -162,5 +162,25 @@
       "email": "lifepulsecorp@gmail.com"
     },
     "createdAt": "2026-10-10T15:03:44.192Z"
+  },
+  {
+    "id": "audit_notif_b6d097d0",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor-test",
+    "details": {
+      "requestId": "req-test",
+      "matchId": "m-1",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:brevo",
+        "email:brevo"
+      ],
+      "phone": "+919876543210",
+      "email": "lifepulsecorp@gmail.com"
+    },
+    "createdAt": "2026-10-10T15:24:47.640Z"
   }
 ]

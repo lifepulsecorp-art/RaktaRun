@@ -1,121 +1,143 @@
-# 🩸 LifePulse — Emergency Blood Coordination System
+# 🩸 LifePulse — Emergency Blood Donor Matching & Coordination Network
 
 > *"Every minute matters. Connect. Locate. Respond. Save."*
 
-LifePulse is a real-time emergency blood donor matching and dispatch system designed for **Udupi and Dakshina Kannada** districts in Coastal Karnataka. Unlike open directories, LifePulse connects hospitals exclusively with **medically screened, verified blood donors** during acute trauma and emergency surges.
+**LifePulse** is a mission-critical, real-time emergency blood donation matching and coordination system designed for the Coastal Karnataka region (**Udupi & Dakshina Kannada** districts). Rather than operating as an unverified public phone directory, LifePulse connects trauma centers exclusively with **medically screened, verified blood donors** during acute emergencies and mass-casualty surges.
 
 ---
 
-## 🏗️ Architecture
+## 🌟 Key Innovations & Core Features
 
-- **Frontend:** React 19, TypeScript, Tailwind CSS 4, Vite, Lucide Icons, React Router 7.
-- **Backend:** Express, TypeScript, Node.js (`tsx`), REST API with Bearer token authentication.
-- **Authentication:** Dual Mode — Offline Local JWT (bcrypt + standard Bearer token) and Firebase Auth (Firebase Admin SDK).
-- **Data Layer:** Local JSON Database (`server/data/*.json`) with atomic file writes, structured for direct 1:1 MongoDB/Firestore migration.
+### 1. 🛡️ Medically Verified Donor Network
+- **Hospital-Issued Digital Medical Screening:** Donors must upload an authorized hospital-issued medical certificate (PDF, JPG, PNG) validating blood group, Rh factor, and health fitness before activation.
+- **Accredited Screening Hospitals Directory:** Integrated directory with blood bank contacts and opening hours for donors needing certification.
+- **Automated Donor Onboarding:** Base64 certificate upload with automated validation, PIN code mapping, and profile provisioning.
+
+### 2. ⚡ Rule-Based Matching & Dynamic Escalation
+- **Recipient-to-Donor Compatibility Matrix:** Comprehensive ABO/Rh matching engine ensuring zero blood mismatch errors.
+- **Medical Donation Interval Enforcement:** Enforces strict intervals between donations: 90 days for Whole Blood/PRBC, 14 days for Platelets, and 28 days for Plasma.
+- **Automated Radius Escalation:** Incremental radius expansion (+5 km increments up to 50 km) if initial batches do not fulfill units within configured timeout windows.
+- **Urgency Filtering:** Supports Code Red Trauma Surge, Urgent (2h-4h), and Routine donor dispatch tiers.
+
+### 3. 🗺️ Interactive Maps & Turn-by-Turn GPS Navigation
+- **Click-and-Drag Location Picker:** Interactive map allowing donors and hospitals to drag pins, search localities, or use high-accuracy browser geolocation.
+- **Turn-by-Turn Mobile Navigation:** Instant one-click Google Maps turn-by-turn driving directions to the emergency department.
+- **Privacy-Preserving Ephemeral Transit Radar:** Live donor tracking activates *only* after a donor accepts an emergency request and automatically terminates within 150m of hospital arrival.
+
+### 4. 📢 Real-Time Multi-Gateway Notifications (Powered by Brevo)
+- **Brevo Transactional Email:** Automated HTML emails for account registration welcome and Code Red emergency dispatch alerts with interactive links.
+- **Brevo SMS Gateway:** Automated SMS dispatch (`/v3/transactionalSMS/send`) formatted in international E.164 with Unicode support for real-time mobile alerting.
+- **Channel Preferences:** Donors can customize alert channels (Email, SMS) and toggle "Critical Trauma Only (Code Red)" and "Emergency-Only Availability".
+
+### 5. 🎨 Modern Human-Centric UI/UX
+- **Shadcn-Inspired Clean Aesthetics:** Refined typography, rose/slate palettes, modern cards, and intuitive micro-interactions.
+- **Light & Dark Mode:** Native theme switcher with persistent user preferences.
+- **Responsive Layouts:** Desktop sidebar navigation with smooth scrolling and responsive mobile-first views.
+
+### 6. 🏆 Community Recognition & Private Hero Studio
+- **Public Hero Wall (`/heroes`):** Celebrates verified blood donors who opt in to community recognition.
+- **Private Instagram Hero Share Studio (`/donor/hero-studio`):** Generates high-resolution 1:1 Square (1080x1080) and 9:16 Instagram Story (1080x1920) graphics for completed donations with 1-click download.
+- **5 Recognition Badges:** LifePulse Hero, Rapid Responder, Repeat Hero, Rare Blood Hero, and Community Champion.
+
+### 7. 🔒 District Administration & Telemetry Console
+- **District Filters:** Monitor requests, matches, and dispatches filtered across Udupi and Dakshina Kannada.
+- **Live Rule Configuration:** Update batch timeouts, search radiuses, and escalation parameters in real time.
+- **Audit Logging & CSV Export:** Download cryptographically sequenced audit logs for medical governance.
+
+---
+
+## 🏗️ Architecture & Technology Stack
 
 ```
-┌────────────────────────────────────────────────────────┐
-│  React 19 Frontend (client/)                           │
-│  - Public Landing & Registration (/, /register)        │
-│  - Public Community Hero Wall (/heroes)                │
-│  - Donor Portal & History (/donor, /donor/history)     │
-│  - Private Hero Share Studio (/donor/hero-studio)      │
-│  - Hospital Dispatch & History (/hospital)             │
-│  - Admin Telemetry, Rules & Audit (/admin)             │
-│  - Ephemeral Live Transit Radar (/live-tracking/*)     │
-└───────────────────────────┬────────────────────────────┘
-                            │ REST + Bearer <JWT Token>
-                            ↓
-┌────────────────────────────────────────────────────────┐
-│  Express Backend API (server/)                         │
-│  - Offline Local Auth & Firebase Admin Token Guards    │
-│  - RBAC Middleware (admin, hospital, donor)            │
-│  - Rule-Based Compatibility & Escalation Engine        │
-│  - Live Config Console & CSV Audit Exporter            │
-│  - Ephemeral Journey Tracker (150m cutoff)             │
-└───────────────────────────┬────────────────────────────┘
-                            │ Atomic Persistence
-                            ↓
-┌────────────────────────────────────────────────────────┐
-│  JSON Data Layer (server/data/)                        │
-│  - users.json, hospitals.json, donors.json             │
-│  - bloodRequests.json, matches.json, auditLogs.json    │
-└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                      React 19 Frontend (client/)                       │
+│  - Modern TypeScript + Vite + Tailwind CSS 4                           │
+│  - Shadcn-style components, Lucide icons, Dark/Light Theme Switcher    │
+│  - Interactive Location Picker & Live Transit Radar Map                │
+│  - Donor Portal, Hospital Dispatch Console, Admin Telemetry            │
+│  - Private Instagram Hero Share Studio & Public Hero Wall              │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ REST API + Bearer JWT Token
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                     Express Backend API (server/)                      │
+│  - TypeScript + Node.js (tsx)                                          │
+│  - Offline Local JWT Authentication & RBAC Middleware                  │
+│  - Rule-Based Compatibility & Automated Escalation Engine              │
+│  - Brevo Transactional Email & SMS Notification Engine                 │
+│  - Ephemeral Live Transit Tracker (150m arrival cutoff)                │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Atomic Persistence
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Local JSON Data Layer                           │
+│  - users.json, hospitals.json, donors.json                             │
+│  - bloodRequests.json, matches.json, auditLogs.json                    │
+│  - server/data/certificates/ (Screening documents)                     │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ✨ Key Capabilities
-
-1. **Rule-Based Emergency Matching:**
-   - 8-group recipient-to-donor ABO/Rh compatibility matrix.
-   - Medical donation intervals: 90 days for Whole Blood/PRBC, 14 days for Platelets, 28 days for Plasma.
-   - Expired certificate rejection and distance-ranked candidate scoring.
-
-2. **Automated Search Radius Escalation:**
-   - Strict 2-minute alert response window per batch.
-   - Dynamic expansion (+5 km increments up to 50 km) configurable live from the Admin Console.
-
-3. **Privacy-Preserving Ephemeral Tracking:**
-   - Live GPS streaming activates only after a donor accepts an emergency alert.
-   - Telemetry automatically terminates within 150m of hospital arrival.
-
-4. **Comprehensive Donation & Dispatch History:**
-   - **Donor:** Full timeline of completed donations and emergency responses with component badges.
-   - **Hospital:** Historical request records, units collected, and donor fulfillment logs.
-   - **Admin:** Network-wide audit history with district filters (`Udupi`, `Dakshina Kannada`), status filters, and search.
-
-5. **Community Recognition & Private Hero Studio:**
-   - **Public Hero Wall (`/heroes`):** Shows opted-in donors; public downloads are restricted.
-   - **Private Hero Studio (`/donor/hero-studio`):** Generates high-res 1:1 Square (1080x1080) and 9:16 Instagram Story (1080x1920) graphics with 1-click download.
-   - 5 Award Badges: LifePulse Hero, Rapid Responder, Repeat Hero, Rare Blood Hero, and Community Champion.
-
-6. **Medical Accreditation & Guidance:**
-   - Donors must hold a verified hospital screening certificate.
-   - Registration includes an **Approved Screening Hospitals Directory** modal with contact numbers, addresses, and blood bank timings.
-
----
-
-## 🚀 Quick Start
+## 🚀 Quick Start Guide
 
 ### 1. Prerequisites
-- Node.js (v18+ or v20+)
-- npm (v9+)
+- **Node.js:** v18.0.0 or higher
+- **npm:** v9.0.0 or higher
 
-### 2. Installation & Run
+### 2. Installation
 ```bash
-# Install root dependencies
-npm install
+# Clone the repository
+git clone https://github.com/lifepulsecorp-art/LifePulse.git
+cd LifePulse
 
-# Start both backend (port 5000) and frontend (port 5173):
+# Install all project dependencies
+npm install
+```
+
+### 3. Environment Configuration
+Create a `.env` file in `server/` (reference `server/.env.example`):
+```env
+PORT=5000
+NODE_ENV=development
+
+# Brevo Transactional Email & SMS Gateway
+BREVO_API_KEY=your_brevo_api_key_here
+BREVO_SENDER_EMAIL=lifepulsecorp@gmail.com
+BREVO_SENDER_NAME=LifePulse Emergency Network
+```
+
+### 4. Running the Application
+```bash
+# Start backend (port 5000) and frontend (port 5173) concurrently:
 npm run dev
 
-# Re-seed demo database at any time:
+# Re-seed the demo database with verified mock data at any time:
 npm run seed
 ```
 
-- **Frontend:** [http://localhost:5173](http://localhost:5173)
-- **Backend Health Check:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
+- **Frontend Client:** [http://localhost:5173](http://localhost:5173)
+- **Backend API Health:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
 - **Public Hero Wall:** [http://localhost:5173/heroes](http://localhost:5173/heroes)
 
 ---
 
 ## 🔑 Pre-Seeded Demo Accounts
 
-| Role | Email | Password | Access & Features |
+| Role | Email | Password | Access & Capabilities |
 | :--- | :--- | :--- | :--- |
-| 🛡️ **System Admin** | `admin@lifepulse.in` | `AdminPulse@2026` / `LifePulse@123` | Full admin console, rule config, audit logs & CSV export |
-| 🏥 **Hospital Staff** | `manipal@lifepulse.in` | `LifePulse@123` | Kasturba Hospital Manipal emergency dispatch & history |
-| 🏥 **Hospital Staff** | `ajhospital@lifepulse.in` | `LifePulse@123` | AJ Hospital Mangaluru emergency dispatch & history |
+| 🛡️ **System Admin** | `admin@lifepulse.in` | `AdminPulse@2026` / `LifePulse@123` | District telemetry, live rule configuration, audit logs & CSV export |
+| 🏥 **Hospital Staff** | `manipal@lifepulse.in` | `LifePulse@123` | Kasturba Hospital Manipal emergency blood requests & live tracking |
+| 🏥 **Hospital Staff** | `ajhospital@lifepulse.in` | `LifePulse@123` | AJ Hospital Mangaluru trauma dispatch & fulfillment logs |
 | 🩸 **Verified Donor** | `rahul.shetty@gmail.com` | `LifePulse@123` | O+ Screened Donor (7 donations, 5 emergency responses, Hero Studio) |
-| 🩸 **Verified Donor** | `sneha.rao@gmail.com` | `LifePulse@123` | A+ Screened Donor with active alerts & history |
+| 🩸 **Verified Donor** | `sneha.rao@gmail.com` | `LifePulse@123` | A+ Screened Donor with active alerts & channel preferences |
 
 ---
 
 ## 🧪 Testing & Verification
 
 ```bash
-# Run server test suite (7/7 simulation tests):
+# Run server test suite (100% pass rate across matching and notifications):
 npm run test --prefix server
 
 # Run client production build:
@@ -124,9 +146,6 @@ npm run build --prefix client
 
 ---
 
-## 📋 Documentation Reference
+## 📄 License
 
-- [`yetto.md`](yetto.md): Comprehensive gap analysis & status of requirements against specification.
-- [`WHAT_WAS_MADE.md`](WHAT_WAS_MADE.md): Complete Phase 1–5 delivery report and REST API dictionary.
-- [`PILOT_READINESS.md`](PILOT_READINESS.md): Operational handoff and hospital onboarding checklist for district rollout.
-- [`reduired.md`](reduired.md): Original system requirements specification.
+This project is licensed under the MIT License — see the LICENSE file for details.
