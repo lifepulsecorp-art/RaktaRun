@@ -63,8 +63,21 @@ const DEFAULT_HOSPITALS = [
 
 const inputClass = 'w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition shadow-sm';
 
+const readFileAsBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64Data = result.includes(',') ? result.split(',')[1] : result;
+      resolve(base64Data);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function DonorRegisterPage() {
-  const { role } = useAuth();
+  const { role, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState(1);
@@ -109,6 +122,15 @@ export default function DonorRegisterPage() {
     e.preventDefault();
     setError('');
 
+    const cleanFullName = form.fullName.trim();
+    const cleanPhone = form.phone.trim();
+    const cleanBloodGroup = form.bloodGroup.trim();
+
+    if (!cleanFullName || !cleanPhone || !cleanBloodGroup) {
+      setError('Please provide your full name, phone number, and blood group.');
+      return;
+    }
+
     if (!form.certificate) {
       setError('Please select and upload your hospital screening certificate');
       return;
@@ -118,34 +140,43 @@ export default function DonorRegisterPage() {
       setLoading(true);
 
       const regRes = await api.post('/auth/register', {
-        email: form.email,
+        email: form.email.trim(),
         password: form.password,
         role: 'donor',
-        displayName: form.fullName,
+        displayName: cleanFullName,
       });
 
-      if (regRes.data?.token) {
-        localStorage.setItem('lifepulse_token', regRes.data.token);
+      const token = regRes.data?.token || localStorage.getItem('lifepulse_token');
+      if (token) {
+        localStorage.setItem('lifepulse_token', token);
       }
 
-      const fd = new FormData();
-      fd.append('fullName', form.fullName);
-      fd.append('phone', form.phone);
-      fd.append('bloodGroup', form.bloodGroup);
-      fd.append('homeLocality', form.homeLocality);
-      fd.append('pincode', form.pincode);
-      if (form.lastDonationDate) {
-        fd.append('lastDonationDate', form.lastDonationDate);
+      let certificateFileBase64 = '';
+      if (form.certificate) {
+        certificateFileBase64 = await readFileAsBase64(form.certificate);
       }
-      fd.append('certificate', form.certificate);
 
-      await api.post('/donors/register', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      await api.post('/donors/register', {
+        fullName: cleanFullName,
+        phone: cleanPhone,
+        bloodGroup: cleanBloodGroup,
+        homeLocality: form.homeLocality.trim(),
+        pincode: form.pincode.trim(),
+        lastDonationDate: form.lastDonationDate || null,
+        certificateFileName: form.certificate?.name || 'certificate.jpg',
+        certificateFileBase64,
+      }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
+
+      if (refreshProfile) {
+        await refreshProfile();
+      }
 
       setStep(3);
       setTimeout(() => navigate('/donor/pending'), 2000);
     } catch (err: any) {
+      console.error('Donor registration error:', err);
       setError(err.response?.data?.error || err.message || 'Registration failed');
     } finally {
       setLoading(false);

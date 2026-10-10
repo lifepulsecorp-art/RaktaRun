@@ -128,34 +128,61 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
     homeLocality,
     pincode,
     lastDonationDate,
+    certificateFileName,
+    certificateFileBase64,
   } = req.body;
 
-  if (!fullName || !phone || !bloodGroup) {
+  const cleanName = typeof fullName === 'string' ? fullName.trim() : '';
+  const cleanPhone = typeof phone === 'string' ? phone.trim() : '';
+  const cleanBloodGroup = typeof bloodGroup === 'string' ? bloodGroup.trim() : '';
+
+  if (!cleanName || !cleanPhone || !cleanBloodGroup) {
     return res.status(400).json({ error: 'Full name, phone, and blood group are required.' });
+  }
+
+  // Ensure certificates directory exists
+  try {
+    fs.mkdirSync(CERTIFICATES_DIR, { recursive: true });
+  } catch {}
+
+  let savedCertFilename: string | undefined = undefined;
+  if (certificateFileBase64) {
+    const ext = certificateFileName ? path.extname(certificateFileName) : '.jpg';
+    savedCertFilename = `cert_${req.user!.uid}_${Date.now()}${ext || '.jpg'}`;
+    const buffer = Buffer.from(certificateFileBase64, 'base64');
+    fs.writeFileSync(path.join(CERTIFICATES_DIR, savedCertFilename), buffer);
   }
 
   // Check if donor already exists for this UID
   let existingDonor = find<Donor>('donors', (d) => d.uid === req.user!.uid);
   if (existingDonor) {
     const updated = update<Donor>('donors', existingDonor.id, {
-      fullName,
-      phone,
-      bloodGroup,
+      fullName: cleanName,
+      phone: cleanPhone,
+      bloodGroup: cleanBloodGroup,
+      rhType: cleanBloodGroup.includes('-') ? 'negative' : 'positive',
       homeLocality: homeLocality ? `${homeLocality} (${pincode || ''})`.trim() : existingDonor.homeLocality,
       lastDonationDate: lastDonationDate || existingDonor.lastDonationDate,
+      verification: {
+        ...existingDonor.verification,
+        certificateFileName: savedCertFilename || existingDonor.verification.certificateFileName,
+        verifiedAt: new Date().toISOString(),
+      },
     });
+    update<User>('users', req.user!.uid, { donorId: existingDonor.id, role: 'donor', name: cleanName, phone: cleanPhone });
     return res.status(200).json({ donor: updated || existingDonor });
   }
 
   const donorId = `donor_${uuidv4().substring(0, 8)}`;
+  const certId = `LP-CERT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   const newDonor: Donor = {
     id: donorId,
     uid: req.user!.uid,
-    fullName,
-    phone,
+    fullName: cleanName,
+    phone: cleanPhone,
     aadhaarVerified: true,
-    bloodGroup,
-    rhType: bloodGroup.includes('-') ? 'negative' : 'positive',
+    bloodGroup: cleanBloodGroup,
+    rhType: cleanBloodGroup.includes('-') ? 'negative' : 'positive',
     bloodComponentEligibility: ['whole_blood'],
     lastDonationDate: lastDonationDate || null,
     hemoglobinLevel: 14.0,
@@ -164,9 +191,10 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
     verification: {
       hospitalId: 'pending',
       hospitalName: 'Pending Admin Verification',
-      certificateId: `LP-CERT-${Date.now().toString().slice(-6)}`,
+      certificateId: certId,
       verifiedAt: new Date().toISOString(),
       verifiedBy: 'Pending Review',
+      certificateFileName: savedCertFilename,
       expiryDate: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
     },
     homeLocality: homeLocality ? `${homeLocality} (${pincode || ''})`.trim() : 'Udupi/Mangaluru',
@@ -185,7 +213,7 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
   };
 
   insert<Donor>('donors', newDonor);
-  update<User>('users', req.user!.uid, { donorId: newDonor.id, role: 'donor', name: fullName, phone });
+  update<User>('users', req.user!.uid, { donorId: newDonor.id, role: 'donor', name: cleanName, phone: cleanPhone });
 
   res.status(201).json({ donor: newDonor });
 });
