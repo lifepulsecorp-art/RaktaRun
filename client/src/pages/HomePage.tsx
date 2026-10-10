@@ -148,7 +148,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Intelligent Matching</h3>
               <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                The algorithm filters verified donors by clinical compatibility, travel radius, donation intervals, and dispatches multi-channel alerts (SMS, WhatsApp, Push).
+                The algorithm filters verified donors by clinical compatibility, travel radius, donation intervals, and dispatches multi-channel alerts (Brevo SMS, Email, Push).
               </p>
             </div>
 

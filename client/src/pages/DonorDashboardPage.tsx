@@ -7,7 +7,6 @@ import {
   BellRing,
   UserCheck,
   Sliders,
-  MessageSquare,
   Smartphone,
   Bell,
   Clock,
@@ -90,7 +89,6 @@ export const DonorDashboardPage: React.FC = () => {
   const [notifPrefs, setNotifPrefs] = useState({
     push: roleData?.notificationPreferences?.push ?? true,
     sms: roleData?.notificationPreferences?.sms ?? true,
-    whatsapp: roleData?.notificationPreferences?.whatsapp ?? true,
     email: roleData?.notificationPreferences?.email ?? true,
     criticalOnly: roleData?.notificationPreferences?.criticalOnly ?? false,
   });
@@ -159,7 +157,6 @@ export const DonorDashboardPage: React.FC = () => {
       setNotifPrefs({
         push: roleData.notificationPreferences.push ?? true,
         sms: roleData.notificationPreferences.sms ?? true,
-        whatsapp: roleData.notificationPreferences.whatsapp ?? true,
         email: roleData.notificationPreferences.email ?? true,
         criticalOnly: roleData.notificationPreferences.criticalOnly ?? false,
       });
@@ -762,30 +759,7 @@ export const DonorDashboardPage: React.FC = () => {
                     <span className={`px-2 py-0.5 rounded-full font-medium ${
                       notifPrefs.sms ? 'bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                     }`}>
-                      {notifPrefs.sms ? '● Twilio / Fast2SMS Carrier' : 'Disabled'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* WhatsApp */}
-                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3 text-xs space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-semibold">
-                      <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" /> WhatsApp Fallback Broadcasts
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={notifPrefs.whatsapp}
-                      onChange={(e) => setNotifPrefs({ ...notifPrefs, whatsapp: e.target.checked })}
-                      className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-500 dark:text-slate-400">
-                    <span>Direct WhatsApp message with 1-tap navigation link</span>
-                    <span className={`px-2 py-0.5 rounded-full font-medium ${
-                      notifPrefs.whatsapp ? 'bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                    }`}>
-                      {notifPrefs.whatsapp ? '● Twilio WA Business API' : 'Disabled'}
+                      {notifPrefs.sms ? '● Brevo SMS Gateway' : 'Disabled'}
                     </span>
                   </div>
                 </div>

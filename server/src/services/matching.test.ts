@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BLOOD_COMPATIBILITY, findCandidates } from './matching.js';
@@ -68,7 +70,7 @@ test('emergency-only availability is included for critical requests only', () =>
 });
 
 test('critical-only notification preference excludes non-critical requests', () => {
-  const criticalDonor = donor({ notificationPreferences: { push: true, sms: true, whatsapp: true, criticalOnly: true } });
+  const criticalDonor = donor({ notificationPreferences: { push: true, sms: true, criticalOnly: true } });
   assert.equal(findCandidates(request({ urgency: 'critical' }), [criticalDonor]).length, 1);
   assert.equal(findCandidates(request({ urgency: 'urgent' }), [criticalDonor]).length, 0);
   assert.equal(findCandidates(request({ urgency: 'standard' }), [criticalDonor]).length, 0);
@@ -115,3 +117,25 @@ test('timed out alerts cannot be accepted', () => {
   assert.equal(result.ok, false);
   if (!result.ok) assert.equal(result.expire, true);
 });
+
+test('Brevo registration notification and alert dispatch omit WhatsApp and send email & sms', async () => {
+  const { sendRegistrationNotification, dispatchAlertNotifications } = await import('./notificationService.js');
+  const regResult = await sendRegistrationNotification({
+    name: 'Test Donor',
+    email: 'lifepulsecorp@gmail.com',
+    phone: '+919876543210',
+    role: 'donor',
+    bloodGroup: 'O+',
+  });
+  assert.equal(regResult.emailSent, true);
+
+  const matchedAlerts = await dispatchAlertNotifications(
+    donor({ email: 'lifepulsecorp@gmail.com', phone: '+919876543210', notificationPreferences: { push: true, sms: true, email: true, criticalOnly: false } }),
+    request(),
+    { id: 'm-1', requestId: 'req-test', donorId: 'donor-test', distance: 4.5, score: 95, rank: 1, status: 'alerted', alertedAt: new Date().toISOString(), alertExpiresAt: new Date().toISOString(), respondedAt: null, response: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+  );
+  assert.ok(matchedAlerts.some(a => a.channel === 'email' && a.provider === 'brevo'));
+  assert.ok(matchedAlerts.some(a => a.channel === 'sms'));
+  assert.ok(!matchedAlerts.some((a: any) => a.channel === 'whatsapp'));
+});
+

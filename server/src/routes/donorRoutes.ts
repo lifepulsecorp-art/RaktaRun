@@ -7,7 +7,7 @@ import { authenticate, authorizeRoles, AuthenticatedRequest } from '../middlewar
 import { readJson, find, filter, insert, update } from '../utils/db.js';
 import type { Donor, Match, BloodRequest, User, AuditLog, Hospital } from '../types.js';
 import { resolveDonorResponse, updateJourney } from '../services/journey.js';
-import { sendSmsAlert, sendWhatsAppAlert, sendEmailAlert } from '../services/notificationService.js';
+import { sendSmsAlert, sendEmailAlert, sendRegistrationNotification } from '../services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -215,6 +215,15 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
   insert<Donor>('donors', newDonor);
   update<User>('users', req.user!.uid, { donorId: newDonor.id, role: 'donor', name: cleanName, phone: cleanPhone });
 
+  // Send Welcome Email & SMS via Brevo
+  sendRegistrationNotification({
+    name: cleanName,
+    email: req.user?.email,
+    phone: cleanPhone,
+    role: 'donor',
+    bloodGroup: cleanBloodGroup,
+  }).catch((err) => console.warn('[DONOR REGISTRATION NOTIFICATION ERROR]', err.message));
+
   res.status(201).json({ donor: newDonor });
 });
 
@@ -386,7 +395,6 @@ router.put('/me/preferences', authenticate, (req: AuthenticatedRequest, res) => 
     patch.notificationPreferences = {
       push: Boolean(notificationPreferences.push),
       sms: Boolean(notificationPreferences.sms),
-      whatsapp: Boolean(notificationPreferences.whatsapp),
       email: notificationPreferences.email !== undefined ? Boolean(notificationPreferences.email) : true,
       criticalOnly: Boolean(notificationPreferences.criticalOnly),
     };
@@ -403,7 +411,6 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
   const prefs = donor.notificationPreferences || {
     push: true,
     sms: true,
-    whatsapp: true,
     email: true,
     criticalOnly: false,
   };
@@ -424,11 +431,6 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
   if (prefs.sms && donor.phone) {
     const smsRes = await sendSmsAlert(donor.phone, testMessage);
     results.push(smsRes);
-  }
-
-  if (prefs.whatsapp && donor.phone) {
-    const waRes = await sendWhatsAppAlert(donor.phone, testMessage);
-    results.push(waRes);
   }
 
   const donorEmail = donor.email || find<User>('users', (u) => u.uid === donor.uid)?.email || req.user?.email;

@@ -82,5 +82,45 @@
       "status": "verified"
     },
     "createdAt": "2026-10-10T13:50:53.454Z"
+  },
+  {
+    "id": "audit_notif_9b266821",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor-test",
+    "details": {
+      "requestId": "req-test",
+      "matchId": "m-1",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543210",
+      "email": "lifepulsecorp@gmail.com"
+    },
+    "createdAt": "2026-10-10T14:31:04.968Z"
+  },
+  {
+    "id": "audit_notif_b70ca010",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor-test",
+    "details": {
+      "requestId": "req-test",
+      "matchId": "m-1",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:brevo"
+      ],
+      "phone": "+919876543210",
+      "email": "lifepulsecorp@gmail.com"
+    },
+    "createdAt": "2026-10-10T14:31:36.665Z"
   }
 ]

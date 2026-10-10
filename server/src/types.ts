@@ -37,7 +37,7 @@ export interface HeroStats {
 export interface NotificationPreferences {
   push: boolean;
   sms: boolean;
-  whatsapp: boolean;
+  whatsapp?: boolean;
   email?: boolean;
   criticalOnly: boolean;
 }

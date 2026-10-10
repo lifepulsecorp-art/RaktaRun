@@ -6,7 +6,7 @@ import type { Hospital, BloodRequest, Match, Donor, BloodGroup, BloodComponent, 
 import { findCandidates } from '../services/matching.js';
 import { completeDonation } from '../services/journey.js';
 import { getSystemConfig } from '../services/configService.js';
-import { dispatchAlertNotifications } from '../services/notificationService.js';
+import { dispatchAlertNotifications, sendRegistrationNotification } from '../services/notificationService.js';
 
 const router = Router();
 
@@ -109,6 +109,14 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
 
   insert<Hospital>('hospitals', newHospital);
   update<User>('users', req.user!.uid, { hospitalId: newHospital.id, role: 'hospital', name });
+
+  sendRegistrationNotification({
+    name: newHospital.bloodBankContact.name || name,
+    email: newHospital.bloodBankContact.email || req.user!.email,
+    phone: newHospital.bloodBankContact.phone,
+    role: 'hospital',
+    hospitalName: name,
+  }).catch((err) => console.warn('[HOSPITAL REGISTRATION NOTIFICATION ERROR]', err.message));
 
   res.status(201).json({ hospital: newHospital });
 });
