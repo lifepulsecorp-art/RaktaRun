@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticate, authorizeRoles, AuthenticatedRequest } from '../middleware/auth.js';
 import { readJson, find, filter, insert, update } from '../utils/db.js';
-import type { Hospital, BloodRequest, Match, Donor, BloodGroup, BloodComponent, User, AuditLog } from '../types.js';
+import type { Hospital, BloodRequest, Match, Donor, BloodGroup, BloodComponent, User, AuditLog, BuddyReferral, BuddyConcernCategory } from '../types.js';
 import { findCandidates } from '../services/matching.js';
 import { completeDonation } from '../services/journey.js';
 import { getSystemConfig } from '../services/configService.js';
@@ -275,6 +275,52 @@ router.get('/:id/requests/:requestId/matches', authenticate, (req, res) => {
   });
 
   res.json(detailedMatches);
+});
+
+// Hospital teams can review no-signup buddy interests for their own requests.
+router.get('/:id/requests/:requestId/buddy-referrals', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
+  const request = find<BloodRequest>('bloodRequests', (item) => item.id === req.params.requestId && item.hospitalId === req.params.id);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  const hospital = find<Hospital>('hospitals', (item) => item.id === request.hospitalId);
+  if (req.user!.role !== 'admin' && hospital?.uid !== req.user!.uid && req.user!.hospitalId !== hospital?.id) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const referrals = filter<BuddyReferral>('buddyReferrals', (lead) => lead.requestId === request.id)
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  res.json(referrals);
+});
+
+// Reports are limited to operational concerns; do not submit diagnoses or private medical details.
+router.post('/:id/buddy-referrals/:referralId/report', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
+  const referral = find<BuddyReferral>('buddyReferrals', (lead) => lead.id === req.params.referralId);
+  if (!referral) return res.status(404).json({ error: 'Buddy referral not found' });
+  const request = find<BloodRequest>('bloodRequests', (item) => item.id === referral.requestId && item.hospitalId === req.params.id);
+  if (!request) return res.status(404).json({ error: 'Referral is not associated with this hospital request' });
+  const hospital = find<Hospital>('hospitals', (item) => item.id === request.hospitalId);
+  if (req.user!.role !== 'admin' && hospital?.uid !== req.user!.uid && req.user!.hospitalId !== hospital?.id) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  if (referral.hospitalReport) return res.status(409).json({ error: 'A report has already been submitted for this referral.' });
+
+  const validCategories: BuddyConcernCategory[] = ['certificate_unavailable', 'identity_not_verified', 'not_available', 'screening_concern', 'other'];
+  const category = req.body?.category as BuddyConcernCategory;
+  if (!validCategories.includes(category)) return res.status(400).json({ error: 'Choose a valid report category.' });
+  const notes = typeof req.body?.notes === 'string' ? req.body.notes.trim().slice(0, 240) : '';
+  const updated = update<BuddyReferral>('buddyReferrals', referral.id, {
+    status: 'reported',
+    hospitalReport: {
+      id: `buddy_report_${uuidv4().slice(0, 10)}`,
+      hospitalId: hospital?.id || req.params.id,
+      actorUid: req.user!.uid,
+      category,
+      notes: notes || undefined,
+      reportedAt: new Date().toISOString(),
+    },
+  });
+  const referrer = find<User>('users', (user) => user.uid === referral.referrerUid);
+  if (referrer && referrer.trustStatus !== 'flagged') update<User>('users', referrer.uid, { trustStatus: 'under_review' });
+  audit(req, 'buddy_referral.hospital_reported', 'buddyReferral', referral.id, { category, requestId: request.id });
+  res.status(201).json({ message: 'Report sent to LifePulse administrators for review.', referral: updated });
 });
 
 router.post('/:id/requests/:requestId/cancel', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {

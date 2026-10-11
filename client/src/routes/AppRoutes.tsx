@@ -11,6 +11,7 @@ import HospitalPendingPage from '../pages/hospital/HospitalPendingPage';
 import AdminDashboardPage from '../pages/AdminDashboardPage';
 import AdminHospitalsPage from '../pages/admin/AdminHospitalsPage';
 import AdminDonorsPage from '../pages/admin/AdminDonorsPage';
+import AdminBuddyReportsPage from '../pages/admin/AdminBuddyReportsPage';
 import HospitalDashboardPage from '../pages/HospitalDashboardPage';
 import HospitalProfilePage from '../pages/hospital/HospitalProfilePage';
 import DonorDashboardPage from '../pages/DonorDashboardPage';
@@ -19,6 +20,7 @@ import LiveTrackingPage from '../pages/LiveTrackingPage';
 import EmergencyRequestPage from '../pages/hospital/EmergencyRequestPage';
 import HeroWallPage from '../pages/HeroWallPage';
 import DonorHeroCardPage from '../pages/donor/DonorHeroCardPage';
+import BuddyPage from '../pages/BuddyPage';
 
 export default function AppRoutes() {
   return (
@@ -32,6 +34,7 @@ export default function AppRoutes() {
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/hero-wall" element={<HeroWallPage />} />
       <Route path="/heroes" element={<HeroWallPage />} />
+      <Route path="/buddy/:token" element={<BuddyPage />} />
 
       {/* PENDING (logged in but not verified) */}
       <Route path="/donor/pending" element={<ProtectedRoute><DonorPendingPage /></ProtectedRoute>} />
@@ -54,6 +57,7 @@ export default function AppRoutes() {
       <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage /></ProtectedRoute>} />
       <Route path="/admin/hospitals" element={<ProtectedRoute allowedRoles={['admin']}><AdminHospitalsPage /></ProtectedRoute>} />
       <Route path="/admin/donors" element={<ProtectedRoute allowedRoles={['admin']}><AdminDonorsPage /></ProtectedRoute>} />
+      <Route path="/admin/buddy-reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminBuddyReportsPage /></ProtectedRoute>} />
 
       {/* SHARED */}
       <Route path="/live-tracking/:requestId" element={<ProtectedRoute><LiveTrackingPage /></ProtectedRoute>} />

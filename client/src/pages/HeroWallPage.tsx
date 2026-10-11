@@ -10,11 +10,11 @@ import { Card } from '../components/ui/Card';
 type Hero = { id: string; displayName: string; district: string; bloodGroup: string; donations: number; responses: number; badges: string[] };
 
 const BADGE_LABELS: Record<string, { label: string; icon: string }> = {
-  life_pulse_hero: { label: 'LifePulse Hero', icon: '🦸' },
-  rapid_responder: { label: 'Rapid Responder', icon: '⚡' },
-  repeat_hero: { label: 'Repeat Hero', icon: '❤️' },
-  rare_blood_hero: { label: 'Rare Blood Hero', icon: '🏅' },
-  community_champion: { label: 'Community Champion', icon: '🌟' },
+  life_pulse_hero: { label: 'LifePulse Hero', icon: '✦' },
+  rapid_responder: { label: 'Rapid Responder', icon: '›' },
+  repeat_hero: { label: 'Repeat Hero', icon: '◆' },
+  rare_blood_hero: { label: 'Rare Blood Hero', icon: '◇' },
+  community_champion: { label: 'Community Champion', icon: '✧' },
 };
 
 function makeLandscapeCard(hero: Hero) {
@@ -76,7 +76,7 @@ function makeInstagramStoryCard(hero: Hero) {
   ctx.fillStyle = '#fb7185';
   ctx.font = 'bold 46px Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('LIFEPULSE HERO ❤️', 540, 220);
+  ctx.fillText('LIFEPULSE HERO', 540, 220);
 
   ctx.fillStyle = '#fda4af';
   ctx.font = '30px Arial, sans-serif';
@@ -103,18 +103,18 @@ function makeInstagramStoryCard(hero: Hero) {
   // Badges & Details
   ctx.font = 'bold 44px Arial, sans-serif';
   ctx.fillStyle = '#fb7185';
-  ctx.fillText(`🩸 ${hero.bloodGroup} Donor`, 540, 680);
+  ctx.fillText(`${hero.bloodGroup} Blood Donor`, 540, 680);
 
   ctx.fillStyle = '#38bdf8';
-  ctx.fillText(`⚡ Emergency Response`, 540, 760);
+  ctx.fillText('Emergency Response', 540, 760);
 
   ctx.fillStyle = '#cbd5e1';
   ctx.font = '38px Arial, sans-serif';
-  ctx.fillText(`📍 ${hero.district}`, 540, 840);
+  ctx.fillText(`${hero.district} District`, 540, 840);
 
   ctx.fillStyle = '#34d399';
   ctx.font = 'bold 46px Arial, sans-serif';
-  ctx.fillText(`❤️ Supported verified emergency cases`, 540, 940);
+  ctx.fillText('Supported verified emergency cases', 540, 940);
 
   // Lifetime metrics
   ctx.fillStyle = '#f8fafc';
@@ -266,7 +266,7 @@ export default function HeroWallPage() {
                 {/* Badges */}
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {hero.badges.map((badge) => {
-                    const info = BADGE_LABELS[badge] || { label: badge.replace(/_/g, ' '), icon: '🏆' };
+                    const info = BADGE_LABELS[badge] || { label: badge.replace(/_/g, ' '), icon: '✦' };
                     return (
                       <span key={badge} className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
                         <span>{info.icon}</span> {info.label}

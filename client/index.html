@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-    <meta name="theme-color" content="#e11d48" />
+    <meta name="theme-color" content="#f4efe4" />
     <meta name="description" content="LifePulse is a real-time emergency blood coordination and transit dispatch network connecting verified donors with trauma care hospitals across coastal Karnataka." />
     
     <!-- Google Fonts: Inter -->
@@ -19,8 +19,7 @@
       (function() {
         try {
           var stored = localStorage.getItem('lifepulse-theme');
-          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (stored === 'dark' || (!stored && systemDark)) {
+          if (stored === 'dark') {
             document.documentElement.classList.add('dark');
           } else {
             document.documentElement.classList.remove('dark');

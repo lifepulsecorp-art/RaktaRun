@@ -22,6 +22,10 @@ import {
   CheckCircle2,
   Send,
   Mail,
+  Users,
+  Copy,
+  Check,
+  Building2,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -29,18 +33,18 @@ import LocationPickerModal from '../components/LocationPickerModal';
 import { AppLayout } from '../components/AppLayout';
 
 const BADGE_MAP: Record<string, { label: string; icon: string }> = {
-  life_pulse_hero: { label: 'LifePulse Hero', icon: '🦸' },
-  rapid_responder: { label: 'Rapid Responder', icon: '⚡' },
-  repeat_hero: { label: 'Repeat Hero', icon: '❤️' },
-  rare_blood_hero: { label: 'Rare Blood Hero', icon: '🏅' },
-  community_champion: { label: 'Community Champion', icon: '🌟' },
+  life_pulse_hero: { label: 'LifePulse Hero', icon: '✦' },
+  rapid_responder: { label: 'Rapid Responder', icon: '›' },
+  repeat_hero: { label: 'Repeat Hero', icon: '◆' },
+  rare_blood_hero: { label: 'Rare Blood Hero', icon: '◇' },
+  community_champion: { label: 'Community Champion', icon: '✧' },
 };
 
 export function getCompatibilityExplanation(donorBlood?: string, reqBlood?: string): string {
   if (!donorBlood || !reqBlood) return 'Clinically verified compatible donor match';
-  if (donorBlood === 'O-') return `🌟 Universal Life-Saver: Your O- is a universal emergency match for this ${reqBlood} patient.`;
-  if (donorBlood === reqBlood) return `🎯 Exact Group Match: Your verified ${donorBlood} directly matches this patient's blood group.`;
-  return `✅ Compatible Blood Match: Your ${donorBlood} is clinically compatible with recipient ${reqBlood}.`;
+  if (donorBlood === 'O-') return `Universal life-saving match: your O- is compatible with this ${reqBlood} request.`;
+  if (donorBlood === reqBlood) return `Exact group match: your verified ${donorBlood} directly matches this patient's blood group.`;
+  return `Compatible blood match: your ${donorBlood} is clinically compatible with recipient ${reqBlood}.`;
 }
 
 export const DonorDashboardPage: React.FC = () => {
@@ -50,6 +54,9 @@ export const DonorDashboardPage: React.FC = () => {
   const [dismissedModalIds, setDismissedModalIds] = useState<Set<string>>(new Set());
   const [shareLocationEnabled, setShareLocationEnabled] = useState(true);
   const [busyId, setBusyId] = useState('');
+  const [buddyInviteByMatch, setBuddyInviteByMatch] = useState<Record<string, string>>({});
+  const [buddyBusyId, setBuddyBusyId] = useState('');
+  const [buddyMessage, setBuddyMessage] = useState('');
   const [now, setNow] = useState(Date.now());
   const [consent, setConsent] = useState(Boolean(roleData?.publicHeroConsent));
   const [consentNotice, setConsentNotice] = useState('');
@@ -112,7 +119,7 @@ export const DonorDashboardPage: React.FC = () => {
           const permission = await Notification.requestPermission();
           setBrowserPushPermission(permission);
           if (permission === 'granted') {
-            new Notification('🔔 LifePulse Web Push Enabled', {
+            new Notification('LifePulse Web Push Enabled', {
               body: 'You are now ready to receive real-time emergency blood requests on this device.',
               icon: '/favicon.ico',
             });
@@ -134,7 +141,7 @@ export const DonorDashboardPage: React.FC = () => {
       setTestNotifResult(res.data);
 
       if (notifPrefs.push && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-        new Notification('🚨 LifePulse Test Emergency Alert', {
+        new Notification('LifePulse Test Emergency Alert', {
           body: `Emergency dispatch test for ${roleData?.fullName || 'Donor'}. Priority: CODE RED Trauma.`,
           icon: '/favicon.ico',
         });
@@ -281,6 +288,37 @@ export const DonorDashboardPage: React.FC = () => {
     }
   };
 
+  const createBuddyInvite = async (matchId: string) => {
+    setBuddyBusyId(matchId);
+    setBuddyMessage('');
+    try {
+      const { data } = await api.post(`/buddies/matches/${matchId}/link`);
+      const inviteUrl = `${window.location.origin}/buddy/${data.token}`;
+      setBuddyInviteByMatch((current) => ({ ...current, [matchId]: inviteUrl }));
+      try {
+        await navigator.clipboard.writeText(inviteUrl);
+        setBuddyMessage('Your unique buddy link is ready and copied. Send it to a friend.');
+      } catch {
+        setBuddyMessage('Your unique buddy link is ready. Copy it below and send it to a friend.');
+      }
+    } catch (error: any) {
+      setBuddyMessage(error.response?.data?.error || 'Could not create a buddy link for this alert.');
+    } finally {
+      setBuddyBusyId('');
+    }
+  };
+
+  const copyBuddyInvite = async (matchId: string) => {
+    const inviteUrl = buddyInviteByMatch[matchId];
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setBuddyMessage('Buddy link copied.');
+    } catch {
+      setBuddyMessage('Select and copy the buddy link.');
+    }
+  };
+
   const setPublicConsent = async (enabled: boolean) => {
     setConsent(enabled);
     setConsentNotice('');
@@ -407,7 +445,7 @@ export const DonorDashboardPage: React.FC = () => {
                           {compText}
                         </p>
                         <p className="mt-1 text-xs text-slate-400">
-                          📍 Located approx. <strong>{match.distance} km</strong> away (Est. drive time: <strong className="text-rose-300">{etaMinutes} mins</strong>) · Urgency: <strong className="capitalize text-rose-400">{request?.urgency || 'Critical'}</strong>
+                          Located approx. <strong>{match.distance} km</strong> away (Est. drive time: <strong className="text-rose-300">{etaMinutes} mins</strong>) · Urgency: <strong className="capitalize text-rose-400">{request?.urgency || 'Critical'}</strong>
                         </p>
                       </div>
 
@@ -488,7 +526,7 @@ export const DonorDashboardPage: React.FC = () => {
               </div>
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {(roleData?.heroStats?.badges || []).map((b: string) => {
-                  const info = BADGE_MAP[b] || { label: b.replace(/_/g, ' '), icon: '🏆' };
+                  const info = BADGE_MAP[b] || { label: b.replace(/_/g, ' '), icon: '✦' };
                   return (
                     <span key={b} className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 border border-amber-500/20">
                       <span>{info.icon}</span> {info.label}
@@ -547,7 +585,7 @@ export const DonorDashboardPage: React.FC = () => {
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
-                  🟢 Ready
+                  ✓ Ready
                 </button>
                 <button
                   type="button"
@@ -559,7 +597,7 @@ export const DonorDashboardPage: React.FC = () => {
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
-                  🟡 Trauma
+                  ◆ Trauma
                 </button>
                 <button
                   type="button"
@@ -571,7 +609,7 @@ export const DonorDashboardPage: React.FC = () => {
                       : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
-                  🔴 Pause
+                  ‖ Pause
                 </button>
               </div>
 
@@ -735,7 +773,7 @@ export const DonorDashboardPage: React.FC = () => {
                     }`}>
                       {!notifPrefs.push ? 'Disabled' :
                        browserPushPermission === 'granted' ? '● Browser Permitted' :
-                       browserPushPermission === 'denied' ? '⚠ Blocked by Browser' :
+                       browserPushPermission === 'denied' ? '! Blocked by Browser' :
                        '● Permission Pending'}
                     </span>
                   </div>
@@ -805,7 +843,7 @@ export const DonorDashboardPage: React.FC = () => {
                     <span className={`px-2 py-0.5 rounded-full font-medium ${
                       notifPrefs.criticalOnly ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                     }`}>
-                      {notifPrefs.criticalOnly ? '⚡ Code Red Only' : 'All Urgencies'}
+                      {notifPrefs.criticalOnly ? 'Code Red Only' : 'All Urgencies'}
                     </span>
                   </div>
                 </div>
@@ -882,7 +920,7 @@ export const DonorDashboardPage: React.FC = () => {
                 className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-rose-600/30 hover:shadow-rose-600/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 <Camera className="h-4 w-4 transition-transform group-hover:rotate-6" />
-                <span>📱 Preview & Download My Hero Cards →</span>
+                <span>Preview & Download My Hero Cards →</span>
               </Link>
               <Link
                 to="/hero-wall"
@@ -899,7 +937,7 @@ export const DonorDashboardPage: React.FC = () => {
               <div className="text-left md:text-right">
                 <span className="block text-xs font-bold text-slate-900 dark:text-white">Show My Hero Profile</span>
                 <span className="block text-[11px] text-slate-500 dark:text-slate-400">
-                  {consent ? '🟢 Public on Wall' : '⚪ Hidden from Wall'}
+                  {consent ? 'Public on Wall' : 'Hidden from Wall'}
                 </span>
               </div>
               <button
@@ -932,12 +970,12 @@ export const DonorDashboardPage: React.FC = () => {
       {/* High-Impact Emergency Alert Modal */}
       {pendingAlerts.filter((item) => !dismissedModalIds.has(item.match.id)).length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 dark:bg-slate-950/90 p-4 backdrop-blur-md">
-          <div role="dialog" aria-modal="true" className="relative w-full max-w-lg rounded-3xl border border-rose-500/40 bg-white text-slate-900 dark:bg-slate-900 dark:text-white p-7 shadow-2xl dark:shadow-rose-950/60 animate-in fade-in zoom-in-95">
+          <div role="dialog" aria-modal="true" className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-rose-500/40 bg-white p-4 text-slate-900 shadow-2xl animate-in fade-in zoom-in-95 dark:bg-slate-900 dark:text-white dark:shadow-rose-950/60 sm:p-7">
             {/* Header Badge */}
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white font-bold animate-pulse shadow-lg shadow-rose-600/40">
-                  🚨
+                  <BellRing className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-xs font-black uppercase tracking-widest text-rose-600 dark:text-rose-400">
@@ -986,18 +1024,18 @@ export const DonorDashboardPage: React.FC = () => {
 
                     <div className="mt-4 space-y-2 text-sm">
                       <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                        <span>🏥</span>
+                        <Building2 className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
                         <span className="font-semibold">{request?.hospitalName}</span>
                       </div>
                       <div className="rounded-xl bg-white border border-slate-200 p-2.5 text-xs text-emerald-700 dark:bg-slate-900 dark:border-slate-800/80 dark:text-emerald-400 font-medium">
                         {compText}
                       </div>
                       <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs">
-                        <span>📍</span>
+                        <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
                         <span>Approximately <strong>{match.distance} km</strong> away (within your preferred {preferredRadius} km radius)</span>
                       </div>
                       <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs">
-                        <span>⏱</span>
+                        <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
                         <span>Urgency: <strong className="capitalize">{request?.urgency || 'Critical emergency'}</strong></span>
                       </div>
                     </div>
@@ -1034,11 +1072,11 @@ export const DonorDashboardPage: React.FC = () => {
                   </label>
 
                   {/* Actions */}
-                  <div className="flex gap-3 pt-2">
+                  <div className="grid gap-3 pt-2 sm:grid-cols-[1.7fr_1fr_1fr]">
                     <button
                       disabled={!seconds || !!busyId}
                       onClick={() => respond(match.id, 'accepted', shareLocationEnabled)}
-                      className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 font-bold text-white shadow-xl shadow-emerald-950/20 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 transition text-sm sm:text-base active:scale-[0.98]"
+                      className="flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-3.5 font-bold text-white shadow-xl shadow-emerald-950/20 transition hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-sm sm:text-base active:scale-[0.98]"
                     >
                       <MapPin className="h-4 w-4" />
                       <span>
@@ -1052,11 +1090,33 @@ export const DonorDashboardPage: React.FC = () => {
                     <button
                       disabled={!!busyId}
                       onClick={() => respond(match.id, 'declined')}
-                      className="rounded-2xl border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 px-5 py-3.5 font-semibold transition text-xs sm:text-sm dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                      className="rounded-2xl border border-slate-200 bg-slate-100 px-5 py-3.5 font-semibold text-slate-700 transition hover:bg-slate-200 text-xs sm:text-sm dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                     >
                       Decline
                     </button>
+                    <button
+                      type="button"
+                      disabled={buddyBusyId === match.id}
+                      onClick={() => createBuddyInvite(match.id)}
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3.5 text-sm font-bold text-amber-900 transition hover:bg-amber-100 disabled:opacity-60 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200 dark:hover:bg-amber-950/50"
+                    >
+                      <Users className="h-4 w-4" />
+                      {buddyBusyId === match.id ? 'Creating link…' : 'Invite a buddy'}
+                    </button>
                   </div>
+                  {buddyInviteByMatch[match.id] && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-800 dark:bg-amber-950/20">
+                      <p className="text-xs leading-5 text-slate-700 dark:text-slate-200">A friend can share their name and phone without creating an account. Hospital staff must verify eligibility and screening before donation.</p>
+                      <div className="mt-2 flex gap-2">
+                        <input aria-label="Buddy invite link" readOnly value={buddyInviteByMatch[match.id]} className="min-w-0 flex-1 rounded-lg border border-amber-200 bg-white px-2 py-2 text-xs dark:border-amber-800 dark:bg-slate-900" />
+                        <button type="button" onClick={() => copyBuddyInvite(match.id)} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white hover:bg-amber-700">
+                          {buddyMessage === 'Buddy link copied.' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {buddyMessage && <p role="status" className="text-xs text-slate-600 dark:text-slate-300">{buddyMessage}</p>}
                 </article>
               );
             })}
@@ -1186,7 +1246,7 @@ export const DonorDashboardPage: React.FC = () => {
                           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-bold ${
                             item.matchStatus === 'donated' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400'
                           }`}>
-                            {item.matchStatus === 'donated' ? '🩸' : '🚨'}
+                            {item.matchStatus === 'donated' ? <Award className="h-4 w-4" /> : <BellRing className="h-4 w-4" />}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">

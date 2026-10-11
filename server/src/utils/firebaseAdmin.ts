@@ -16,13 +16,13 @@ if (fs.existsSync(serviceAccountPath)) {
         credential: admin.credential.cert(serviceAccount),
         projectId: process.env.FIREBASE_PROJECT_ID || 'lifepulse-dev',
       });
-      console.log('✅ Firebase Admin initialized for project:', serviceAccount.project_id);
+      console.log('Firebase Admin initialized for project:', serviceAccount.project_id);
     }
   } catch (error: any) {
-    console.warn('⚠️ Could not initialize Firebase Admin SDK (continuing in Local Auth mode):', error.message);
+    console.warn('Could not initialize Firebase Admin SDK (continuing in Local Auth mode):', error.message);
   }
 } else {
-  console.log('ℹ️ Running in Local Auth mode (firebase-service-account.json not found).');
+  console.log('Running in Local Auth mode (firebase-service-account.json not found).');
 }
 
 export default admin;

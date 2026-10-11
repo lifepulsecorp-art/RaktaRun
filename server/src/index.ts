@@ -13,6 +13,7 @@ import donorRoutes from './routes/donorRoutes.js';
 import heroRoutes from './routes/heroRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import requestRoutes from './routes/requestRoutes.js';
+import buddyRoutes from './routes/buddyRoutes.js';
 import { escalateUnansweredRequests } from './services/escalation.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -51,6 +52,7 @@ app.use('/api/donors', donorRoutes);
 app.use('/api/heroes', heroRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/requests', requestRoutes);
+app.use('/api/buddies', buddyRoutes);
 
 app.get('/api', (req, res) => {
   res.json({ message: 'LifePulse API v1 — ready' });
@@ -70,8 +72,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 LifePulse API running at http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`LifePulse API running at http://localhost:${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/api/health`);
 });
 
 // A lightweight scheduler for the JSON-backed pilot implementation.

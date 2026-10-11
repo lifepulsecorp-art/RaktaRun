@@ -31,50 +31,52 @@ export default function HomePage() {
     <AppLayout withSidebar={false}>
       <div className="mx-auto max-w-7xl space-y-16 py-4 sm:py-8">
         {/* Hero Section */}
-        <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-b from-white via-rose-50/30 to-white p-8 sm:p-14 lg:p-20 text-center shadow-xl shadow-rose-950/5 dark:border-slate-800/80 dark:from-slate-900/90 dark:via-slate-950 dark:to-slate-950 dark:shadow-2xl dark:shadow-rose-950/10">
-          {/* Ambient background glows */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3.5 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400">
-              <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
-              <span>Medically Verified Rapid Trauma Network</span>
+        <section className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-50 px-6 py-12 shadow-sm sm:px-12 sm:py-16 lg:px-16 lg:py-20">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl" />
+          <div className="relative z-10 max-w-3xl space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-700/20 bg-emerald-700/5 px-3.5 py-1.5 text-xs font-bold tracking-wide text-emerald-800">
+              <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
+              <span>A little care can go a long way</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white font-display leading-[1.1]">
-              Every second counts <br className="hidden sm:inline" />
-              when <span className="bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 bg-clip-text text-transparent">trauma strikes.</span>
+            <h1 className="max-w-3xl text-5xl font-extrabold leading-[0.98] tracking-[-0.065em] text-slate-900 sm:text-7xl lg:text-[5.5rem]">
+              A little help,
+              <br />
+              <span className="text-rose-600">a whole lot of</span>
+              <br />
+              <span className="text-rose-600">hope.</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-              LifePulse coordinates hospital-screened blood donors with emergency intensive care units across Udupi and Dakshina Kannada in real time with turn-by-turn navigation.
+            <p className="max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+              When someone needs blood, LifePulse brings nearby donors and local hospitals together. It is simple to join, easy to use, and made for showing up when it matters.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
+            <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row">
               <Link
                 to="/register"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 hover:bg-rose-500 px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-rose-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-rose-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-rose-900/15 transition hover:-translate-y-0.5 hover:bg-rose-700 sm:w-auto"
               >
-                <span>Join as a Hero Donor</span>
+                <span>Join the donor community</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/login"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/90 hover:bg-slate-100 px-7 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
+                to="/hero-wall"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white/60 px-6 py-4 text-sm font-bold text-slate-800 transition hover:bg-white sm:w-auto"
               >
-                <span>Hospital Blood Bank Login</span>
+                <span>Meet our community</span>
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-6 pt-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-3 text-xs font-medium text-slate-600">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Aadhaar & Lab Verified
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Hospital-screened donors
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Zero Commercial Ads
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Here for our community
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Instant GPS Dispatch
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Local to coastal Karnataka
               </span>
             </div>
           </div>
@@ -120,47 +122,52 @@ export default function HomePage() {
         </section>
 
         {/* 3-Step Emergency Flow */}
-        <section className="space-y-6">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Protocol</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
-              How LifePulse Saves Lives in Real Time
+        <section className="relative overflow-hidden rounded-[2rem] bg-emerald-950 px-6 py-10 text-white sm:px-10 sm:py-12 lg:px-14">
+          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div className="space-y-3">
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300">From the first alert to a helping hand</span>
+            <h2 className="text-3xl font-extrabold leading-tight text-white sm:text-4xl">
+              Clear next steps.
+              <br /><span className="text-amber-300">Care, all the way.</span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Automated emergency response pipeline designed for instant clinical dispatch.
+            <p className="max-w-md text-sm leading-6 text-emerald-50/75">
+              A calm, coordinated path helps donors and hospitals know what to do, right when it matters.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-all dark:border-slate-800/80 dark:bg-slate-900/70">
-              <div className="h-10 w-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-lg mb-4">
+          <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
+            <div className="border-t border-white/20 py-5">
+              <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-amber-300">
                 1
               </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Emergency Broadcast</h3>
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Hospital emergency departments broadcast urgent requirements for specific blood components with patient urgency indicators (Code Red Trauma).
+              <h3 className="text-base font-bold text-amber-300">A hospital reaches out</h3>
+              <p className="mt-2 text-sm leading-6 text-emerald-50/75">
+                A care team shares the blood type and details of an urgent request.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-all dark:border-slate-800/80 dark:bg-slate-900/70">
-              <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-lg mb-4">
+            <div className="border-t border-white/20 py-5">
+              <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-amber-300">
                 2
               </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Intelligent Matching</h3>
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                The algorithm filters verified donors by clinical compatibility, travel radius, donation intervals, and dispatches multi-channel alerts (Brevo SMS, Email, Push).
+              <h3 className="text-base font-bold text-amber-300">Nearby donors are matched</h3>
+              <p className="mt-2 text-sm leading-6 text-emerald-50/75">
+                The right people are notified based on blood group, availability, and distance.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-all dark:border-slate-800/80 dark:bg-slate-900/70">
-              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg mb-4">
+            <div className="border-t border-white/20 py-5 sm:col-span-2 sm:grid sm:grid-cols-[2rem_1fr] sm:gap-3">
+              <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-amber-300 sm:mb-0">
                 3
               </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Turn-by-Turn Transit</h3>
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Donor taps accept, launches Google Maps navigation directly to the hospital blood bank, and shares real-time ETA while doctors prepare for transfusion.
+              <div>
+              <h3 className="text-base font-bold text-amber-300">A donor shows up</h3>
+              <p className="mt-2 text-sm leading-6 text-emerald-50/75">
+                Donors can accept an invitation and get clear directions to the hospital.
               </p>
+              </div>
             </div>
+          </div>
           </div>
         </section>
 
@@ -202,7 +209,7 @@ export default function HomePage() {
                 </div>
                 {compInfo.isUniversal && (
                   <span className="self-start rounded-full bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    ⭐ Universal Emergency Donor
+                    <Award className="h-4 w-4" /> Universal Emergency Donor
                   </span>
                 )}
               </div>

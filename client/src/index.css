@@ -5,52 +5,141 @@
 @theme {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Plus Jakarta Sans', var(--font-sans);
+
+  /* Warm cream neutrals keep every existing screen in the same visual family. */
+  --color-slate-50: #fffaf0;
+  --color-slate-100: #fff2d9;
+  --color-slate-200: #efdfc3;
+  --color-slate-300: #d9c5a2;
+  --color-slate-400: #aa9c87;
+  --color-slate-500: #817663;
+  --color-slate-600: #655c4e;
+  --color-slate-700: #4a463c;
+  --color-slate-800: #34372f;
+  --color-slate-900: #24271f;
+  --color-slate-950: #19251f;
+
+  /* LifePulse orange replaces the old rose brand accents. */
+  --color-rose-50: #fff5e9;
+  --color-rose-100: #ffe8cf;
+  --color-rose-200: #ffd0a6;
+  --color-rose-300: #f8ad72;
+  --color-rose-400: #ed8a48;
+  --color-rose-500: #df7432;
+  --color-rose-600: #ca6026;
+  --color-rose-700: #a94c21;
+  --color-rose-800: #873f22;
+  --color-rose-900: #6e361f;
+  --color-rose-950: #3c2117;
+
+  /* A clear, deep green is used for trust and supporting feature surfaces. */
+  --color-emerald-50: #eff7ef;
+  --color-emerald-100: #dcebdc;
+  --color-emerald-200: #bdd8c2;
+  --color-emerald-300: #91bd9d;
+  --color-emerald-400: #5c9b72;
+  --color-emerald-500: #367b55;
+  --color-emerald-600: #286343;
+  --color-emerald-700: #214f39;
+  --color-emerald-800: #1b4032;
+  --color-emerald-900: #17382d;
+  --color-emerald-950: #10291f;
+
+  /* Alphonso mango shades, from soft pulp to gamboge peel. */
+  --color-amber-50: #fff9e8;
+  --color-amber-100: #fff0c2;
+  --color-amber-200: #ffdf87;
+  --color-amber-300: #ffca4f;
+  --color-amber-400: #f6b735;
+  --color-amber-500: #e8a51b;
+  --color-amber-600: #d48a0d;
+  --color-amber-700: #b76c0c;
+  --color-amber-800: #935315;
+  --color-amber-900: #784419;
+  --color-amber-950: #43240c;
+
+  --color-sky-50: #eff7ef;
+  --color-sky-100: #dcebdc;
+  --color-sky-200: #bdd8c2;
+  --color-sky-300: #91bd9d;
+  --color-sky-400: #5c9b72;
+  --color-sky-500: #367b55;
+  --color-sky-600: #286343;
+  --color-sky-700: #214f39;
+  --color-sky-800: #1b4032;
+  --color-sky-900: #17382d;
+  --color-sky-950: #10291f;
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  background: var(--cream);
+  color: var(--ink);
+  --cream: #fff7e7;
+  --cream-light: #fffaf0;
+  --ink: #24271f;
+  --pepper: #ca6026;
+  --forest: #17382d;
+}
+.dark {
+  color-scheme: dark;
+  --cream: #19251f;
+  --cream-light: #24372d;
+  --ink: #f4efe4;
+  --pepper: #ed8a48;
+}
+.dark body { background-image: none; }
+
+html { scroll-behavior: smooth; }
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background-color: var(--cream);
+  background-image:
+    radial-gradient(ellipse at 88% 5%, rgba(246, 183, 53, 0.14), transparent 30rem),
+    radial-gradient(ellipse at 4% 92%, rgba(232, 165, 27, 0.08), transparent 26rem);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); letter-spacing: -0.045em; }
+::selection { background: #e9a064; color: #24271f; }
+:focus-visible { outline: 3px solid #df7432; outline-offset: 3px; }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: #fff7e7; }
+::-webkit-scrollbar-thumb { background: #d9c5a2; border: 2px solid #fff7e7; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #b8a27f; }
+.dark ::-webkit-scrollbar-track { background: #19251f; }
+.dark ::-webkit-scrollbar-thumb { background: #46584c; border-color: #19251f; }
+
+.glass-panel { background: rgba(251, 248, 241, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.dark .glass-panel { background: rgba(25, 37, 31, 0.91); }
+
+/* A gentler paper-like treatment for forms and shared panels. */
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+  border-radius: 0.85rem;
+}
+input::placeholder, textarea::placeholder { color: #aa9c87; }
+button, a { -webkit-tap-highlight-color: transparent; }
+
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+  button, input[type="submit"] { min-height: 2.75rem; }
+  #root { overflow-x: clip; }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+@keyframes heart-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.animate-heart-pulse { animation: heart-pulse 2s infinite ease-in-out; }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
-  border-radius: 9999px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.5);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.7);
-}
-
-/* Glassmorphism helpers */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.85);
-}
-
-/* Pulse animation utility */
-@keyframes heart-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-
-.animate-heart-pulse {
-  animation: heart-pulse 2s infinite ease-in-out;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

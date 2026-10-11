@@ -6,11 +6,11 @@ import api from '../../utils/api';
 import { AppLayout } from '../../components/AppLayout';
 
 const BADGE_DESCRIPTIONS: Record<string, { label: string; icon: string; desc: string }> = {
-  life_pulse_hero: { label: 'LifePulse Hero', icon: '🦸', desc: 'Responded to your first verified hospital emergency dispatch.' },
-  rapid_responder: { label: 'Rapid Responder', icon: '⚡', desc: 'Accepted alert promptly and arrived within required trauma window.' },
-  repeat_hero: { label: 'Repeat Hero', icon: '❤️', desc: 'Supported 3 or more verified life-saving emergency requests.' },
-  rare_blood_hero: { label: 'Rare Blood Hero', icon: '🏅', desc: 'Screened donor with high-priority Rh-negative blood group.' },
-  community_champion: { label: 'Community Champion', icon: '🌟', desc: 'Active contributor to regional blood awareness and public mobilisation.' },
+  life_pulse_hero: { label: 'LifePulse Hero', icon: '✦', desc: 'Responded to your first verified hospital emergency dispatch.' },
+  rapid_responder: { label: 'Rapid Responder', icon: '›', desc: 'Accepted alert promptly and arrived within required trauma window.' },
+  repeat_hero: { label: 'Repeat Hero', icon: '◆', desc: 'Supported 3 or more verified life-saving emergency requests.' },
+  rare_blood_hero: { label: 'Rare Blood Hero', icon: '◇', desc: 'Screened donor with high-priority Rh-negative blood group.' },
+  community_champion: { label: 'Community Champion', icon: '✧', desc: 'Active contributor to regional blood awareness and public mobilisation.' },
 };
 
 export const DonorHeroCardPage: React.FC = () => {
@@ -55,7 +55,7 @@ export const DonorHeroCardPage: React.FC = () => {
       ctx.fillStyle = '#fb7185';
       ctx.font = 'bold 46px Arial, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('LIFEPULSE HERO ❤️', 540, 220);
+      ctx.fillText('LIFEPULSE HERO', 540, 220);
 
       ctx.fillStyle = '#fda4af';
       ctx.font = '30px Arial, sans-serif';
@@ -80,18 +80,18 @@ export const DonorHeroCardPage: React.FC = () => {
 
       ctx.font = 'bold 44px Arial, sans-serif';
       ctx.fillStyle = '#fb7185';
-      ctx.fillText(`🩸 ${bloodGroup} Donor`, 540, 680);
+      ctx.fillText(`${bloodGroup} Blood Donor`, 540, 680);
 
       ctx.fillStyle = '#38bdf8';
-      ctx.fillText(`⚡ Emergency Response`, 540, 760);
+      ctx.fillText('Emergency Response', 540, 760);
 
       ctx.fillStyle = '#cbd5e1';
       ctx.font = '38px Arial, sans-serif';
-      ctx.fillText(`📍 ${district} District`, 540, 840);
+      ctx.fillText(`${district} District`, 540, 840);
 
       ctx.fillStyle = '#34d399';
       ctx.font = 'bold 46px Arial, sans-serif';
-      ctx.fillText(`❤️ Supported verified emergency cases`, 540, 940);
+      ctx.fillText('Supported verified emergency cases', 540, 940);
 
       ctx.fillStyle = '#f8fafc';
       ctx.font = 'bold 58px Arial, sans-serif';
@@ -270,7 +270,7 @@ export const DonorHeroCardPage: React.FC = () => {
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Earned Hero Badges</h4>
               <div className="space-y-2">
                 {badges.map((b: string) => {
-                  const info = BADGE_DESCRIPTIONS[b] || { label: b.replace(/_/g, ' '), icon: '🏆', desc: 'Verified emergency contribution.' };
+                  const info = BADGE_DESCRIPTIONS[b] || { label: b.replace(/_/g, ' '), icon: '✦', desc: 'Verified emergency contribution.' };
                   return (
                     <div key={b} className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3">
                       <span className="text-xl">{info.icon}</span>
@@ -301,7 +301,7 @@ export const DonorHeroCardPage: React.FC = () => {
               <div>
                 <span className="block text-xs font-bold text-slate-900 dark:text-white">Feature my profile on the Public Hero Wall</span>
                 <span className="block text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  {consent ? '🟢 Visible to community' : '⚪ Kept private'}
+                  {consent ? 'Visible to community' : 'Kept private'}
                 </span>
               </div>
               <button

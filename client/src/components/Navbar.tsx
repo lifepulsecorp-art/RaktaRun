@@ -15,11 +15,13 @@ import {
 interface NavbarProps {
   onToggleSidebar?: () => void;
   showSidebarToggle?: boolean;
+  sidebarOpen?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onToggleSidebar,
   showSidebarToggle = false,
+  sidebarOpen = false,
 }) => {
   const { profile, role, roleData, logout, firebaseUser } = useAuth();
   const location = useLocation();
@@ -44,6 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onToggleSidebar}
+              aria-expanded={sidebarOpen}
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 lg:hidden dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
               aria-label="Toggle navigation sidebar"
             >
@@ -51,9 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          <Link to={isAuthenticated ? getDashboardLink() : '/'} className="flex items-center gap-2">
-            <LifePulseLogo size="md" subtitle="Coastal Karnataka Emergency Response" />
-          </Link>
+          <LifePulseLogo size="md" subtitle="Coastal Karnataka Emergency Response" />
 
           {/* Regional network pill indicator */}
           <div className="hidden xl:flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
@@ -63,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Center Navigation Links (Desktop) */}
-        <nav className="hidden md:flex items-center gap-1 text-xs lg:text-sm font-semibold">
+        <nav className="hidden xl:flex items-center gap-1 text-xs lg:text-sm font-semibold">
           {!isAuthenticated ? (
             <>
               <Link
@@ -227,13 +228,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white transition active:scale-95"
+                className="hidden rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white transition active:scale-95 sm:inline-flex"
               >
                 Sign In
               </Link>
               <Link
                 to="/register"
-                className="rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-rose-950/20 hover:from-rose-500 hover:to-rose-600 transition active:scale-95"
+                className="hidden rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-rose-950/20 hover:from-rose-500 hover:to-rose-600 transition active:scale-95 sm:inline-flex"
               >
                 Register
               </Link>
@@ -241,19 +242,23 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Mobile hamburger menu button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 md:hidden dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          {(!showSidebarToggle || !isAuthenticated) && (
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 xl:hidden dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white/95 px-6 py-4 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 space-y-3 animate-in fade-in slide-in-from-top-2">
+        <div className="xl:hidden border-t border-slate-200 bg-white/95 px-4 py-4 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 space-y-3 animate-in fade-in slide-in-from-top-2">
           {!isAuthenticated ? (
             <>
               <Link

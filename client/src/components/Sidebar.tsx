@@ -11,6 +11,7 @@ import {
   LogOut,
   Activity,
   Sparkles,
+  Flag,
 } from 'lucide-react';
 
 interface NavItem {
@@ -57,6 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { label: 'System Overview', path: '/admin', icon: Shield, badge: 'Admin' },
     { label: 'Hospital Verifications', path: '/admin/hospitals', icon: Building2 },
     { label: 'Verified Donors', path: '/admin/donors', icon: Users },
+    { label: 'Buddy Reports', path: '/admin/buddy-reports', icon: Flag },
     { label: 'Community Hero Wall', path: '/hero-wall', icon: Award },
   ];
 

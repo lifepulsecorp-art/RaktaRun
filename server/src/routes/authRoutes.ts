@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { authenticate, AuthenticatedRequest, JWT_SECRET } from '../middleware/auth.js';
 import { find, insert, update } from '../utils/db.js';
 import type { User, Donor, Hospital, UserRole } from '../types.js';
+import { isEmailBlocked } from '../utils/accountRestrictions.js';
 
 const router = Router();
 
@@ -15,6 +16,9 @@ router.post('/login', (req, res) => {
   }
 
   const normalizedEmail = email.trim().toLowerCase();
+  if (isEmailBlocked(normalizedEmail)) {
+    return res.status(403).json({ error: 'This email address is not permitted to create a LifePulse account.' });
+  }
   let user = find<User>('users', (u) => u.email.toLowerCase() === normalizedEmail);
 
   if (!user) {
@@ -117,6 +121,9 @@ router.post('/register', (req, res, next) => {
   }
 
   const normalizedEmail = email.trim().toLowerCase();
+  if (isEmailBlocked(normalizedEmail)) {
+    return res.status(403).json({ error: 'This email address is not permitted to create a LifePulse account.' });
+  }
   let existingUser = find<User>('users', (u) => u.email.toLowerCase() === normalizedEmail);
 
   if (existingUser) {

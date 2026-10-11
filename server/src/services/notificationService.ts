@@ -265,7 +265,7 @@ export async function sendRegistrationNotification(data: {
   if (data.role === 'donor') {
     // 1. Donor Welcome Email
     if (data.email) {
-      const subject = `Welcome to LifePulse Emergency Donor Network, ${data.name}! ❤️`;
+      const subject = `Welcome to LifePulse Emergency Donor Network, ${data.name}`;
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #0f172a; color: #f8fafc; border-radius: 12px; border: 1px solid #1e293b;">
           <div style="text-align: center; margin-bottom: 20px;">
@@ -360,7 +360,7 @@ export async function dispatchAlertNotifications(
 
   const results: ChannelDispatchResult[] = [];
   const etaMinutes = Math.max(3, Math.ceil(((match.distance || 5) / 25) * 60));
-  const urgencyLabel = request.urgency === 'critical' ? '🚨 CODE RED' : 'URGENT';
+  const urgencyLabel = request.urgency === 'critical' ? 'CODE RED' : 'URGENT';
 
   // 1. Web Push Notification Record
   if (prefs.push) {

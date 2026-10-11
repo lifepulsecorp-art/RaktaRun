@@ -29,10 +29,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const showSidebar = withSidebar !== undefined ? withSidebar : Boolean(firebaseUser && role);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/60 to-rose-50/40 text-slate-900 transition-colors duration-200 dark:bg-none dark:bg-slate-950 dark:text-slate-100 flex flex-col">
       {/* Top Navbar */}
       <Navbar
         showSidebarToggle={showSidebar}
+        sidebarOpen={mobileSidebarOpen}
         onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
       />
 
@@ -46,14 +47,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         )}
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
           {(title || actions) && (
             <div className="border-b border-slate-200/80 bg-white/50 px-4 sm:px-6 lg:px-8 py-5 backdrop-blur-sm dark:border-slate-800/80 dark:bg-slate-900/30">
-              <div className="mx-auto max-w-7xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
+              <div className="mx-auto flex min-w-0 max-w-7xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-3">
                     {title && (
-                      <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white font-display">
+                      <h1 className="min-w-0 break-words text-xl font-black tracking-tight text-slate-900 dark:text-white font-display sm:text-2xl">
                         {title}
                       </h1>
                     )}
@@ -65,12 +66,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     </p>
                   )}
                 </div>
-                {actions && <div className="flex items-center gap-2.5">{actions}</div>}
+                {actions && <div className="flex flex-wrap items-center gap-2.5">{actions}</div>}
               </div>
             </div>
           )}
 
-          <main className={`flex-1 p-4 sm:p-6 lg:p-8 ${containerClassName}`}>
+          <main className={`min-w-0 flex-1 px-3 py-4 sm:p-6 lg:p-8 ${containerClassName}`}>
             {children}
           </main>
         </div>

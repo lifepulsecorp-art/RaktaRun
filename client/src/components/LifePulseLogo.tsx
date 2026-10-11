@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface LifePulseLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -17,9 +19,14 @@ export const LifePulseLogo: React.FC<LifePulseLogoProps> = ({
   animate = false,
   className = '',
 }) => {
+  const { firebaseUser, role } = useAuth();
+  const dashboardPath = role === 'admin' ? '/admin' : role === 'hospital' ? '/hospital' : '/donor';
+  const destination = firebaseUser && role ? dashboardPath : '/';
+  const label = firebaseUser && role ? 'Go to your dashboard' : 'Go to LifePulse home';
+
   const sizeMap = {
-    sm: { box: 'h-8 w-8', icon: 32, text: 'text-base', sub: 'text-[9px]' },
-    md: { box: 'h-10 w-10', icon: 40, text: 'text-lg', sub: 'text-[11px]' },
+    sm: { box: 'h-8 w-8', icon: 32, text: 'text-base', sub: 'hidden sm:inline text-[9px]' },
+    md: { box: 'h-10 w-10', icon: 40, text: 'text-lg', sub: 'hidden sm:inline text-[11px]' },
     lg: { box: 'h-12 w-12', icon: 48, text: 'text-xl', sub: 'text-xs' },
     xl: { box: 'h-16 w-16', icon: 64, text: 'text-3xl', sub: 'text-sm' },
   };
@@ -28,7 +35,12 @@ export const LifePulseLogo: React.FC<LifePulseLogoProps> = ({
   const displaySubtitle = showSubtitle === false ? undefined : (subtitle || (showSubtitle ? 'Emergency Blood Network' : undefined));
 
   return (
-    <div className={`inline-flex items-center gap-3 select-none ${className}`}>
+    <Link
+      to={destination}
+      aria-label={label}
+      title={label}
+      className={`inline-flex items-center gap-3 select-none ${className}`}
+    >
       {/* Visual Mark */}
       <div
         className={`relative flex items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 via-rose-600 to-rose-700 shadow-lg shadow-rose-600/30 ring-1 ring-white/20 ${current.box} ${
@@ -80,6 +92,6 @@ export const LifePulseLogo: React.FC<LifePulseLogoProps> = ({
           )}
         </div>
       )}
-    </div>
+    </Link>
   );
 };

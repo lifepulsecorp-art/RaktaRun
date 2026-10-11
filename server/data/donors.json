@@ -611,5 +611,51 @@
     },
     "createdAt": "2026-01-18T00:00:00.000Z",
     "updatedAt": "2026-09-18T10:00:00.000Z"
+  },
+  {
+    "id": "donor_db9105bf",
+    "uid": "user_87d2a036",
+    "fullName": "hugo",
+    "phone": "7878767869",
+    "aadhaarVerified": true,
+    "bloodGroup": "O+",
+    "rhType": "positive",
+    "bloodComponentEligibility": [
+      "whole_blood"
+    ],
+    "lastDonationDate": "2004-08-13",
+    "hemoglobinLevel": 14,
+    "weight": 65,
+    "eligibilityStatus": "eligible",
+    "verification": {
+      "hospitalId": "pending",
+      "hospitalName": "Pending Admin Verification",
+      "certificateId": "LP-CERT-2026-7001",
+      "verifiedAt": "2026-10-11T08:31:16.375Z",
+      "verifiedBy": "Pending Review",
+      "certificateFileName": "cert_user_87d2a036_1791707476370.png",
+      "expiryDate": "2027-10-11T08:31:16.375Z"
+    },
+    "homeLocality": "Manipal (576104)",
+    "coordinates": {
+      "latitude": 13.3524,
+      "longitude": 74.7927
+    },
+    "locationSharingEnabled": false,
+    "preferredRadius": 15,
+    "availabilityStatus": "available",
+    "heroStats": {
+      "totalEmergencyResponses": 1,
+      "totalDonations": 1,
+      "averageResponseTime": 0,
+      "badges": [
+        "life_pulse_hero"
+      ],
+      "lastResponseDate": "2026-10-11T09:11:29.279Z"
+    },
+    "createdAt": "2026-10-11T08:31:16.375Z",
+    "updatedAt": "2026-10-11T09:11:29.283Z",
+    "deferralReason": null,
+    "deferralUntil": null
   }
 ]

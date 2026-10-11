@@ -406,13 +406,13 @@ const matches: Match[] = [
   },
 ];
 
-console.log('🌱 Seeding LifePulse JSON Database...');
+console.log('Seeding LifePulse JSON Database...');
 writeJson('users', users);
 writeJson('hospitals', hospitals);
 writeJson('donors', donors);
 writeJson('bloodRequests', bloodRequests);
 writeJson('matches', matches);
-console.log('✅ Seed completed successfully:');
+console.log('Seed completed successfully:');
 console.log(`   - Users: ${users.length} (Admin UID: 5G6ajWegMiepIzvIyreG7bx82SG2)`);
 console.log(`   - Hospitals: ${hospitals.length}`);
 console.log(`   - Donors: ${donors.length}`);

@@ -102,5 +102,33 @@
     "donorId": "donor_meera_13",
     "createdAt": "2026-01-18T00:00:00.000Z",
     "updatedAt": "2026-01-18T00:00:00.000Z"
+  },
+  {
+    "uid": "user_66f55e5d",
+    "email": "donor1@gmail.com",
+    "role": "hospital",
+    "name": "District Hosp",
+    "createdAt": "2026-10-11T08:26:32.989Z",
+    "updatedAt": "2026-10-11T08:26:33.020Z",
+    "hospitalId": "hosp_b02c4775"
+  },
+  {
+    "uid": "user_87d2a036",
+    "email": "don@gmail.com",
+    "role": "donor",
+    "name": "hugo",
+    "createdAt": "2026-10-11T08:31:16.309Z",
+    "updatedAt": "2026-10-11T08:31:16.381Z",
+    "donorId": "donor_db9105bf",
+    "phone": "7878767869"
+  },
+  {
+    "uid": "user_ad3b4f10",
+    "email": "hosp@gmail.com",
+    "role": "hospital",
+    "name": "asd",
+    "createdAt": "2026-10-11T08:58:07.397Z",
+    "updatedAt": "2026-10-11T08:58:07.423Z",
+    "hospitalId": "hosp_fd68a3e8"
   }
 ]

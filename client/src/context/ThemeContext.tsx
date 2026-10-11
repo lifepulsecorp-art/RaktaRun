@@ -22,7 +22,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return stored;
       }
     }
-    return 'dark'; // Default to sleek medical dark theme
+    return 'light'; // The warm cream palette is the default LifePulse experience.
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => {
@@ -30,9 +30,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'light') return 'light';
       if (stored === 'dark') return 'dark';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (stored === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return 'light';
     }
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => {

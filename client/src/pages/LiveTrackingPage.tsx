@@ -15,6 +15,11 @@ export const LiveTrackingPage: React.FC = () => {
   const { role } = useAuth();
   const [request, setRequest] = useState<any>(null);
   const [matches, setMatches] = useState<any[]>([]);
+  const [buddyReferrals, setBuddyReferrals] = useState<any[]>([]);
+  const [reportingBuddyId, setReportingBuddyId] = useState('');
+  const [buddyReportCategory, setBuddyReportCategory] = useState('certificate_unavailable');
+  const [buddyReportNotes, setBuddyReportNotes] = useState('');
+  const [buddyNotice, setBuddyNotice] = useState('');
   const [myMatch, setMyMatch] = useState<any>(null);
   const [error, setError] = useState('');
   const [sharing, setSharing] = useState(false);
@@ -39,6 +44,12 @@ export const LiveTrackingPage: React.FC = () => {
         setRequest(data.request);
         const { data: found } = await api.get(`/hospitals/${data.request.hospitalId}/requests/${requestId}/matches`);
         setMatches(found);
+        try {
+          const { data: buddyData } = await api.get(`/hospitals/${data.request.hospitalId}/requests/${requestId}/buddy-referrals`);
+          setBuddyReferrals(buddyData);
+        } catch {
+          setBuddyReferrals([]);
+        }
       }
       setError('');
     } catch (e: any) {
@@ -165,6 +176,23 @@ export const LiveTrackingPage: React.FC = () => {
       if (enable) navigate('/hero-wall');
     } catch (e: any) {
       setCelebrationModal(false);
+    }
+  };
+
+  const reportBuddyReferral = async (referralId: string) => {
+    if (!request?.hospitalId) return;
+    setBuddyNotice('');
+    try {
+      const { data } = await api.post(`/hospitals/${request.hospitalId}/buddy-referrals/${referralId}/report`, {
+        category: buddyReportCategory,
+        notes: buddyReportNotes,
+      });
+      setBuddyReferrals((current) => current.map((lead) => lead.id === referralId ? data.referral : lead));
+      setReportingBuddyId('');
+      setBuddyReportNotes('');
+      setBuddyNotice('Report sent to LifePulse administrators for review.');
+    } catch (err: any) {
+      setBuddyNotice(err.response?.data?.error || 'Could not submit the report.');
     }
   };
 
@@ -492,12 +520,12 @@ export const LiveTrackingPage: React.FC = () => {
                             {m.donor?.bloodGroup}
                           </span>
                         </div>
-                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                          📍 {m.donor?.homeLocality || 'Verified Area'} · <strong>{m.distance} km</strong> away
+                        <p className="mt-1 flex items-start gap-1 text-xs text-slate-600 dark:text-slate-400">
+                          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" /> <span>{m.donor?.homeLocality || 'Verified Area'} · <strong>{m.distance} km</strong> away</span>
                         </p>
                       </div>
                       <Badge variant={m.status === 'alerted' ? 'warning' : m.status === 'declined' ? 'destructive' : 'secondary'} className="text-[10px]">
-                        {m.status === 'alerted' ? '📡 Awaiting' : m.status}
+                        {m.status === 'alerted' ? 'Awaiting' : m.status}
                       </Badge>
                     </div>
 
@@ -509,6 +537,55 @@ export const LiveTrackingPage: React.FC = () => {
                 ))}
                 {matches.length === 0 && <p className="text-sm text-slate-500 py-4 text-center">No compatible donors found in current radius.</p>}
               </div>
+
+              <section className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-800">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-bold text-slate-900 dark:text-white">Buddy invite responses</h3>
+                  <Badge variant="secondary">{buddyReferrals.length}</Badge>
+                </div>
+                <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-400">These people shared an interest through a donor invite. They are not yet cleared or confirmed as donors.</p>
+                {buddyNotice && <p role="status" className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">{buddyNotice}</p>}
+                <div className="mt-3 space-y-3">
+                  {buddyReferrals.map((lead) => (
+                    <div key={lead.id} className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 dark:border-amber-900 dark:bg-amber-950/20">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{lead.friendName}</p>
+                          <a className="text-xs text-emerald-800 underline dark:text-emerald-300" href={`tel:${lead.friendPhone}`}>{lead.friendPhone}</a>
+                        </div>
+                        {lead.hospitalReport ? (
+                          <Badge variant="warning">Sent for admin review</Badge>
+                        ) : (
+                          <button type="button" onClick={() => { setReportingBuddyId(reportingBuddyId === lead.id ? '' : lead.id); setBuddyNotice(''); }} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            Report concern
+                          </button>
+                        )}
+                      </div>
+                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Interest received {new Date(lead.createdAt).toLocaleString()}</p>
+                      {reportingBuddyId === lead.id && !lead.hospitalReport && (
+                        <div className="mt-3 space-y-2 border-t border-amber-200 pt-3 dark:border-amber-900">
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                            Operational concern
+                            <select value={buddyReportCategory} onChange={(event) => setBuddyReportCategory(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                              <option value="certificate_unavailable">Certificate unavailable</option>
+                              <option value="identity_not_verified">Identity could not be verified</option>
+                              <option value="not_available">Person was not available</option>
+                              <option value="screening_concern">Screening concern; follow hospital protocol</option>
+                              <option value="other">Other operational concern</option>
+                            </select>
+                          </label>
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                            Note (optional; do not include a diagnosis or private medical details)
+                            <textarea maxLength={240} rows={2} value={buddyReportNotes} onChange={(event) => setBuddyReportNotes(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white" />
+                          </label>
+                          <Button size="sm" onClick={() => reportBuddyReferral(lead.id)}>Send report for admin review</Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {buddyReferrals.length === 0 && <p className="py-3 text-center text-xs text-slate-500">No buddy invite responses for this request yet.</p>}
+                </div>
+              </section>
             </Card>
           </div>
         )}
@@ -519,7 +596,7 @@ export const LiveTrackingPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md">
           <div role="dialog" aria-modal="true" className="w-full max-w-md rounded-3xl border border-amber-300 dark:border-amber-500/40 bg-white dark:bg-slate-900 p-7 text-center shadow-2xl">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-3xl text-amber-500 border border-amber-200 dark:border-amber-500/20">
-              ❤️
+              <Award className="h-8 w-8" aria-hidden="true" />
             </div>
             <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-white">You helped save a life!</h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">

@@ -10,6 +10,59 @@ export interface User {
   donorId?: string;
   createdAt: string;
   updatedAt: string;
+  trustStatus?: 'clear' | 'under_review' | 'flagged';
+}
+
+export interface BuddyLink {
+  id: string;
+  token: string;
+  requestId: string;
+  matchId: string;
+  donorId: string;
+  referrerUid: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export type BuddyConcernCategory = 'certificate_unavailable' | 'identity_not_verified' | 'not_available' | 'screening_concern' | 'other';
+
+export interface BuddyHospitalReport {
+  id: string;
+  hospitalId: string;
+  actorUid: string;
+  category: BuddyConcernCategory;
+  notes?: string;
+  reportedAt: string;
+}
+
+export interface BuddyAdminReview {
+  decision: 'dismissed' | 'confirmed';
+  notes?: string;
+  reviewedBy: string;
+  reviewedAt: string;
+}
+
+export interface BuddyReferral {
+  id: string;
+  linkId: string;
+  requestId: string;
+  matchId: string;
+  donorId: string;
+  referrerUid: string;
+  friendName: string;
+  friendPhone: string;
+  status: 'interest_received' | 'reported';
+  createdAt: string;
+  hospitalReport?: BuddyHospitalReport;
+  adminReview?: BuddyAdminReview;
+}
+
+export interface BlockedEmail {
+  email: string;
+  reason: string;
+  blockedAt: string;
+  blockedBy: string;
+  deletedUid: string;
 }
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import admin from '../utils/firebaseAdmin.js';
 import { find, insert } from '../utils/db.js';
 import type { User, UserRole } from '../types.js';
+import { isEmailBlocked } from '../utils/accountRestrictions.js';
 
 export const JWT_SECRET = process.env.JWT_SECRET || 'lifepulse_local_jwt_secret_key_2026';
 
@@ -21,7 +22,10 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
   // 1. Try local JWT token first
   try {
     const payload = jwt.verify(token, JWT_SECRET) as { uid: string; email?: string; role?: UserRole };
-    let user = find<User>('users', (u) => u.uid === payload.uid || (payload.email && u.email.toLowerCase() === payload.email.toLowerCase()));
+    if (isEmailBlocked(payload.email)) {
+      return res.status(403).json({ error: 'This email address is not permitted to access LifePulse.' });
+    }
+    let user = find<User>('users', (u) => u.uid === payload.uid || Boolean(payload.email && u.email.toLowerCase() === payload.email.toLowerCase()));
     if (user) {
       req.user = user;
       return next();
@@ -34,6 +38,9 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
   try {
     if (admin && admin.apps && admin.apps.length) {
       const decoded = await admin.auth().verifyIdToken(token, true);
+      if (isEmailBlocked(decoded.email)) {
+        return res.status(403).json({ error: 'This email address is not permitted to access LifePulse.' });
+      }
       let user = find<User>('users', (u) => u.uid === decoded.uid);
 
       if (!user) {

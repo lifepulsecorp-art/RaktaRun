@@ -178,5 +178,51 @@
     "verifiedAt": "2026-03-20T10:00:00.000Z",
     "createdAt": "2026-03-20T09:00:00.000Z",
     "updatedAt": "2026-03-20T10:00:00.000Z"
+  },
+  {
+    "id": "hosp_b02c4775",
+    "uid": "user_66f55e5d",
+    "name": "District Hosp",
+    "address": "Udupi,",
+    "district": "Udupi",
+    "coordinates": {
+      "latitude": 13.3524,
+      "longitude": 74.7927
+    },
+    "verificationStatus": "verified",
+    "bloodBankContact": {
+      "name": "Dr.Adhitya",
+      "phone": "6786785689",
+      "email": "donor1@gmail.com"
+    },
+    "licenseNumber": "REG-KA-890",
+    "registrationNumber": "REG-KA-890",
+    "createdAt": "2026-10-11T08:26:33.013Z",
+    "updatedAt": "2026-10-11T08:32:27.366Z",
+    "verifiedBy": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "verifiedAt": "2026-10-11T08:32:27.364Z"
+  },
+  {
+    "id": "hosp_fd68a3e8",
+    "uid": "user_ad3b4f10",
+    "name": "asd",
+    "address": "asd,",
+    "district": "Udupi",
+    "coordinates": {
+      "latitude": 13.3524,
+      "longitude": 74.7927
+    },
+    "verificationStatus": "verified",
+    "bloodBankContact": {
+      "name": "asd",
+      "phone": "4564564567",
+      "email": "hosp@gmail.com"
+    },
+    "licenseNumber": "asd",
+    "registrationNumber": "asd",
+    "createdAt": "2026-10-11T08:58:07.419Z",
+    "updatedAt": "2026-10-11T08:58:42.557Z",
+    "verifiedBy": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "verifiedAt": "2026-10-11T08:58:42.556Z"
   }
 ]
