@@ -1,4 +1,4 @@
-# 🩸 RaktaRun — Emergency Blood Donor Matching & Coordination Network
+# 🩸 RaktaRun : Emergency Blood Donor Matching & Coordination Network
 
 > *"Every minute matters. Connect. Locate. Respond. Save."*
 
