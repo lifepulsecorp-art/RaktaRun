@@ -1,8 +1,8 @@
-# 🩸 LifePulse — Emergency Blood Donor Matching & Coordination Network
+# 🩸 RaktaRun — Emergency Blood Donor Matching & Coordination Network
 
 > *"Every minute matters. Connect. Locate. Respond. Save."*
 
-**LifePulse** is a mission-critical, real-time emergency blood donation matching and coordination system designed for the Coastal Karnataka region (**Udupi & Dakshina Kannada** districts). Rather than operating as an unverified public phone directory, LifePulse connects trauma centers exclusively with **medically screened, verified blood donors** during acute emergencies and mass-casualty surges.
+**RaktaRun** is a mission-critical, real-time emergency blood donation matching and coordination system designed for the Coastal Karnataka region (**Udupi & Dakshina Kannada** districts). Rather than operating as an unverified public phone directory, RaktaRun connects trauma centers exclusively with **medically screened, verified blood donors** during acute emergencies and mass-casualty surges.
 
 ---
 
@@ -37,7 +37,7 @@
 ### 6. 🏆 Community Recognition & Private Hero Studio
 - **Public Hero Wall (`/heroes`):** Celebrates verified blood donors who opt in to community recognition.
 - **Private Instagram Hero Share Studio (`/donor/hero-studio`):** Generates high-resolution 1:1 Square (1080x1080) and 9:16 Instagram Story (1080x1920) graphics for completed donations with 1-click download.
-- **5 Recognition Badges:** LifePulse Hero, Rapid Responder, Repeat Hero, Rare Blood Hero, and Community Champion.
+- **5 Recognition Badges:** RaktaRun Hero, Rapid Responder, Repeat Hero, Rare Blood Hero, and Community Champion.
 
 ### 7. 🔒 District Administration & Telemetry Console
 - **District Filters:** Monitor requests, matches, and dispatches filtered across Udupi and Dakshina Kannada.
@@ -104,7 +104,7 @@ NODE_ENV=development
 # Brevo Transactional Email & SMS Gateway
 BREVO_API_KEY=your_brevo_api_key_here
 BREVO_SENDER_EMAIL=lifepulsecorp@gmail.com
-BREVO_SENDER_NAME=LifePulse Emergency Network
+BREVO_SENDER_NAME=RaktaRun Emergency Network
 ```
 
 ### 4. Running the Application
