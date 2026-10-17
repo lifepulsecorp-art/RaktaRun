@@ -79,7 +79,7 @@
 
 ---
 
-## 🚀 Quick Start Guide
+##  Quick Start Guide
 
 ### 1. Prerequisites
 - **Node.js:** v18.0.0 or higher
