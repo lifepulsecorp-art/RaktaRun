@@ -191,17 +191,6 @@ export default function LiveMap({ hospital, donors, className = '' }: LiveMapPro
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapApi, hospital.latitude, hospital.longitude, pointsKey]);
 
-  useEffect(() => () => {
-    hospitalMarker.current?.setMap(null);
-    hospitalMarker.current = null;
-    for (const marker of donorMarkers.current.values()) marker.setMap(null);
-    donorMarkers.current.clear();
-    for (const line of routeLines.current.values()) line.setMap(null);
-    routeLines.current.clear();
-    routeRequests.current.clear();
-    map.current = null;
-  }, []);
-
   return (
     <div className={`overflow-hidden rounded-xl border border-slate-800 bg-slate-950 ${className}`}>
       {error && (

@@ -27,16 +27,6 @@ const isCertificateImage = (file: File) => {
   return Boolean(expectedMime && (!file.type || file.type === expectedMime));
 };
 
-const readFileAsBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = () => {
-    const result = String(reader.result || '');
-    resolve(result.split(',')[1] || result);
-  };
-  reader.onerror = () => reject(reader.error || new Error('Could not read certificate image.'));
-  reader.readAsDataURL(file);
-});
-
 export const DonorRegisterPage: React.FC = () => {
   const { profile, roleData, refreshProfile } = useAuth();
   const navigate = useNavigate();
@@ -59,7 +49,7 @@ export const DonorRegisterPage: React.FC = () => {
   const [certificateId, setCertificateId] = useState(roleData?.verification?.certificateId || `LP-CERT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`);
   const [verifiedBy, setVerifiedBy] = useState(roleData?.verification?.verifiedBy || 'Dr. Screening Officer');
   const [certificateFileName, setCertificateFileName] = useState<string>(roleData?.verification?.certificateFileName || '');
-  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const [certificateFileBase64, setCertificateFileBase64] = useState<string>('');
 
   useEffect(() => {
     if (roleData) {
@@ -105,21 +95,23 @@ export const DonorRegisterPage: React.FC = () => {
 
     setErrorMessage(null);
     setCertificateFileName(file.name);
-    setCertificateFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64Data = result.split(',')[1] || result;
+      setCertificateFileBase64(base64Data);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!certificateFile && !roleData?.verification?.certificateFileName) {
+    if (!certificateFileBase64 && !roleData?.verification?.certificateFileName) {
       setErrorMessage('Please upload your hospital screening certificate as a JPG, PNG, or WEBP image.');
       return;
     }
-    if (certificateFile && !isCertificateImage(certificateFile)) {
+    if (certificateFileBase64 && !/\.(jpe?g|png|webp)$/i.test(certificateFileName)) {
       setErrorMessage('Upload a certificate image in JPG, PNG, or WEBP format. PDF files are not accepted.');
-      return;
-    }
-    if (certificateFile && certificateFile.size > 3 * 1024 * 1024) {
-      setErrorMessage('Certificate images must be 3 MB or smaller.');
       return;
     }
     setLoading(true);
@@ -128,7 +120,6 @@ export const DonorRegisterPage: React.FC = () => {
     const rhType = bloodGroup.includes('-') ? 'negative' : 'positive';
 
     try {
-      const certificateFileBase64 = certificateFile ? await readFileAsBase64(certificateFile) : '';
       const payload = {
         fullName,
         phone,
@@ -149,7 +140,7 @@ export const DonorRegisterPage: React.FC = () => {
       navigate('/donor');
     } catch (err: any) {
       console.error('Registration error:', err);
-      setErrorMessage(err.response?.data?.error || err.message || 'Failed to complete donor onboarding.');
+      setErrorMessage(err.response?.data?.error || 'Failed to complete donor onboarding.');
     } finally {
       setLoading(false);
     }

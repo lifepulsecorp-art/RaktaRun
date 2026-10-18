@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { AppLayout } from '../components/AppLayout';
-import { getToken } from '../utils/tokenStorage';
 import {
   Shield,
   Building2,
@@ -119,7 +118,7 @@ export const AdminDashboardPage: React.FC = () => {
   };
 
   const exportCsv = () => {
-    const token = getToken();
+    const token = localStorage.getItem('lifepulse_token');
     const url = `${api.defaults.baseURL || 'http://localhost:5000/api'}/admin/reports/export`;
     // Trigger download
     fetch(url, { headers: { Authorization: `Bearer ${token}` } })

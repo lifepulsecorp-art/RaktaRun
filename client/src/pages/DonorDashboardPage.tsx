@@ -30,7 +30,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import LocationPickerModal from '../components/LocationPickerModal';
 import { AppLayout } from '../components/AppLayout';
-import { usePolling } from '../hooks/usePolling';
 
 const BADGE_MAP: Record<string, { label: string; icon: string }> = {
   life_pulse_hero: { label: 'RaktaRun Hero', icon: '✦' },
@@ -222,12 +221,15 @@ export const DonorDashboardPage: React.FC = () => {
     }
   }, []);
 
-  usePolling(refreshAlerts, 5000);
-
   useEffect(() => {
-    const clock = window.setInterval(() => setNow(Date.now()), 5000);
-    return () => window.clearInterval(clock);
-  }, []);
+    refreshAlerts();
+    const poll = setInterval(refreshAlerts, 4000);
+    const clock = setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      clearInterval(poll);
+      clearInterval(clock);
+    };
+  }, [refreshAlerts]);
 
   const pendingAlerts = allAlerts.filter(
     (entry: any) =>

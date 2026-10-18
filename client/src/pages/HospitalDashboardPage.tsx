@@ -4,7 +4,6 @@ import { Send, History, X, Building2, Calendar, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { AppLayout } from '../components/AppLayout';
-import { usePolling } from '../hooks/usePolling';
 
 export const HospitalDashboardPage: React.FC = () => {
   const { roleData } = useAuth();
@@ -46,7 +45,11 @@ export const HospitalDashboardPage: React.FC = () => {
     }
   }, [hospitalId]);
 
-  usePolling(refresh, 10000);
+  useEffect(() => {
+    refresh();
+    const timer = setInterval(refresh, 10000);
+    return () => clearInterval(timer);
+  }, [refresh]);
 
   return (
     <AppLayout

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../utils/api';
-import { setToken } from '../../utils/tokenStorage';
 import { useAuth } from '../../context/AuthContext';
 import { RaktaRunLogo } from '../../components/RaktaRunLogo';
 import EmailOtpVerification from '../../components/EmailOtpVerification';
@@ -197,7 +196,7 @@ export default function DonorRegisterPage() {
   };
 
   const completeRegistration = async (token: string) => {
-    setToken(token);
+    localStorage.setItem('lifepulse_token', token);
     const certificateFileBase64 = form.certificate ? await readFileAsBase64(form.certificate) : '';
     await api.post('/donors/register', {
       fullName: form.fullName.trim(),

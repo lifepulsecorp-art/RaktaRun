@@ -8,7 +8,6 @@ import { AppLayout } from '../components/AppLayout';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { usePolling } from '../hooks/usePolling';
 
 export const LiveTrackingPage: React.FC = () => {
   const { requestId = '' } = useParams();
@@ -58,11 +57,15 @@ export const LiveTrackingPage: React.FC = () => {
     }
   }, [requestId, role, celebrated]);
 
-  usePolling(refresh, 5000);
-
-  useEffect(() => () => {
-    if (watchId.current !== null) navigator.geolocation?.clearWatch(watchId.current);
-  }, []);
+  useEffect(() => {
+    refresh();
+    const intervalMs = role === 'donor' ? 4000 : 2500;
+    const timer = setInterval(refresh, intervalMs);
+    return () => {
+      clearInterval(timer);
+      if (watchId.current !== null) navigator.geolocation?.clearWatch(watchId.current);
+    };
+  }, [refresh, role]);
 
   const startSharing = useCallback(() => {
     if (!navigator.geolocation) {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../utils/api';
-import { setToken } from '../../utils/tokenStorage';
 import { useAuth } from '../../context/AuthContext';
 import { RaktaRunLogo } from '../../components/RaktaRunLogo';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
@@ -68,7 +67,7 @@ export default function HospitalRegisterPage() {
   };
 
   const completeRegistration = async (token: string) => {
-    setToken(token);
+    localStorage.setItem('lifepulse_token', token);
     await api.post('/hospitals/register', {
       name: form.name,
       licenseNumber: form.registrationNumber,

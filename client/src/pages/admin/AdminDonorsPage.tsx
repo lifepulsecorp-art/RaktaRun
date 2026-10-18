@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import {
@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '../../components/AppLayout';
 import { Badge } from '../../components/ui/Badge';
-import { usePolling } from '../../hooks/usePolling';
 
 interface Donor {
   id: string;
@@ -71,7 +70,11 @@ export const AdminDonorsPage: React.FC = () => {
     }
   };
 
-  usePolling(() => fetchDonors(donors.length === 0), 15000);
+  useEffect(() => {
+    void fetchDonors();
+    const refreshTimer = window.setInterval(() => void fetchDonors(false), 15_000);
+    return () => window.clearInterval(refreshTimer);
+  }, []);
 
   const handleViewCertificate = async (donorId: string) => {
     const certificateWindow = window.open('about:blank', '_blank');
