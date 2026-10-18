@@ -16,7 +16,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
       <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
         <div className="text-center">
           <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-rose-500 border-t-transparent"></div>
-          <p className="mt-4 font-medium text-slate-300">Verifying LifePulse Credentials...</p>
+          <p className="mt-4 font-medium text-slate-300">Verifying RaktaRun Credentials...</p>
         </div>
       </div>
     );

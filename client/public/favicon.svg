@@ -25,7 +25,7 @@
     stroke-opacity="0.35"
   />
 
-  <!-- LifePulse ECG Rhythm Wave -->
+  <!-- RaktaRun ECG Rhythm Wave -->
   <path
     d="M16 41 L24 41 L27 34 L31 47 L36 29 L40 44 L43 41 L48 41"
     stroke="#ffffff"

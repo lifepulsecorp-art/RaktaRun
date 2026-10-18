@@ -6,6 +6,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import api from '../utils/api';
+import { clearToken, getToken, setToken } from '../utils/tokenStorage';
 
 export type UserRole = 'admin' | 'hospital' | 'donor';
 
@@ -57,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initAuth = async () => {
-      const localToken = localStorage.getItem('lifepulse_token');
+      const localToken = getToken();
       if (localToken) {
         await fetchProfile();
       } else {
@@ -90,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Save local JWT
       if (token) {
-        localStorage.setItem('lifepulse_token', token);
+        setToken(token);
       }
 
       setProfile(user);
@@ -106,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    localStorage.removeItem('lifepulse_token');
+    clearToken();
     try {
       if (auth) await signOut(auth);
     } catch {

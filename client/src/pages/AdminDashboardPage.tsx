@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { AppLayout } from '../components/AppLayout';
+import { getToken } from '../utils/tokenStorage';
 import {
   Shield,
   Building2,
@@ -118,7 +119,7 @@ export const AdminDashboardPage: React.FC = () => {
   };
 
   const exportCsv = () => {
-    const token = localStorage.getItem('lifepulse_token');
+    const token = getToken();
     const url = `${api.defaults.baseURL || 'http://localhost:5000/api'}/admin/reports/export`;
     // Trigger download
     fetch(url, { headers: { Authorization: `Bearer ${token}` } })
@@ -126,7 +127,7 @@ export const AdminDashboardPage: React.FC = () => {
       .then((blob) => {
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `lifepulse-audit-trail-${new Date().toISOString().slice(0, 10)}.csv`;
+        link.download = `raktarun-audit-trail-${new Date().toISOString().slice(0, 10)}.csv`;
         link.click();
       })
       .catch((err) => console.error('Export failed', err));
@@ -788,7 +789,7 @@ export const AdminDashboardPage: React.FC = () => {
             {/* Modal Footer */}
             <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-950/60">
               <span className="text-xs text-slate-500 dark:text-slate-400">
-                LifePulse Emergency Dispatch System · Audit Logs Synchronized
+                RaktaRun Emergency Dispatch System · Audit Logs Synchronized
               </span>
               <button
                 type="button"

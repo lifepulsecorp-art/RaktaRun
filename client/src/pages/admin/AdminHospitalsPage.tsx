@@ -105,7 +105,7 @@ export const AdminHospitalsPage: React.FC = () => {
   return (
     <AppLayout
       title="Hospital Accreditation Auditing"
-      subtitle="LifePulse Medical Authority • Block F Clinical Verification"
+      subtitle="RaktaRun Medical Authority • Block F Clinical Verification"
       actions={headerActions}
       withSidebar={true}
     >

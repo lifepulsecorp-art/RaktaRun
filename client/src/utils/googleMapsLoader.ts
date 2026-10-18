@@ -3,13 +3,13 @@ type GoogleMapsApi = any;
 declare global {
   interface Window {
     google?: GoogleMapsApi;
-    __lifePulseMapsPromise?: Promise<GoogleMapsApi>;
+    __raktaRunMapsPromise?: Promise<GoogleMapsApi>;
   }
 }
 
 export function loadGoogleMaps(apiKey: string): Promise<GoogleMapsApi> {
   if (window.google?.maps?.importLibrary) return Promise.resolve(window.google.maps);
-  if (window.__lifePulseMapsPromise) return window.__lifePulseMapsPromise;
+  if (window.__raktaRunMapsPromise) return window.__raktaRunMapsPromise;
 
   const google = window.google ?? (window.google = {});
   const maps = google.maps ?? (google.maps = {});
@@ -38,8 +38,8 @@ export function loadGoogleMaps(apiKey: string): Promise<GoogleMapsApi> {
     return bootstrapPromise.then(() => maps.importLibrary(library, ...args));
   };
 
-  window.__lifePulseMapsPromise = maps.importLibrary('maps').then(() => maps);
+  window.__raktaRunMapsPromise = maps.importLibrary('maps').then(() => maps);
 
-  return window.__lifePulseMapsPromise!;
+  return window.__raktaRunMapsPromise!;
 }
 

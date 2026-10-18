@@ -1,11 +1,5 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { readJson, writeJson } from '../utils/db.js';
 import type { SystemConfig } from '../types.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const CONFIG_FILE = path.join(__dirname, '../../data/systemConfig.json');
 
 const DEFAULT_CONFIG: SystemConfig = {
   alertTimeoutSeconds: 120,
@@ -14,20 +8,13 @@ const DEFAULT_CONFIG: SystemConfig = {
   schedulerIntervalSeconds: 30,
 };
 
-export function getSystemConfig(): SystemConfig {
-  try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
-      return { ...DEFAULT_CONFIG, ...data };
-    }
-  } catch (err) {
-    console.error('Error reading systemConfig.json, using defaults:', err);
-  }
-  return DEFAULT_CONFIG;
+export async function getSystemConfig(): Promise<SystemConfig> {
+  const [stored] = await readJson<SystemConfig>('systemConfig');
+  return { ...DEFAULT_CONFIG, ...stored };
 }
 
-export function updateSystemConfig(patch: Partial<SystemConfig>): SystemConfig {
-  const current = getSystemConfig();
+export async function updateSystemConfig(patch: Partial<SystemConfig>): Promise<SystemConfig> {
+  const current = await getSystemConfig();
   const updated: SystemConfig = {
     ...current,
     ...patch,
@@ -37,11 +24,6 @@ export function updateSystemConfig(patch: Partial<SystemConfig>): SystemConfig {
     schedulerIntervalSeconds: Math.max(10, Math.min(300, Number(patch.schedulerIntervalSeconds) || current.schedulerIntervalSeconds)),
   };
 
-  try {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(updated, null, 2), 'utf-8');
-  } catch (err) {
-    console.error('Error writing systemConfig.json:', err);
-  }
+  await writeJson('systemConfig', [updated]);
   return updated;
 }
-

@@ -51,7 +51,7 @@ export async function sendSmsAlert(toPhone: string, message: string): Promise<Ch
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          sender: 'LifePulse',
+          sender: 'RaktaRun',
           recipient: formattedTo,
           content: message,
           type: 'transactional',
@@ -176,10 +176,10 @@ export async function sendEmailAlert(
   htmlContent: string
 ): Promise<ChannelDispatchResult> {
   const brevoKey = process.env.BREVO_API_KEY?.trim();
-  const senderEmail = process.env.BREVO_SENDER_EMAIL?.trim() || 'lifepulsecorp@gmail.com';
-  const senderName = process.env.BREVO_SENDER_NAME?.trim() || 'LifePulse Emergency Network';
+  const senderEmail = process.env.BREVO_SENDER_EMAIL?.trim();
+  const senderName = process.env.BREVO_SENDER_NAME?.trim() || 'RaktaRun Emergency Network';
 
-  if (brevoKey) {
+  if (brevoKey && senderEmail) {
     try {
       const response = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
@@ -229,20 +229,20 @@ export async function sendEmailAlert(
     }
   }
 
-  // Built-in Simulator Mode
-  console.log(`\n================== [LIFE-PULSE BREVO EMAIL SIMULATOR] ==================`);
-  console.log(`TO:       ${toName} <${toEmail}>`);
-  console.log(`FROM:     ${senderName} <${senderEmail}>`);
-  console.log(`SUBJECT:  ${subject}`);
-  console.log(`STATUS:   DELIVERED via Brevo Simulator`);
-  console.log(`========================================================================\n`);
+  // Without a real API key, do not report a simulated message as delivered.
+  const missingSettings = [
+    !brevoKey && 'BREVO_API_KEY',
+    !senderEmail && 'BREVO_SENDER_EMAIL',
+  ].filter(Boolean);
+  const error = `${missingSettings.join(' and ')} ${missingSettings.length === 1 ? 'is' : 'are'} not configured; no real email was sent.`;
+  console.warn(`[EMAIL NOT SENT] ${error} Recipient: ${toEmail}`);
 
   return {
     channel: 'email',
     recipient: toEmail,
-    success: true,
+    success: false,
     provider: 'simulator',
-    messageId: `sim_email_${Date.now()}`,
+    error,
   };
 }
 
@@ -265,17 +265,17 @@ export async function sendRegistrationNotification(data: {
   if (data.role === 'donor') {
     // 1. Donor Welcome Email
     if (data.email) {
-      const subject = `Welcome to LifePulse Emergency Donor Network, ${data.name}`;
+      const subject = `Welcome to RaktaRun Emergency Donor Network, ${data.name}`;
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #0f172a; color: #f8fafc; border-radius: 12px; border: 1px solid #1e293b;">
           <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #f43f5e; margin: 0; font-size: 26px;">LifePulse Emergency Network</h1>
+            <h1 style="color: #f43f5e; margin: 0; font-size: 26px;">RaktaRun Emergency Network</h1>
             <p style="color: #fda4af; font-size: 13px; margin: 4px 0 0 0;">Coastal Karnataka Trauma Coordination</p>
           </div>
 
           <p style="font-size: 16px; line-height: 1.5; color: #cbd5e1;">Dear <strong>${data.name}</strong>,</p>
           <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1;">
-            Thank you for registering as a verified blood donor on the LifePulse Emergency Network.
+            Thank you for registering as a verified blood donor on the RaktaRun Emergency Network.
             Your medical screening certificate has been received and submitted for clinical verification.
           </p>
 
@@ -295,7 +295,7 @@ export async function sendRegistrationNotification(data: {
           </div>
 
           <hr style="border: none; border-top: 1px solid #334155; margin: 24px 0;" />
-          <p style="font-size: 11px; color: #64748b; text-align: center; margin: 0;">LifePulse Emergency Dispatch Network • Manipal & Mangaluru Grid</p>
+          <p style="font-size: 11px; color: #64748b; text-align: center; margin: 0;">RaktaRun Emergency Dispatch Network • Manipal & Mangaluru Grid</p>
         </div>
       `;
 
@@ -305,7 +305,7 @@ export async function sendRegistrationNotification(data: {
 
     // 2. Donor Welcome SMS
     if (data.phone) {
-      const smsText = `LifePulse: Welcome ${data.name}! Your donor profile (${data.bloodGroup || 'Blood Donor'}) is registered. You will receive real-time emergency alerts when nearby hospitals need your blood group.`;
+      const smsText = `RaktaRun: Welcome ${data.name}! Your donor profile (${data.bloodGroup || 'Blood Donor'}) is registered. You will receive real-time emergency alerts when nearby hospitals need your blood group.`;
       const smsRes = await sendSmsAlert(data.phone, smsText);
       smsSent = smsRes.success;
     }
@@ -313,20 +313,20 @@ export async function sendRegistrationNotification(data: {
     // Hospital Registration
     const hospitalTitle = data.hospitalName || data.name;
     if (data.email) {
-      const subject = `LifePulse Healthcare Authority Registration: ${hospitalTitle}`;
+      const subject = `RaktaRun Healthcare Authority Registration: ${hospitalTitle}`;
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #0f172a; color: #f8fafc; border-radius: 12px; border: 1px solid #1e293b;">
-          <h1 style="color: #10b981; margin: 0 0 10px 0; font-size: 22px;">LifePulse Medical Authority</h1>
+          <h1 style="color: #10b981; margin: 0 0 10px 0; font-size: 22px;">RaktaRun Medical Authority</h1>
           <p style="font-size: 15px; color: #cbd5e1;">Dear <strong>${hospitalTitle}</strong> Blood Bank Authority,</p>
           <p style="font-size: 14px; color: #cbd5e1; line-height: 1.6;">
-            Your healthcare center registration has been successfully received. Clinical license and blood bank credentials are being reviewed by the LifePulse administrator desk.
+            Your healthcare center registration has been successfully received. Clinical license and blood bank credentials are being reviewed by the RaktaRun administrator desk.
           </p>
           <div style="background-color: #1e293b; padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
             <p style="margin: 4px 0; font-size: 13px;"><strong>Hospital:</strong> ${hospitalTitle}</p>
             <p style="margin: 4px 0; font-size: 13px;"><strong>Status:</strong> Accreditation Audit In Progress</p>
             <p style="margin: 4px 0; font-size: 13px;"><strong>Emergency Broadcasts:</strong> Available immediately upon accreditation</p>
           </div>
-          <p style="font-size: 12px; color: #64748b;">LifePulse Regional Trauma Desk • Udupi & Dakshina Kannada</p>
+          <p style="font-size: 12px; color: #64748b;">RaktaRun Regional Trauma Desk • Udupi & Dakshina Kannada</p>
         </div>
       `;
       const emailRes = await sendEmailAlert(data.email, hospitalTitle, subject, htmlContent);
@@ -334,7 +334,7 @@ export async function sendRegistrationNotification(data: {
     }
 
     if (data.phone) {
-      const smsText = `LifePulse: Welcome ${hospitalTitle}! Hospital registration received. Administrative accreditation review is underway.`;
+      const smsText = `RaktaRun: Welcome ${hospitalTitle}! Hospital registration received. Administrative accreditation review is underway.`;
       const smsRes = await sendSmsAlert(data.phone, smsText);
       smsSent = smsRes.success;
     }
@@ -375,18 +375,18 @@ export async function dispatchAlertNotifications(
 
   // 2. Brevo Transactional SMS Alert Message
   if (prefs.sms && donor.phone) {
-    const smsText = `${urgencyLabel}: LifePulse Match! ${request.bloodGroup} ${request.component.replace('_', ' ')} needed at ${request.hospitalName} (~${match.distance}km, ETA ~${etaMinutes}m). Respond: https://lifepulse.in/live-tracking/${request.id}`;
+    const smsText = `${urgencyLabel}: RaktaRun Match! ${request.bloodGroup} ${request.component.replace('_', ' ')} needed at ${request.hospitalName} (~${match.distance}km, ETA ~${etaMinutes}m). Respond: https://lifepulse.in/live-tracking/${request.id}`;
     const smsResult = await sendSmsAlert(donor.phone, smsText);
     results.push(smsResult);
   }
 
   // 3. Brevo Transactional Email Alert Message
-  const donorEmail = donor.email || find<User>('users', (u) => u.uid === donor.uid)?.email;
+  const donorEmail = donor.email || (await find<User>('users', (u) => u.uid === donor.uid))?.email;
   if (prefs.email !== false && donorEmail) {
     const emailSubject = `${urgencyLabel}: Emergency Blood Donation Match at ${request.hospitalName}`;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #0f172a; color: #f8fafc; border-radius: 12px; border: 1px solid #1e293b;">
-        <h1 style="color: #f43f5e; margin: 0 0 8px 0; font-size: 22px;">LifePulse Emergency Network</h1>
+        <h1 style="color: #f43f5e; margin: 0 0 8px 0; font-size: 22px;">RaktaRun Emergency Network</h1>
         <p style="font-size: 15px; line-height: 1.5; color: #cbd5e1; margin-top: 12px;">Dear ${donor.fullName},</p>
         <p style="font-size: 15px; line-height: 1.5; color: #cbd5e1;">A critical blood match has been requested for an emergency patient in your locality:</p>
         <div style="background-color: #1e293b; padding: 18px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
@@ -397,10 +397,10 @@ export async function dispatchAlertNotifications(
         </div>
         <p style="font-size: 14px; color: #94a3b8;">As a verified compatible donor, your prompt response can save a life.</p>
         <div style="text-align: center; margin: 28px 0;">
-          <a href="https://lifepulse.in/live-tracking/${request.id}" style="background-color: #e11d48; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; display: inline-block;">View Request & Accept Donation</a>
+          <a href="http://localhost:5173/live-tracking/${request.id}" style="background-color: #e11d48; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; display: inline-block;">View Request & Accept Donation</a>
         </div>
         <hr style="border: none; border-top: 1px solid #334155; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #64748b; text-align: center; margin: 0;">LifePulse Emergency Dispatch Network • Powered by Brevo</p>
+        <p style="font-size: 12px; color: #64748b; text-align: center; margin: 0;">RaktaRun Emergency Dispatch Network • Powered by Brevo</p>
       </div>
     `;
     const emailResult = await sendEmailAlert(donorEmail, donor.fullName, emailSubject, emailHtml);
@@ -408,7 +408,7 @@ export async function dispatchAlertNotifications(
   }
 
   // Log dispatch event to audit trail
-  insert('auditLogs', {
+  await insert('auditLogs', {
     id: `audit_notif_${uuidv4().slice(0, 8)}`,
     actorUid: 'system_notification_dispatcher',
     actorRole: 'system',
@@ -418,7 +418,7 @@ export async function dispatchAlertNotifications(
     details: {
       requestId: request.id,
       matchId: match.id,
-      channelsDispatched: results.map((r) => `${r.channel}:${r.provider}`),
+      channelsDispatched: results.map((r) => `${r.channel}:${r.provider}:${r.success ? 'sent' : 'failed'}`),
       phone: donor.phone,
       email: donorEmail,
     },

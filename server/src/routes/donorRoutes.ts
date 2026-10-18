@@ -1,31 +1,83 @@
 import { Router } from 'express';
-import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticate, authorizeRoles, AuthenticatedRequest } from '../middleware/auth.js';
 import { readJson, find, filter, insert, update } from '../utils/db.js';
-import type { Donor, Match, BloodRequest, User, AuditLog, Hospital } from '../types.js';
+import type { Donor, Match, BloodRequest, User, AuditLog, Hospital, BloodGroup } from '../types.js';
 import { resolveDonorResponse, updateJourney } from '../services/journey.js';
+import { distanceKm } from '../services/matching.js';
+import { reviewCertificateWithAi } from '../services/certificateAiReview.js';
+import { uploadCertificate } from '../utils/supabase.js';
 import { sendSmsAlert, sendEmailAlert, sendRegistrationNotification } from '../services/notificationService.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const CERTIFICATES_DIR = path.join(__dirname, '../../data/certificates');
-
 const router = Router();
+const VALID_BLOOD_GROUPS: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+const CERTIFICATE_IMAGE_EXTENSIONS: Record<string, string> = {
+  '.jpg': 'jpeg',
+  '.jpeg': 'jpeg',
+  '.png': 'png',
+  '.webp': 'webp',
+};
+
+function parseCertificateImage(fileName: unknown, base64: unknown): { extension: string; buffer: Buffer } | null {
+  if (typeof fileName !== 'string' || typeof base64 !== 'string' || !base64.trim()) return null;
+  const extension = path.extname(fileName).toLowerCase();
+  const expectedFormat = CERTIFICATE_IMAGE_EXTENSIONS[extension];
+  if (!expectedFormat) return null;
+
+  const buffer = Buffer.from(base64, 'base64');
+  // Base64 request bodies pass through Vercel's request payload limit.
+  if (buffer.length === 0 || buffer.length > 3 * 1024 * 1024) return null;
+  const isPng = buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  const isJpeg = buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  const isWebp = buffer.length >= 12 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP';
+  if ((expectedFormat === 'png' && !isPng)
+    || (expectedFormat === 'jpeg' && !isJpeg)
+    || (expectedFormat === 'webp' && !isWebp)) return null;
+
+  return { extension, buffer };
+}
+
+async function storeCertificate(uid: string, certificateId: string, image: { extension: string; buffer: Buffer }): Promise<string> {
+  const safeUid = uid.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const safeCertificateId = certificateId.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const objectPath = `certificates/${safeUid}/${safeCertificateId}_${Date.now()}${image.extension}`;
+  const contentType = image.extension === '.jpg' || image.extension === '.jpeg'
+    ? 'image/jpeg'
+    : image.extension === '.png' ? 'image/png' : 'image/webp';
+  return uploadCertificate(objectPath, image.buffer, contentType);
+}
+
+function certificateImageError(res: import('express').Response) {
+  return res.status(400).json({ error: 'Upload a certificate image in JPG, PNG, or WEBP format, up to 3 MB. PDF files are not accepted.' });
+}
+
+async function expireStaleDonorAlerts(donor: Donor) {
+  const pendingMatches = (await filter<Match>('matches', (match) => match.donorId === donor.id && ['pending_alert', 'alerted'].includes(match.status)));
+  for (const match of pendingMatches) {
+    const request = (await find<BloodRequest>('bloodRequests', (entry) => entry.id === match.requestId));
+    const distance = request ? distanceKm(request.hospitalLocation, donor.coordinates) : Number.POSITIVE_INFINITY;
+    const outsideRadius = !request || distance > Math.min(request.radiusKm, donor.preferredRadius || request.radiusKm);
+    const criticalOnlyMismatch = Boolean(donor.notificationPreferences?.criticalOnly) && request?.urgency !== 'critical';
+    const unavailable = donor.availabilityStatus === 'unavailable'
+      || (donor.availabilityStatus === 'emergency_only' && request?.urgency !== 'critical');
+    if (outsideRadius || criticalOnlyMismatch || unavailable) {
+      (await update<Match>('matches', match.id, { status: 'expired' }));
+    }
+  }
+}
 
 // GET /api/donors - List all donors (hospital or admin)
-router.get('/', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
-  const donors = readJson<Donor>('donors');
+router.get('/', authenticate, authorizeRoles('hospital', 'admin'), async (req: AuthenticatedRequest, res) => {
+  const donors = (await readJson<Donor>('donors'));
   if (req.user!.role === 'admin') return res.json(donors);
   res.json(donors.map(({ phone, coordinates, preciseLocation, ...publicProfile }) => publicProfile));
 });
 
 // GET /api/donors/me - Get current donor profile
-router.get('/me', authenticate, (req: AuthenticatedRequest, res) => {
+router.get('/me', authenticate, async (req: AuthenticatedRequest, res) => {
   const user = req.user!;
-  const donor = find<Donor>('donors', (d) => d.uid === user.uid || d.id === user.donorId);
+  const donor = (await find<Donor>('donors', (d) => d.uid === user.uid || d.id === user.donorId));
   if (!donor) {
     return res.status(404).json({ error: 'Donor profile not found for current user' });
   }
@@ -33,15 +85,15 @@ router.get('/me', authenticate, (req: AuthenticatedRequest, res) => {
 });
 
 // GET /api/donors/:id - Get specific donor
-router.get('/:id', authenticate, (req: AuthenticatedRequest, res) => {
-  const donor = find<Donor>('donors', (d) => d.id === req.params.id);
+router.get('/:id', authenticate, async (req: AuthenticatedRequest, res) => {
+  const donor = (await find<Donor>('donors', (d) => d.id === req.params.id));
   if (!donor) return res.status(404).json({ error: 'Donor not found' });
   if (req.user!.role !== 'admin' && donor.uid !== req.user!.uid) return res.status(403).json({ error: 'Donor profiles are private' });
   res.json(donor);
 });
 
 // POST /api/donors - Register/Onboard donor with certificate
-router.post('/', authenticate, (req: AuthenticatedRequest, res) => {
+router.post('/', authenticate, async (req: AuthenticatedRequest, res) => {
   const {
     fullName,
     phone,
@@ -65,43 +117,112 @@ router.post('/', authenticate, (req: AuthenticatedRequest, res) => {
     return res.status(400).json({ error: 'Missing mandatory donor registration fields' });
   }
 
+  const cleanName = String(fullName).trim();
+  const cleanPhone = String(phone).trim();
+  const cleanBloodGroup = String(bloodGroup).trim();
+  if (!cleanName || !cleanPhone || !VALID_BLOOD_GROUPS.includes(cleanBloodGroup as BloodGroup)) {
+    return res.status(400).json({ error: 'Enter a valid name, phone number, and blood group.' });
+  }
+
+  const existingDonor = (await find<Donor>('donors', (donor) => donor.uid === req.user!.uid || donor.id === req.user!.donorId));
+  const certificateImage = certificateFileBase64
+    ? parseCertificateImage(certificateFileName, certificateFileBase64)
+    : null;
+  if (certificateFileBase64 && !certificateImage) return certificateImageError(res);
+  if (!existingDonor && !certificateImage) return certificateImageError(res);
+  const cleanComponents = Array.isArray(bloodComponentEligibility)
+    ? bloodComponentEligibility.filter((component: unknown) => ['whole_blood', 'RBC', 'platelets', 'plasma'].includes(String(component)))
+    : ['whole_blood'];
+  const numericHemoglobin = Number(hemoglobinLevel);
+  const numericWeight = Number(weight);
+  const numericRadius = Number(preferredRadius);
+  const cleanVerification: Donor['verification'] = {
+    ...(existingDonor?.verification || {}),
+    hospitalId: hospitalId || existingDonor?.verification?.hospitalId || 'hosp_general',
+    hospitalName: hospitalName || existingDonor?.verification?.hospitalName || 'Verified Medical Centre',
+    certificateId: String(certificateId).trim(),
+    verifiedAt: new Date().toISOString(),
+    verifiedBy: verifiedBy || existingDonor?.verification?.verifiedBy || 'Screening Medical Officer',
+    expiryDate: existingDonor?.verification?.expiryDate || new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+  };
+
   const donorId = `donor_${uuidv4().substring(0, 8)}`;
   let savedCertFilename: string | undefined = undefined;
 
-  // Option 2: Save certificate file separately in server/data/certificates/
-  if (certificateFileBase64) {
-    const ext = certificateFileName ? path.extname(certificateFileName) : '.pdf';
-    savedCertFilename = `cert_${certificateId}_${Date.now()}${ext}`;
-    const buffer = Buffer.from(certificateFileBase64, 'base64');
-    fs.writeFileSync(path.join(CERTIFICATES_DIR, savedCertFilename), buffer);
+  // Store certificates in the private Supabase bucket and keep only the object path in the donor record.
+  if (certificateImage) {
+    savedCertFilename = await storeCertificate(req.user!.uid, String(certificateId).trim(), certificateImage);
+  }
+
+  if (savedCertFilename) {
+    cleanVerification.certificateFileName = savedCertFilename;
+    cleanVerification.expiryDate = new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString();
+    cleanVerification.aiReview = await reviewCertificateWithAi({
+      file: certificateImage!.buffer,
+      fileName: certificateFileName || savedCertFilename.split('/').at(-1),
+      donorName: cleanName,
+      bloodGroup: cleanBloodGroup,
+      hospitalName,
+    });
+  } else if (existingDonor?.verification?.certificateFileName) {
+    cleanVerification.certificateFileName = existingDonor.verification.certificateFileName;
+    cleanVerification.aiReview = existingDonor.verification.aiReview;
+  }
+
+  if (existingDonor) {
+    const clinicalDetailsChanged = existingDonor.bloodGroup !== cleanBloodGroup
+      || JSON.stringify(existingDonor.bloodComponentEligibility || []) !== JSON.stringify(cleanComponents)
+      || existingDonor.hemoglobinLevel !== (numericHemoglobin || 14)
+      || existingDonor.weight !== (numericWeight || 65)
+      || existingDonor.verification?.certificateId !== cleanVerification.certificateId
+      || Boolean(savedCertFilename);
+
+    const updated = (await update<Donor>('donors', existingDonor.id, {
+      fullName: cleanName,
+      phone: cleanPhone,
+      bloodGroup: cleanBloodGroup as Donor['bloodGroup'],
+      rhType: rhType || (cleanBloodGroup.endsWith('-') ? 'negative' : 'positive'),
+      bloodComponentEligibility: cleanComponents as Donor['bloodComponentEligibility'],
+      hemoglobinLevel: numericHemoglobin || 14,
+      weight: numericWeight || 65,
+      homeLocality: homeLocality || existingDonor.homeLocality,
+      preferredRadius: Number.isFinite(numericRadius) ? Math.max(5, Math.min(50, numericRadius)) : existingDonor.preferredRadius,
+      coordinates: coordinates || existingDonor.coordinates,
+      verification: cleanVerification,
+      ...(clinicalDetailsChanged ? { eligibilityStatus: 'pending' as const } : {}),
+    }));
+    (await update<User>('users', req.user!.uid, { donorId: existingDonor.id, role: 'donor', name: cleanName, phone: cleanPhone }));
+    if (clinicalDetailsChanged) {
+      for (const match of await filter<Match>('matches', (match) => match.donorId === existingDonor.id && ['pending_alert', 'alerted'].includes(match.status))) {
+        await update<Match>('matches', match.id, { status: 'expired' });
+      }
+    } else if (updated) {
+      await expireStaleDonorAlerts(updated);
+    }
+    return res.status(200).json({ message: 'Donor profile updated', donor: updated || existingDonor });
   }
 
   const newDonor: Donor = {
     id: donorId,
     uid: req.user!.uid,
-    fullName,
-    phone,
+    fullName: cleanName,
+    phone: cleanPhone,
     aadhaarVerified: true,
-    bloodGroup,
+    bloodGroup: cleanBloodGroup as Donor['bloodGroup'],
     rhType: rhType || 'positive',
-    bloodComponentEligibility: bloodComponentEligibility || ['whole_blood'],
+    bloodComponentEligibility: cleanComponents as Donor['bloodComponentEligibility'],
     lastDonationDate: null,
     hemoglobinLevel: Number(hemoglobinLevel) || 14.0,
     weight: Number(weight) || 65,
-    eligibilityStatus: 'eligible',
+    eligibilityStatus: 'pending',
     verification: {
-      hospitalId: hospitalId || 'hosp_general',
-      hospitalName: hospitalName || 'Verified Medical Centre',
-      certificateId,
-      verifiedAt: new Date().toISOString(),
-      verifiedBy: verifiedBy || 'Screening Medical Officer',
+      ...cleanVerification,
       certificateFileName: savedCertFilename,
-      expiryDate: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
     },
     homeLocality: homeLocality || 'Udupi/Mangaluru',
     coordinates: coordinates || { latitude: 13.35, longitude: 74.78 },
     locationSharingEnabled: false,
-    preferredRadius: Number(preferredRadius) || 15,
+    preferredRadius: Number.isFinite(numericRadius) ? Math.max(5, Math.min(50, numericRadius)) : 15,
     availabilityStatus: 'available',
     heroStats: {
       totalEmergencyResponses: 0,
@@ -113,14 +234,14 @@ router.post('/', authenticate, (req: AuthenticatedRequest, res) => {
     updatedAt: new Date().toISOString(),
   };
 
-  insert<Donor>('donors', newDonor);
-  update<User>('users', req.user!.uid, { donorId: newDonor.id, role: 'donor' });
+  (await insert<Donor>('donors', newDonor));
+  (await update<User>('users', req.user!.uid, { donorId: newDonor.id, role: 'donor', name: cleanName, phone: cleanPhone }));
 
   res.status(201).json(newDonor);
 });
 
 // POST /api/donors/register - Self-service registration from public onboarding
-router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
+router.post('/register', authenticate, async (req: AuthenticatedRequest, res) => {
   const {
     fullName,
     phone,
@@ -134,29 +255,40 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
 
   const cleanName = typeof fullName === 'string' ? fullName.trim() : '';
   const cleanPhone = typeof phone === 'string' ? phone.trim() : '';
-  const cleanBloodGroup = typeof bloodGroup === 'string' ? bloodGroup.trim() : '';
+  const rawBloodGroup = typeof bloodGroup === 'string' ? bloodGroup.trim() : '';
+  if (!VALID_BLOOD_GROUPS.includes(rawBloodGroup as BloodGroup)) {
+    return res.status(400).json({ error: 'Choose a valid blood group.' });
+  }
+  const cleanBloodGroup = rawBloodGroup as BloodGroup;
 
   if (!cleanName || !cleanPhone || !cleanBloodGroup) {
     return res.status(400).json({ error: 'Full name, phone, and blood group are required.' });
   }
 
-  // Ensure certificates directory exists
-  try {
-    fs.mkdirSync(CERTIFICATES_DIR, { recursive: true });
-  } catch {}
+  const existingDonor = (await find<Donor>('donors', (d) => d.uid === req.user!.uid));
+  const certificateImage = certificateFileBase64
+    ? parseCertificateImage(certificateFileName, certificateFileBase64)
+    : null;
+  if (certificateFileBase64 && !certificateImage) return certificateImageError(res);
+  if (!existingDonor && !certificateImage) return certificateImageError(res);
 
   let savedCertFilename: string | undefined = undefined;
-  if (certificateFileBase64) {
-    const ext = certificateFileName ? path.extname(certificateFileName) : '.jpg';
-    savedCertFilename = `cert_${req.user!.uid}_${Date.now()}${ext || '.jpg'}`;
-    const buffer = Buffer.from(certificateFileBase64, 'base64');
-    fs.writeFileSync(path.join(CERTIFICATES_DIR, savedCertFilename), buffer);
+  if (certificateImage) {
+    savedCertFilename = await storeCertificate(req.user!.uid, `registration_${Date.now()}`, certificateImage);
   }
 
-  // Check if donor already exists for this UID
-  let existingDonor = find<Donor>('donors', (d) => d.uid === req.user!.uid);
+  const aiReview = savedCertFilename
+    ? await reviewCertificateWithAi({
+        file: certificateImage!.buffer,
+        fileName: certificateFileName || savedCertFilename.split('/').at(-1),
+        donorName: cleanName,
+        bloodGroup: cleanBloodGroup,
+      })
+    : existingDonor?.verification.aiReview;
+
   if (existingDonor) {
-    const updated = update<Donor>('donors', existingDonor.id, {
+    const medicalDetailsChanged = existingDonor.bloodGroup !== cleanBloodGroup || Boolean(savedCertFilename);
+    const updated = (await update<Donor>('donors', existingDonor.id, {
       fullName: cleanName,
       phone: cleanPhone,
       bloodGroup: cleanBloodGroup,
@@ -167,9 +299,17 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
         ...existingDonor.verification,
         certificateFileName: savedCertFilename || existingDonor.verification.certificateFileName,
         verifiedAt: new Date().toISOString(),
+        ...(savedCertFilename ? { expiryDate: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString() } : {}),
+        aiReview,
       },
-    });
-    update<User>('users', req.user!.uid, { donorId: existingDonor.id, role: 'donor', name: cleanName, phone: cleanPhone });
+      ...(medicalDetailsChanged ? { eligibilityStatus: 'pending' as const } : {}),
+    }));
+    (await update<User>('users', req.user!.uid, { donorId: existingDonor.id, role: 'donor', name: cleanName, phone: cleanPhone }));
+    if (medicalDetailsChanged) {
+      for (const match of await filter<Match>('matches', (match) => match.donorId === existingDonor.id && ['pending_alert', 'alerted'].includes(match.status))) {
+        await update<Match>('matches', match.id, { status: 'expired' });
+      }
+    }
     return res.status(200).json({ donor: updated || existingDonor });
   }
 
@@ -195,6 +335,7 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
       verifiedAt: new Date().toISOString(),
       verifiedBy: 'Pending Review',
       certificateFileName: savedCertFilename,
+      aiReview,
       expiryDate: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
     },
     homeLocality: homeLocality ? `${homeLocality} (${pincode || ''})`.trim() : 'Udupi/Mangaluru',
@@ -212,8 +353,8 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
     updatedAt: new Date().toISOString(),
   };
 
-  insert<Donor>('donors', newDonor);
-  update<User>('users', req.user!.uid, { donorId: newDonor.id, role: 'donor', name: cleanName, phone: cleanPhone });
+  (await insert<Donor>('donors', newDonor));
+  (await update<User>('users', req.user!.uid, { donorId: newDonor.id, role: 'donor', name: cleanName, phone: cleanPhone }));
 
   // Send Welcome Email & SMS via Brevo
   sendRegistrationNotification({
@@ -228,26 +369,34 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
 });
 
 // POST /api/donors/certificate - Upload certificate base64 file for current donor
-router.post('/certificate', authenticate, (req: AuthenticatedRequest, res) => {
+router.post('/certificate', authenticate, async (req: AuthenticatedRequest, res) => {
   const { fileName, fileData } = req.body;
   if (!fileData) {
     return res.status(400).json({ error: 'fileData (base64) is required' });
   }
 
-  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
-  const ext = fileName ? path.extname(fileName) : '.pdf';
-  const savedCertFilename = `cert_${req.user!.uid}_${Date.now()}${ext || '.pdf'}`;
-  const buffer = Buffer.from(fileData, 'base64');
-  fs.writeFileSync(path.join(CERTIFICATES_DIR, savedCertFilename), buffer);
+  const certificateImage = parseCertificateImage(fileName, fileData);
+  if (!certificateImage) return certificateImageError(res);
+
+  const donor = (await find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId));
+  const savedCertFilename = await storeCertificate(req.user!.uid, `certificate_${Date.now()}`, certificateImage);
 
   if (donor) {
-    update<Donor>('donors', donor.id, {
+    const aiReview = await reviewCertificateWithAi({
+      file: certificateImage.buffer,
+      fileName: fileName || savedCertFilename,
+      donorName: donor.fullName,
+      bloodGroup: donor.bloodGroup,
+      hospitalName: donor.verification?.hospitalName,
+    });
+    (await update<Donor>('donors', donor.id, {
       verification: {
         ...donor.verification,
         certificateFileName: savedCertFilename,
         verifiedAt: new Date().toISOString(),
+        aiReview,
       },
-    });
+    }));
   }
 
   res.status(200).json({
@@ -257,32 +406,32 @@ router.post('/certificate', authenticate, (req: AuthenticatedRequest, res) => {
 });
 
 // PUT /api/donors/me/availability or /api/donors/:id/availability - Toggle emergency status
-router.put('/me/availability', authenticate, (req: AuthenticatedRequest, res) => {
+router.put('/me/availability', authenticate, async (req: AuthenticatedRequest, res) => {
   const { availabilityStatus } = req.body;
   if (!['available', 'unavailable', 'emergency_only'].includes(availabilityStatus)) {
     return res.status(400).json({ error: 'Invalid availability status. Must be available, unavailable, or emergency_only' });
   }
-  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+  const donor = (await find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId));
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
-  const updated = update<Donor>('donors', donor.id, { availabilityStatus });
+  const updated = (await update<Donor>('donors', donor.id, { availabilityStatus }));
   res.json({ message: 'Emergency status updated', donor: updated, availabilityStatus: updated?.availabilityStatus });
 });
 
-router.put('/:id/availability', authenticate, (req: AuthenticatedRequest, res) => {
+router.put('/:id/availability', authenticate, async (req: AuthenticatedRequest, res) => {
   const { availabilityStatus } = req.body;
   if (!['available', 'unavailable', 'emergency_only'].includes(availabilityStatus)) {
     return res.status(400).json({ error: 'Invalid availability status' });
   }
 
-  const donor = find<Donor>('donors', (d) => d.id === req.params.id);
+  const donor = (await find<Donor>('donors', (d) => d.id === req.params.id));
   if (!donor) return res.status(404).json({ error: 'Donor not found' });
   if (req.user!.role !== 'admin' && donor.uid !== req.user!.uid) return res.status(403).json({ error: 'Forbidden' });
-  const updated = update<Donor>('donors', req.params.id, { availabilityStatus });
+  const updated = (await update<Donor>('donors', req.params.id, { availabilityStatus }));
   res.json({ message: 'Availability updated', donor: updated });
 });
 
 // PUT /api/donors/:id/verify - Admin approves or defers donor eligibility
-router.put('/:id/verify', authenticate, authorizeRoles('admin'), (req: AuthenticatedRequest, res) => {
+router.put('/:id/verify', authenticate, authorizeRoles('admin'), async (req: AuthenticatedRequest, res) => {
   const { eligibilityStatus, deferralReason, deferralUntil } = req.body;
   if (!['pending', 'eligible', 'temporary_deferral', 'permanent_deferral'].includes(eligibilityStatus)) {
     return res.status(400).json({ error: 'Invalid eligibility status' });
@@ -294,20 +443,25 @@ router.put('/:id/verify', authenticate, authorizeRoles('admin'), (req: Authentic
     deferralUntil: deferralUntil || null,
   };
 
-  const updated = update<Donor>('donors', req.params.id, patch);
+  const updated = (await update<Donor>('donors', req.params.id, patch));
   if (!updated) return res.status(404).json({ error: 'Donor not found' });
-  insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action: 'donor.eligibility_updated', entityType: 'donor', entityId: updated.id, details: { eligibilityStatus: updated.eligibilityStatus }, createdAt: new Date().toISOString() });
+  if (eligibilityStatus !== 'eligible') {
+    for (const match of await filter<Match>('matches', (match) => match.donorId === updated.id && ['pending_alert', 'alerted'].includes(match.status))) {
+      await update<Match>('matches', match.id, { status: 'expired' });
+    }
+  }
+  (await insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action: 'donor.eligibility_updated', entityType: 'donor', entityId: updated.id, details: { eligibilityStatus: updated.eligibilityStatus }, createdAt: new Date().toISOString() }));
   res.json({ message: 'Donor eligibility updated', donor: updated });
 });
 
 // GET /api/donors/me/alerts - Get emergency matches for current donor
-router.get('/me/alerts', authenticate, (req: AuthenticatedRequest, res) => {
+router.get('/me/alerts', authenticate, async (req: AuthenticatedRequest, res) => {
   const user = req.user!;
-  const donor = find<Donor>('donors', (d) => d.uid === user.uid || d.id === user.donorId);
+  const donor = (await find<Donor>('donors', (d) => d.uid === user.uid || d.id === user.donorId));
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
 
-  const donorMatches = filter<Match>('matches', (m) => m.donorId === donor.id);
-  const requests = readJson<BloodRequest>('bloodRequests');
+  const donorMatches = (await filter<Match>('matches', (m) => m.donorId === donor.id));
+  const requests = (await readJson<BloodRequest>('bloodRequests'));
 
   const alerts = donorMatches.filter((match) => ['alerted', 'accepted', 'en_route', 'reached'].includes(match.status) && (match.status !== 'alerted' || Date.parse(match.alertExpiresAt || match.alertedAt || '') > Date.now())).map((match) => {
     const request = requests.find((r) => r.id === match.requestId);
@@ -321,63 +475,63 @@ router.get('/me/alerts', authenticate, (req: AuthenticatedRequest, res) => {
 });
 
 // POST /api/donors/matches/:matchId/respond - Accept or Decline match
-router.post('/matches/:matchId/respond', authenticate, (req: AuthenticatedRequest, res) => {
+router.post('/matches/:matchId/respond', authenticate, async (req: AuthenticatedRequest, res) => {
   const { response } = req.body; // 'accepted' | 'declined'
   if (!['accepted', 'declined'].includes(response)) {
     return res.status(400).json({ error: 'Response must be accepted or declined' });
   }
 
-  const match = find<Match>('matches', (m) => m.id === req.params.matchId);
+  const match = (await find<Match>('matches', (m) => m.id === req.params.matchId));
   if (!match) return res.status(404).json({ error: 'Match record not found' });
-  const donor = find<Donor>('donors', (d) => d.id === match.donorId);
+  const donor = (await find<Donor>('donors', (d) => d.id === match.donorId));
   if (!donor || (req.user!.role !== 'admin' && donor.uid !== req.user!.uid)) return res.status(403).json({ error: 'This alert belongs to another donor' });
-  const request = find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId);
+  const request = (await find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId));
   if (!request) return res.status(404).json({ error: 'Request not found' });
-  const acceptedCount = filter<Match>('matches', (m) => m.requestId === match.requestId && ['accepted', 'en_route', 'reached', 'donated'].includes(m.status)).length;
+  const acceptedCount = (await filter<Match>('matches', (m) => m.requestId === match.requestId && ['accepted', 'en_route', 'reached', 'donated'].includes(m.status))).length;
   const result = resolveDonorResponse(match, request, response, acceptedCount);
   if (!result.ok) {
-    if (result.expire) update<Match>('matches', match.id, { status: 'expired' });
+    if (result.expire) (await update<Match>('matches', match.id, { status: 'expired' }));
     return res.status(409).json({ error: result.error });
   }
-  const updatedMatch = update<Match>('matches', match.id, result.matchPatch);
-  if (result.requestStatus) update<BloodRequest>('bloodRequests', request.id, { status: result.requestStatus });
+  const updatedMatch = (await update<Match>('matches', match.id, result.matchPatch));
+  if (result.requestStatus) (await update<BloodRequest>('bloodRequests', request.id, { status: result.requestStatus }));
 
   res.json({ message: `Alert ${response}`, match: updatedMatch });
 });
 
 // POST /api/donors/matches/:matchId/location - Live GPS coordinates stream from donor
-router.post('/matches/:matchId/location', authenticate, (req: AuthenticatedRequest, res) => {
+router.post('/matches/:matchId/location', authenticate, async (req: AuthenticatedRequest, res) => {
   const { latitude, longitude } = req.body;
   if (typeof latitude !== 'number' || typeof longitude !== 'number') {
     return res.status(400).json({ error: 'Valid latitude and longitude required' });
   }
 
-  const match = find<Match>('matches', (m) => m.id === req.params.matchId);
+  const match = (await find<Match>('matches', (m) => m.id === req.params.matchId));
   if (!match) return res.status(404).json({ error: 'Match record not found' });
-  const donor = find<Donor>('donors', (d) => d.id === match.donorId);
+  const donor = (await find<Donor>('donors', (d) => d.id === match.donorId));
   if (!donor || (req.user!.role !== 'admin' && donor.uid !== req.user!.uid)) return res.status(403).json({ error: 'This tracking session belongs to another donor' });
   if (!['accepted', 'en_route'].includes(match.status)) return res.status(409).json({ error: 'Location sharing is available only after accepting an active request' });
   if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return res.status(400).json({ error: 'Coordinates are outside valid bounds' });
-  const request = find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId);
+  const request = (await find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId));
   if (!request || !['searching', 'matched'].includes(request.status)) return res.status(409).json({ error: 'Request is closed; tracking has stopped' });
   const journey = updateJourney(match, request, { latitude, longitude });
-  const updatedMatch = update<Match>('matches', match.id, journey.matchPatch);
+  const updatedMatch = (await update<Match>('matches', match.id, journey.matchPatch));
 
   res.json({ message: journey.message, match: updatedMatch, trackingActive: journey.trackingActive });
 });
 
-router.get('/me/matches/:requestId', authenticate, (req: AuthenticatedRequest, res) => {
-  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+router.get('/me/matches/:requestId', authenticate, async (req: AuthenticatedRequest, res) => {
+  const donor = (await find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId));
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
-  const match = find<Match>('matches', (m) => m.requestId === req.params.requestId && m.donorId === donor.id);
+  const match = (await find<Match>('matches', (m) => m.requestId === req.params.requestId && m.donorId === donor.id));
   if (!match || !['accepted', 'en_route', 'reached', 'donated'].includes(match.status)) return res.status(404).json({ error: 'Active match not found' });
-  const request = find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId);
+  const request = (await find<BloodRequest>('bloodRequests', (r) => r.id === match.requestId));
   if (!request) return res.status(404).json({ error: 'Request not found' });
   res.json({ match, request: { id: request.id, hospitalName: request.hospitalName, hospitalLocation: request.hospitalLocation, status: request.status } });
 });
 
-router.put('/me/preferences', authenticate, (req: AuthenticatedRequest, res) => {
-  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+router.put('/me/preferences', authenticate, async (req: AuthenticatedRequest, res) => {
+  const donor = (await find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId));
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
   const { preferredRadius, notificationPreferences, homeLocality, coordinates } = req.body;
   const patch: Partial<Donor> = {};
@@ -399,13 +553,14 @@ router.put('/me/preferences', authenticate, (req: AuthenticatedRequest, res) => 
       criticalOnly: Boolean(notificationPreferences.criticalOnly),
     };
   }
-  const updated = update<Donor>('donors', donor.id, patch);
+  const updated = (await update<Donor>('donors', donor.id, patch));
+  if (updated) await expireStaleDonorAlerts(updated);
   res.json({ message: 'Donor preferences updated', donor: updated });
 });
 
 // POST /api/donors/me/test-notifications - Dispatch a test alert across donor's active channels
 router.post('/me/test-notifications', authenticate, async (req: AuthenticatedRequest, res) => {
-  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+  const donor = (await find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId));
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
 
   const prefs = donor.notificationPreferences || {
@@ -416,7 +571,7 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
   };
 
   const results: any[] = [];
-  const testMessage = `[LifePulse Emergency Broadcast Test]\nHello ${donor.fullName}! Your emergency alert routing is operational.\nPriority: CODE RED (Trauma)\nBase: ${donor.homeLocality || 'Manipal'}\nStatus: Verified Responder`;
+  const testMessage = `[RaktaRun Emergency Broadcast Test]\nHello ${donor.fullName}! Your emergency alert routing is operational.\nPriority: CODE RED (Trauma)\nBase: ${donor.homeLocality || 'Manipal'}\nStatus: Verified Responder`;
 
   if (prefs.push) {
     results.push({
@@ -433,14 +588,14 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
     results.push(smsRes);
   }
 
-  const donorEmail = donor.email || find<User>('users', (u) => u.uid === donor.uid)?.email || req.user?.email;
+  const donorEmail = donor.email || (await find<User>('users', (u) => u.uid === donor.uid))?.email || req.user?.email;
   if (prefs.email !== false && donorEmail) {
     const emailRes = await sendEmailAlert(
       donorEmail,
       donor.fullName,
-      `[LifePulse TEST] Emergency Channel Verification`,
+      `[RaktaRun TEST] Emergency Channel Verification`,
       `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #0f172a; color: #f8fafc; border-radius: 12px; border: 1px solid #1e293b;">
-        <h2 style="color: #f43f5e; margin: 0 0 10px 0;">LifePulse Emergency Network</h2>
+        <h2 style="color: #f43f5e; margin: 0 0 10px 0;">RaktaRun Emergency Network</h2>
         <p style="font-size: 15px; color: #cbd5e1;">Hello <strong>${donor.fullName}</strong>,</p>
         <p style="font-size: 14px; color: #cbd5e1;">This is a verification test of your emergency email alert channel powered by Brevo.</p>
         <div style="background: #1e293b; padding: 14px; border-radius: 8px; margin: 16px 0; border: 1px solid #334155;">
@@ -448,13 +603,13 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
           <p style="margin: 4px 0; font-size: 13px;"><strong>Base Locality:</strong> ${donor.homeLocality || 'Manipal'}</p>
           <p style="margin: 4px 0; font-size: 13px;"><strong>Delivery Gateway:</strong> Brevo Transactional SMTP</p>
         </div>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">LifePulse Emergency Dispatch Network • Udupi & Dakshina Kannada</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">RaktaRun Emergency Dispatch Network • Udupi & Dakshina Kannada</p>
       </div>`
     );
     results.push(emailRes);
   }
 
-  insert<AuditLog>('auditLogs', {
+  (await insert<AuditLog>('auditLogs', {
     id: `audit_testnotif_${uuidv4().slice(0, 8)}`,
     actorUid: req.user!.uid,
     actorRole: req.user!.role,
@@ -464,10 +619,10 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
     details: {
       recipientPhone: donor.phone,
       recipientEmail: donorEmail,
-      channelsTested: results.map((r) => `${r.channel}:${r.provider}`),
+      channelsTested: results.map((r) => `${r.channel}:${r.provider}:${r.success ? 'sent' : 'failed'}`),
     },
     createdAt: new Date().toISOString(),
-  });
+  }));
 
   res.json({
     message: 'Test notification dispatches processed',
@@ -478,22 +633,22 @@ router.post('/me/test-notifications', authenticate, async (req: AuthenticatedReq
   });
 });
 
-router.put('/me/public-hero-consent', authenticate, (req: AuthenticatedRequest, res) => {
-  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+router.put('/me/public-hero-consent', authenticate, async (req: AuthenticatedRequest, res) => {
+  const donor = (await find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId));
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
   if (typeof req.body.enabled !== 'boolean') return res.status(400).json({ error: 'enabled must be a boolean' });
-  const updated = update<Donor>('donors', donor.id, { publicHeroConsent: req.body.enabled });
+  const updated = (await update<Donor>('donors', donor.id, { publicHeroConsent: req.body.enabled }));
   res.json({ publicHeroConsent: updated?.publicHeroConsent || false });
 });
 
 // GET /api/donors/me/history - Detailed donation & emergency response log
-router.get('/me/history', authenticate, (req: AuthenticatedRequest, res) => {
-  const donor = find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId);
+router.get('/me/history', authenticate, async (req: AuthenticatedRequest, res) => {
+  const donor = (await find<Donor>('donors', (d) => d.uid === req.user!.uid || d.id === req.user!.donorId));
   if (!donor) return res.status(404).json({ error: 'Donor profile not found' });
 
-  const matches = filter<Match>('matches', (m) => m.donorId === donor.id);
-  const requests = readJson<BloodRequest>('bloodRequests');
-  const hospitals = readJson<Hospital>('hospitals');
+  const matches = (await filter<Match>('matches', (m) => m.donorId === donor.id));
+  const requests = (await readJson<BloodRequest>('bloodRequests'));
+  const hospitals = (await readJson<Hospital>('hospitals'));
 
   const realHistory = matches.map((m) => {
     const r = requests.find((req) => req.id === m.requestId);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import {
@@ -11,9 +11,11 @@ import {
   Search,
   RefreshCw,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import { AppLayout } from '../../components/AppLayout';
 import { Badge } from '../../components/ui/Badge';
+import { usePolling } from '../../hooks/usePolling';
 
 interface Donor {
   id: string;
@@ -35,6 +37,13 @@ interface Donor {
     verifiedBy: string;
     certificateFileName?: string;
     expiryDate: string;
+    aiReview?: {
+      status: 'passed' | 'failed' | 'unavailable';
+      summary: string;
+      confidence: number;
+      checkedAt: string;
+      model?: string;
+    };
   };
 }
 
@@ -45,10 +54,12 @@ export const AdminDonorsPage: React.FC = () => {
   const [filterBloodGroup, setFilterBloodGroup] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [certificateInProgress, setCertificateInProgress] = useState<string | null>(null);
+  const [aiReviewInProgress, setAiReviewInProgress] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const fetchDonors = async () => {
-    setLoading(true);
+  const fetchDonors = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const res = await api.get('/donors');
       setDonors(res.data);
@@ -56,13 +67,40 @@ export const AdminDonorsPage: React.FC = () => {
       console.error('Error fetching donors:', err);
       setMessage({ type: 'error', text: 'Could not fetch donors from backend.' });
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDonors();
-  }, []);
+  usePolling(() => fetchDonors(donors.length === 0), 15000);
+
+  const handleViewCertificate = async (donorId: string) => {
+    const certificateWindow = window.open('about:blank', '_blank');
+    if (!certificateWindow) {
+      setMessage({ type: 'error', text: 'Allow pop-ups to open the certificate document.' });
+      return;
+    }
+
+    setCertificateInProgress(donorId);
+    setMessage(null);
+    try {
+      const { data, headers } = await api.get(`/admin/donors/${encodeURIComponent(donorId)}/certificate`, {
+        responseType: 'blob',
+      });
+      const certificateUrl = URL.createObjectURL(new Blob([data], {
+        type: String(headers['content-type'] || 'application/octet-stream'),
+      }));
+      certificateWindow.location.href = certificateUrl;
+      window.setTimeout(() => URL.revokeObjectURL(certificateUrl), 60_000);
+    } catch (error: any) {
+      certificateWindow.close();
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.error || 'Certificate document could not be opened. Confirm that the file exists on the server.',
+      });
+    } finally {
+      setCertificateInProgress(null);
+    }
+  };
 
   const handleUpdateStatus = async (
     id: string,
@@ -83,6 +121,28 @@ export const AdminDonorsPage: React.FC = () => {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to update donor eligibility.' });
     } finally {
       setActionInProgress(null);
+    }
+  };
+
+  const handleAiReview = async (donorId: string) => {
+    setAiReviewInProgress(donorId);
+    setMessage(null);
+    try {
+      const { data } = await api.post(`/admin/donors/${encodeURIComponent(donorId)}/review-certificate`);
+      const status = data.aiReview?.status;
+      setMessage({
+        type: status === 'passed' ? 'success' : 'error',
+        text: status === 'passed'
+          ? 'AI review passed its document checks. Admin approval is still required to activate alerts.'
+          : status === 'failed'
+            ? 'AI review could not confirm the certificate. Admin review is still available.'
+            : 'AI review is unavailable. Admin review is still available.',
+      });
+      await fetchDonors();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.response?.data?.error || 'Could not review the certificate with AI.' });
+    } finally {
+      setAiReviewInProgress(null);
     }
   };
 
@@ -114,7 +174,7 @@ export const AdminDonorsPage: React.FC = () => {
   return (
     <AppLayout
       title="Donor Certificate Audit Portal"
-      subtitle="LifePulse Medical Authority • Block I Medical Screening Verification"
+      subtitle="RaktaRun Medical Authority • Block I Medical Screening Verification"
       actions={headerActions}
       withSidebar={true}
     >
@@ -177,7 +237,7 @@ export const AdminDonorsPage: React.FC = () => {
             </select>
 
             <button
-              onClick={fetchDonors}
+              onClick={() => void fetchDonors()}
               disabled={loading}
               className="flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-sm"
             >
@@ -258,15 +318,40 @@ export const AdminDonorsPage: React.FC = () => {
                           </div>
                           <div className="text-slate-600 dark:text-slate-400 mt-1">{d.verification?.hospitalName}</div>
                           <div className="text-slate-500 text-[11px] mt-0.5">Screener: {d.verification?.verifiedBy}</div>
+                          {d.verification?.aiReview && (
+                            <div className="mt-2 max-w-xs">
+                              <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] font-bold ${
+                                d.verification.aiReview.status === 'passed'
+                                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
+                                  : d.verification.aiReview.status === 'failed'
+                                    ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
+                                    : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
+                              }`}>
+                                <Sparkles className="h-3 w-3" />
+                                {d.verification.aiReview.status === 'passed' ? 'AI check passed' : d.verification.aiReview.status === 'failed' ? 'AI check failed' : 'AI check unavailable'}
+                              </span>
+                              <p className="mt-1 text-[10px] leading-4 text-slate-500 dark:text-slate-400">{d.verification.aiReview.summary}</p>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => void handleAiReview(d.id)}
+                            disabled={!d.verification?.certificateFileName || aiReviewInProgress === d.id}
+                            className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-700 hover:text-indigo-900 disabled:opacity-50 dark:text-indigo-300 dark:hover:text-white"
+                          >
+                            <Sparkles className="h-3 w-3" />
+                            {aiReviewInProgress === d.id ? 'Checking certificate…' : 'Recheck with AI'}
+                          </button>
                           {d.verification?.certificateFileName && (
-                            <a
-                              href={`http://localhost:5000/certificates/${d.verification.certificateFileName}`}
-                              target="_blank"
-                              rel="noreferrer"
+                            <button
+                              type="button"
+                              onClick={() => handleViewCertificate(d.id)}
+                              disabled={certificateInProgress === d.id}
                               className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300"
                             >
-                              <ExternalLink className="h-3 w-3" /> View Certificate Document
-                            </a>
+                              <ExternalLink className="h-3 w-3" />
+                              {certificateInProgress === d.id ? 'Opening certificate…' : 'View Certificate Document'}
+                            </button>
                           )}
                         </td>
 

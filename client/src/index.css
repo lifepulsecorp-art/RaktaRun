@@ -19,7 +19,7 @@
   --color-slate-900: #24271f;
   --color-slate-950: #19251f;
 
-  /* LifePulse orange replaces the old rose brand accents. */
+  /* RaktaRun orange replaces the old rose brand accents. */
   --color-rose-50: #fff5e9;
   --color-rose-100: #ffe8cf;
   --color-rose-200: #ffd0a6;
@@ -125,6 +125,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); letter-spacing: -0.04
 input:not([type="checkbox"]):not([type="radio"]), select, textarea {
   border-radius: 0.85rem;
 }
+input[type="checkbox"] { accent-color: #91bd9d; }
 input::placeholder, textarea::placeholder { color: #aa9c87; }
 button, a { -webkit-tap-highlight-color: transparent; }
 

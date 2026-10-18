@@ -5,12 +5,29 @@ export interface User {
   email: string;
   role: UserRole;
   name: string;
+  emailVerified?: boolean;
+  passwordHash?: string;
   phone?: string;
   hospitalId?: string;
   donorId?: string;
   createdAt: string;
   updatedAt: string;
   trustStatus?: 'clear' | 'under_review' | 'flagged';
+}
+
+export interface EmailVerificationChallenge {
+  id: string;
+  uid: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  passwordHash: string;
+  codeHash: string;
+  expiresAt: string;
+  resendAvailableAt: string;
+  attempts: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface BuddyLink {
@@ -77,6 +94,15 @@ export interface DonorVerification {
   digitalSignature?: string;
   certificateFileName?: string;
   expiryDate: string;
+  aiReview?: CertificateAiReview;
+}
+
+export interface CertificateAiReview {
+  status: 'passed' | 'failed' | 'unavailable';
+  summary: string;
+  confidence: number;
+  checkedAt: string;
+  model?: string;
 }
 
 export interface HeroStats {

@@ -10,7 +10,7 @@ import { Card } from '../components/ui/Card';
 type Hero = { id: string; displayName: string; district: string; bloodGroup: string; donations: number; responses: number; badges: string[] };
 
 const BADGE_LABELS: Record<string, { label: string; icon: string }> = {
-  life_pulse_hero: { label: 'LifePulse Hero', icon: '✦' },
+  life_pulse_hero: { label: 'RaktaRun Hero', icon: '✦' },
   rapid_responder: { label: 'Rapid Responder', icon: '›' },
   repeat_hero: { label: 'Repeat Hero', icon: '◆' },
   rare_blood_hero: { label: 'Rare Blood Hero', icon: '◇' },
@@ -31,7 +31,7 @@ function makeLandscapeCard(hero: Hero) {
 
   ctx.fillStyle = '#fb7185';
   ctx.font = 'bold 32px Arial, sans-serif';
-  ctx.fillText('LIFEPULSE · EMERGENCY HERO RECOGNITION', 72, 88);
+  ctx.fillText('RAKTARUN · EMERGENCY HERO RECOGNITION', 72, 88);
 
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 68px Arial, sans-serif';
@@ -76,7 +76,7 @@ function makeInstagramStoryCard(hero: Hero) {
   ctx.fillStyle = '#fb7185';
   ctx.font = 'bold 46px Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('LIFEPULSE HERO', 540, 220);
+  ctx.fillText('RAKTARUN HERO', 540, 220);
 
   ctx.fillStyle = '#fda4af';
   ctx.font = '30px Arial, sans-serif';
@@ -134,7 +134,7 @@ function makeInstagramStoryCard(hero: Hero) {
   // Footer Tagline
   ctx.fillStyle = '#f43f5e';
   ctx.font = 'bold 40px Arial, sans-serif';
-  ctx.fillText('LifePulse', 540, 1690);
+  ctx.fillText('RaktaRun', 540, 1690);
 
   ctx.fillStyle = '#94a3b8';
   ctx.font = '30px Arial, sans-serif';
@@ -156,7 +156,7 @@ export default function HeroWallPage() {
 
   const downloadCard = (hero: Hero, format: 'landscape' | 'story') => {
     if (!profile) {
-      window.alert('Please log in to download verified LifePulse recognition cards.');
+      window.alert('Please log in to download verified RaktaRun recognition cards.');
       return;
     }
     const canvas = format === 'story' ? makeInstagramStoryCard(hero) : makeLandscapeCard(hero);
@@ -166,7 +166,7 @@ export default function HeroWallPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `lifepulse-hero-${hero.displayName.toLowerCase().replace(/\s+/g, '-')}-${format}.png`;
+      link.download = `raktarun-hero-${hero.displayName.toLowerCase().replace(/\s+/g, '-')}-${format}.png`;
       link.click();
       URL.revokeObjectURL(url);
     }, 'image/png');
@@ -190,7 +190,7 @@ export default function HeroWallPage() {
 
   return (
     <AppLayout
-      title="LifePulse Hero Wall"
+      title="RaktaRun Hero Wall"
       subtitle="Celebrating coastal Karnataka donors who responded when seconds counted"
       actions={headerActions}
       withSidebar={Boolean(profile)}

@@ -6,6 +6,9 @@ import type { User, UserRole } from '../types.js';
 import { isEmailBlocked } from '../utils/accountRestrictions.js';
 
 export const JWT_SECRET = process.env.JWT_SECRET || 'lifepulse_local_jwt_secret_key_2026';
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET?.trim()) {
+  throw new Error('JWT_SECRET must be configured in production.');
+}
 
 export interface AuthenticatedRequest extends Request {
   user?: User;
@@ -22,10 +25,10 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
   // 1. Try local JWT token first
   try {
     const payload = jwt.verify(token, JWT_SECRET) as { uid: string; email?: string; role?: UserRole };
-    if (isEmailBlocked(payload.email)) {
-      return res.status(403).json({ error: 'This email address is not permitted to access LifePulse.' });
+    if (await isEmailBlocked(payload.email)) {
+      return res.status(403).json({ error: 'This email address is not permitted to access RaktaRun.' });
     }
-    let user = find<User>('users', (u) => u.uid === payload.uid || Boolean(payload.email && u.email.toLowerCase() === payload.email.toLowerCase()));
+    let user = await find<User>('users', (u) => u.uid === payload.uid || Boolean(payload.email && u.email.toLowerCase() === payload.email.toLowerCase()));
     if (user) {
       req.user = user;
       return next();
@@ -38,22 +41,22 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
   try {
     if (admin && admin.apps && admin.apps.length) {
       const decoded = await admin.auth().verifyIdToken(token, true);
-      if (isEmailBlocked(decoded.email)) {
-        return res.status(403).json({ error: 'This email address is not permitted to access LifePulse.' });
+      if (await isEmailBlocked(decoded.email)) {
+        return res.status(403).json({ error: 'This email address is not permitted to access RaktaRun.' });
       }
-      let user = find<User>('users', (u) => u.uid === decoded.uid);
+      let user = await find<User>('users', (u) => u.uid === decoded.uid);
 
       if (!user) {
         const role: UserRole = decoded.uid === '5G6ajWegMiepIzvIyreG7bx82SG2' ? 'admin' : 'donor';
         user = {
           uid: decoded.uid,
           email: decoded.email || '',
-          name: decoded.name || decoded.email?.split('@')[0] || 'LifePulse User',
+          name: decoded.name || decoded.email?.split('@')[0] || 'RaktaRun User',
           role,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        insert<User>('users', user);
+        await insert<User>('users', user);
       }
 
       req.user = user;

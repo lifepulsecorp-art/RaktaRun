@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LifePulseLogo } from './LifePulseLogo';
+import { RaktaRunLogo } from './RaktaRunLogo';
 import { ThemeToggle } from './ui/ThemeToggle';
 import {
   Menu,
@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          <LifePulseLogo size="md" subtitle="Coastal Karnataka Emergency Response" />
+          <RaktaRunLogo size="md" subtitle="Coastal Karnataka Emergency Response" />
 
           {/* Regional network pill indicator */}
           <div className="hidden xl:flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
@@ -218,7 +218,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={logout}
-                title="Sign out of LifePulse"
+                title="Sign out of RaktaRun"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-rose-900/50 dark:hover:bg-rose-950/30 dark:hover:text-rose-400"
               >
                 <LogOut className="h-4 w-4" />

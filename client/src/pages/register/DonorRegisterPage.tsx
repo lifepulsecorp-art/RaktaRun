@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../utils/api';
+import { setToken } from '../../utils/tokenStorage';
 import { useAuth } from '../../context/AuthContext';
-import { LifePulseLogo } from '../../components/LifePulseLogo';
+import { RaktaRunLogo } from '../../components/RaktaRunLogo';
+import EmailOtpVerification from '../../components/EmailOtpVerification';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -76,6 +78,15 @@ const readFileAsBase64 = (file: File): Promise<string> => {
   });
 };
 
+const isCertificateImage = (file: File) => {
+  const extension = file.name.toLowerCase().split('.').pop();
+  const expectedMime = extension === 'jpg' || extension === 'jpeg' ? 'image/jpeg'
+    : extension === 'png' ? 'image/png'
+      : extension === 'webp' ? 'image/webp'
+        : null;
+  return Boolean(expectedMime && (!file.type || file.type === expectedMime));
+};
+
 export default function DonorRegisterPage() {
   const { role, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -108,7 +119,7 @@ export default function DonorRegisterPage() {
             district: h.district || 'Udupi',
             phone: h.bloodBankContact?.phone || h.phone || '+918202922761',
             contactPerson: h.bloodBankContact?.name || 'Blood Bank Officer',
-            timing: 'Authorized LifePulse Screening Station',
+            timing: 'Authorized RaktaRun Screening Station',
           }));
           setHospitalList(mapped);
         }
@@ -117,6 +128,24 @@ export default function DonorRegisterPage() {
   }, []);
 
   const update = (k: string, v: any) => setForm({ ...form, [k]: v });
+
+  const handleCertificateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    if (file && !isCertificateImage(file)) {
+      event.target.value = '';
+      update('certificate', null);
+      setError('Upload a certificate image in JPG, PNG, or WEBP format. PDF files are not accepted.');
+      return;
+    }
+    if (file && file.size > 3 * 1024 * 1024) {
+      event.target.value = '';
+      update('certificate', null);
+      setError('Certificate images must be 3 MB or smaller.');
+      return;
+    }
+    setError('');
+    update('certificate', file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,55 +161,57 @@ export default function DonorRegisterPage() {
     }
 
     if (!form.certificate) {
-      setError('Please select and upload your hospital screening certificate');
+      setError('Please select and upload your hospital screening certificate image.');
+      return;
+    }
+    if (!isCertificateImage(form.certificate)) {
+      setError('Upload a certificate image in JPG, PNG, or WEBP format. PDF files are not accepted.');
+      return;
+    }
+    if (form.certificate.size > 3 * 1024 * 1024) {
+      setError('Certificate images must be 3 MB or smaller.');
       return;
     }
 
     try {
       setLoading(true);
 
-      const regRes = await api.post('/auth/register', {
+      await api.post('/auth/register', {
         email: form.email.trim(),
         password: form.password,
         role: 'donor',
         displayName: cleanFullName,
       });
-
-      const token = regRes.data?.token || localStorage.getItem('lifepulse_token');
-      if (token) {
-        localStorage.setItem('lifepulse_token', token);
-      }
-
-      let certificateFileBase64 = '';
-      if (form.certificate) {
-        certificateFileBase64 = await readFileAsBase64(form.certificate);
-      }
-
-      await api.post('/donors/register', {
-        fullName: cleanFullName,
-        phone: cleanPhone,
-        bloodGroup: cleanBloodGroup,
-        homeLocality: form.homeLocality.trim(),
-        pincode: form.pincode.trim(),
-        lastDonationDate: form.lastDonationDate || null,
-        certificateFileName: form.certificate?.name || 'certificate.jpg',
-        certificateFileBase64,
-      }, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-
-      if (refreshProfile) {
-        await refreshProfile();
-      }
-
-      setStep(3);
-      setTimeout(() => navigate('/donor/pending'), 2000);
+      setStep(2);
     } catch (err: any) {
       console.error('Donor registration error:', err);
-      setError(err.response?.data?.error || err.message || 'Registration failed');
+      const message = err.response?.data?.error || err.message || 'Registration failed';
+      if (err.response?.status === 409 && message.toLowerCase().includes('verification is already pending')) {
+        setStep(2);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const completeRegistration = async (token: string) => {
+    setToken(token);
+    const certificateFileBase64 = form.certificate ? await readFileAsBase64(form.certificate) : '';
+    await api.post('/donors/register', {
+      fullName: form.fullName.trim(),
+      phone: form.phone.trim(),
+      bloodGroup: form.bloodGroup.trim(),
+      homeLocality: form.homeLocality.trim(),
+      pincode: form.pincode.trim(),
+      lastDonationDate: form.lastDonationDate || null,
+      certificateFileName: form.certificate?.name || 'certificate.jpg',
+      certificateFileBase64,
+    });
+    await refreshProfile();
+    setStep(3);
+    setTimeout(() => navigate('/donor/pending'), 2000);
   };
 
   if (step === 3) {
@@ -203,7 +234,7 @@ export default function DonorRegisterPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between p-6 transition-colors duration-200">
       {/* Top Header */}
       <div className="mx-auto w-full max-w-3xl flex items-center justify-between py-2">
-        <LifePulseLogo size="md" />
+        <RaktaRunLogo size="md" />
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
@@ -243,7 +274,13 @@ export default function DonorRegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {step === 2 ? (
+            <EmailOtpVerification
+              email={form.email.trim()}
+              onVerified={completeRegistration}
+              onBack={() => setStep(1)}
+            />
+          ) : <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
@@ -287,12 +324,12 @@ export default function DonorRegisterPage() {
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
-                  Password (min 6)
+                  Password (min 8)
                 </label>
                 <input
                   required
                   type="password"
-                  minLength={6}
+                  minLength={8}
                   value={form.password}
                   onChange={(e) => update('password', e.target.value)}
                   placeholder="••••••••"
@@ -358,7 +395,7 @@ export default function DonorRegisterPage() {
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-rose-500" />
-                  Hospital Medical Certificate (PDF/JPG/PNG)
+                  Hospital Medical Certificate Image (JPG/PNG/WEBP)
                 </label>
                 <button
                   type="button"
@@ -371,12 +408,15 @@ export default function DonorRegisterPage() {
               <input
                 required
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => update('certificate', e.target.files?.[0] || null)}
+                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                onChange={handleCertificateChange}
                 className="w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-xs text-slate-900 dark:text-white file:mr-3 file:py-1.5 file:px-3.5 file:rounded-lg file:border-0 file:bg-rose-600 file:text-white file:text-xs file:font-semibold hover:file:bg-rose-500 cursor-pointer shadow-sm"
               />
+              <p className="text-[11px] leading-4 text-slate-500 dark:text-slate-400">
+                An AI-assisted document check may analyze the uploaded certificate. It cannot confirm hospital records or approve alert access; a RaktaRun admin must review your application.
+              </p>
               <div className="flex items-center justify-between pt-1">
-                <span className="text-[11px] text-slate-500">Max size 5MB • Formats: PDF, JPG, PNG</span>
+                <span className="text-[11px] text-slate-500">Max size 3MB • Image formats: JPG, PNG, WEBP</span>
                 <button
                   type="button"
                   onClick={() => setShowHospitalModal(true)}
@@ -397,7 +437,7 @@ export default function DonorRegisterPage() {
                 Register as Verified Donor
               </Button>
             </div>
-          </form>
+          </form>}
         </Card>
       </div>
 
@@ -433,7 +473,7 @@ export default function DonorRegisterPage() {
                 <Info className="h-4 w-4" /> Note for prospective donors:
               </p>
               <p>
-                LifePulse is a medically screened network. To protect patient lives and ensure you are safe to donate, you must obtain a quick, authorized health screening before registering.
+                RaktaRun is a medically screened network. To protect patient lives and ensure you are safe to donate, you must obtain a quick, authorized health screening before registering.
               </p>
               <div className="space-y-1.5 pl-2 pt-1 border-t border-amber-200 dark:border-amber-500/20">
                 <p>1. <strong>Visit any authorized hospital</strong> from the list below in Udupi or Mangaluru.</p>
@@ -495,7 +535,7 @@ export default function DonorRegisterPage() {
                 to="/"
                 className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 order-2 sm:order-1"
               >
-                ← Return to LifePulse Home
+                ← Return to RaktaRun Home
               </Link>
               <Button
                 type="button"
@@ -510,7 +550,7 @@ export default function DonorRegisterPage() {
       )}
 
       <div className="mx-auto w-full max-w-3xl py-4 text-center text-xs text-slate-500">
-        LifePulse Emergency Medical Network • Udupi & Dakshina Kannada
+        RaktaRun Emergency Medical Network • Udupi & Dakshina Kannada
       </div>
     </div>
   );

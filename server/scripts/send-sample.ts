@@ -31,7 +31,7 @@ async function main() {
   const alertHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #0f172a; color: #f8fafc; border-radius: 12px; border: 1px solid #1e293b;">
       <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="color: #f43f5e; margin: 0; font-size: 24px;">LifePulse Emergency Network</h1>
+        <h1 style="color: #f43f5e; margin: 0; font-size: 24px;">RaktaRun Emergency Network</h1>
         <p style="color: #fda4af; font-size: 13px; margin: 4px 0 0 0;">Coastal Karnataka Trauma Response Grid</p>
       </div>
 
@@ -50,13 +50,13 @@ async function main() {
       </div>
 
       <div style="text-align: center; margin: 28px 0;">
-        <a href="https://lifepulse.in/live-tracking/req_emergency_demo" style="background-color: #e11d48; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+        <a href="http://localhost:5173/live-tracking/req_emergency_demo" style="background-color: #e11d48; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
           Accept Donation &amp; Open Turn-by-Turn GPS Navigation
         </a>
       </div>
 
       <hr style="border: none; border-top: 1px solid #334155; margin: 24px 0;" />
-      <p style="font-size: 11px; color: #64748b; text-align: center; margin: 0;">LifePulse Emergency Network • Powered by Brevo</p>
+      <p style="font-size: 11px; color: #64748b; text-align: center; margin: 0;">RaktaRun Emergency Network • Powered by Brevo</p>
     </div>
   `;
 
@@ -68,7 +68,7 @@ async function main() {
   );
   console.log('Emergency Email Alert Result:', JSON.stringify(emailRes, null, 2));
 
-  const smsText = '🚨 CODE RED: LifePulse Match! O+ Whole Blood needed at Kasturba Hospital, Manipal (~4.5km, ETA ~11m). Turn-by-turn navigation ready: https://lifepulse.in/live-tracking/req_emergency_demo';
+  const smsText = '🚨 CODE RED: RaktaRun Match! O+ Whole Blood needed at Kasturba Hospital, Manipal (~4.5km, ETA ~11m). Turn-by-turn navigation ready: https://lifepulse.in/live-tracking/req_emergency_demo';
   const smsRes = await sendSmsAlert(recipientPhone, smsText);
   console.log('Emergency SMS Alert Result:', JSON.stringify(smsRes, null, 2));
 

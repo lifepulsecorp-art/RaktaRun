@@ -8,18 +8,18 @@ import { find, filter, insert } from '../utils/db.js';
 const router = Router();
 const MAX_INTERESTS_PER_LINK = 8;
 
-function getActiveLink(token: string): { link: BuddyLink; request: BloodRequest } | null {
-  const link = find<BuddyLink>('buddyLinks', (item) => item.token === token);
+async function getActiveLink(token: string): Promise<{ link: BuddyLink; request: BloodRequest } | null> {
+  const link = (await find<BuddyLink>('buddyLinks', (item) => item.token === token));
   if (!link || Date.parse(link.expiresAt) <= Date.now()) return null;
-  const request = find<BloodRequest>('bloodRequests', (item) => item.id === link.requestId);
+  const request = (await find<BloodRequest>('bloodRequests', (item) => item.id === link.requestId));
   if (!request || !['searching', 'matched'].includes(request.status)) return null;
   return { link, request };
 }
 
 // A referred friend can see the emergency destination without an account.
 // Only the hospital and public request details needed to plan a visit are returned.
-router.get('/:token', (req, res) => {
-  const active = getActiveLink(req.params.token);
+router.get('/:token', async (req, res) => {
+  const active = await getActiveLink(req.params.token);
   if (!active) return res.status(410).json({ error: 'This buddy link has expired or the emergency request has closed.' });
   const { request } = active;
   res.json({
@@ -34,7 +34,7 @@ router.get('/:token', (req, res) => {
     hospital: {
       id: request.hospitalId,
       name: request.hospitalName,
-      address: find<{ id: string; address?: string }>('hospitals', (hospital) => hospital.id === request.hospitalId)?.address || '',
+      address: (await find<{ id: string; address?: string }>('hospitals', (hospital) => hospital.id === request.hospitalId))?.address || '',
       coordinates: request.hospitalLocation,
     },
     expiresAt: active.link.expiresAt,
@@ -42,8 +42,8 @@ router.get('/:token', (req, res) => {
 });
 
 // This is an interest form, not a medical clearance or donation confirmation.
-router.post('/:token/interest', (req, res) => {
-  const active = getActiveLink(req.params.token);
+router.post('/:token/interest', async (req, res) => {
+  const active = await getActiveLink(req.params.token);
   if (!active) return res.status(410).json({ error: 'This buddy link has expired or the emergency request has closed.' });
 
   const friendName = typeof req.body?.name === 'string' ? req.body.name.trim().replace(/\s+/g, ' ') : '';
@@ -56,7 +56,7 @@ router.post('/:token/interest', (req, res) => {
   if (req.body?.consent !== true) return res.status(400).json({ error: 'Please agree to be contacted by the hospital about this request.' });
 
   const { link, request } = active;
-  const leads = filter<BuddyReferral>('buddyReferrals', (lead) => lead.linkId === link.id);
+  const leads = (await filter<BuddyReferral>('buddyReferrals', (lead) => lead.linkId === link.id));
   if (leads.length >= MAX_INTERESTS_PER_LINK) {
     return res.status(429).json({ error: 'This invite has reached its response limit.' });
   }
@@ -76,7 +76,7 @@ router.post('/:token/interest', (req, res) => {
     status: 'interest_received',
     createdAt: new Date().toISOString(),
   };
-  insert<BuddyReferral>('buddyReferrals', referral);
+  (await insert<BuddyReferral>('buddyReferrals', referral));
 
   res.status(201).json({
     message: 'Your interest has been shared with the hospital. Staff will confirm availability and complete all required screening before any donation.',
@@ -85,11 +85,11 @@ router.post('/:token/interest', (req, res) => {
 });
 
 // Authenticated donors create a high-entropy, expiring link tied to their active alert.
-router.post('/matches/:matchId/link', authenticate, authorizeRoles('donor'), (req: AuthenticatedRequest, res) => {
+router.post('/matches/:matchId/link', authenticate, authorizeRoles('donor'), async (req: AuthenticatedRequest, res) => {
   if (req.user?.role !== 'donor') return res.status(403).json({ error: 'Only a donor can invite a buddy.' });
-  const match = find<Match>('matches', (item) => item.id === req.params.matchId);
+  const match = (await find<Match>('matches', (item) => item.id === req.params.matchId));
   if (!match) return res.status(404).json({ error: 'Alert was not found.' });
-  const donor = find<Donor>('donors', (item) => item.id === match.donorId);
+  const donor = (await find<Donor>('donors', (item) => item.id === match.donorId));
   if (!donor || donor.uid !== req.user!.uid) return res.status(403).json({ error: 'This alert belongs to another donor.' });
   if (!['alerted', 'accepted', 'en_route'].includes(match.status)) {
     return res.status(409).json({ error: 'Buddy invites are available only for an active emergency alert.' });
@@ -97,7 +97,7 @@ router.post('/matches/:matchId/link', authenticate, authorizeRoles('donor'), (re
   if (match.status === 'alerted' && Date.parse(match.alertExpiresAt || match.alertedAt || '') <= Date.now()) {
     return res.status(409).json({ error: 'This emergency alert has expired.' });
   }
-  const request = find<BloodRequest>('bloodRequests', (item) => item.id === match.requestId);
+  const request = (await find<BloodRequest>('bloodRequests', (item) => item.id === match.requestId));
   if (!request || !['searching', 'matched'].includes(request.status)) {
     return res.status(409).json({ error: 'This emergency request is closed.' });
   }
@@ -112,7 +112,7 @@ router.post('/matches/:matchId/link', authenticate, authorizeRoles('donor'), (re
     createdAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   };
-  insert<BuddyLink>('buddyLinks', link);
+  (await insert<BuddyLink>('buddyLinks', link));
   res.status(201).json({ token: link.token, expiresAt: link.expiresAt });
 });
 

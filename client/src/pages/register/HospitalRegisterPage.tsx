@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../utils/api';
+import { setToken } from '../../utils/tokenStorage';
 import { useAuth } from '../../context/AuthContext';
-import { LifePulseLogo } from '../../components/LifePulseLogo';
+import { RaktaRunLogo } from '../../components/RaktaRunLogo';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+import EmailOtpVerification from '../../components/EmailOtpVerification';
 import { ArrowLeft, Building2, CheckCircle2, AlertCircle, MapPin } from 'lucide-react';
 
 const inputClass = 'w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition shadow-sm';
 
 export default function HospitalRegisterPage() {
-  const { role } = useAuth();
+  const { role, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [otpStep, setOtpStep] = useState(false);
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -44,42 +47,40 @@ export default function HospitalRegisterPage() {
     setError('');
     try {
       setLoading(true);
-      const regRes = await api.post('/auth/register', {
+      await api.post('/auth/register', {
         email: form.email,
         password: form.password,
         role: 'hospital',
         displayName: form.name,
       });
-
-      if (regRes.data?.token) {
-        localStorage.setItem('lifepulse_token', regRes.data.token);
-      }
-
-      await api.post('/hospitals/register', {
-        name: form.name,
-        licenseNumber: form.registrationNumber,
-        registrationNumber: form.registrationNumber,
-        address: form.address,
-        district: form.locality.toLowerCase().includes('mangal') ? 'Dakshina Kannada' : 'Udupi',
-        coordinates: {
-          latitude: form.latitude,
-          longitude: form.longitude,
-        },
-        bloodBankContact: {
-          name: form.contactName,
-          phone: form.contactPhone,
-          email: form.email,
-        },
-      });
-
-      setDone(true);
-      setTimeout(() => navigate('/hospital/pending'), 2000);
+      setOtpStep(true);
     } catch (err: any) {
       console.error('Hospital registration error:', err);
-      setError(err.message || 'Registration failed');
+      const message = err.response?.data?.error || err.message || 'Registration failed';
+      if (err.response?.status === 409 && message.toLowerCase().includes('verification is already pending')) {
+        setOtpStep(true);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const completeRegistration = async (token: string) => {
+    setToken(token);
+    await api.post('/hospitals/register', {
+      name: form.name,
+      licenseNumber: form.registrationNumber,
+      registrationNumber: form.registrationNumber,
+      address: form.address,
+      district: form.locality.toLowerCase().includes('mangal') ? 'Dakshina Kannada' : 'Udupi',
+      coordinates: { latitude: form.latitude, longitude: form.longitude },
+      bloodBankContact: { name: form.contactName, phone: form.contactPhone, email: form.email },
+    });
+    await refreshProfile();
+    setDone(true);
+    setTimeout(() => navigate('/hospital/pending'), 2000);
   };
 
   if (done) {
@@ -102,7 +103,7 @@ export default function HospitalRegisterPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between p-6 transition-colors duration-200">
       {/* Top Header */}
       <div className="mx-auto w-full max-w-3xl flex items-center justify-between py-2">
-        <LifePulseLogo size="md" />
+        <RaktaRunLogo size="md" />
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
@@ -122,7 +123,7 @@ export default function HospitalRegisterPage() {
                 Hospital Authority Registration
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-                Your medical center will be reviewed by a LifePulse administrator before emergency broadcast permissions are activated.
+                Your medical center will be reviewed by a RaktaRun administrator before emergency broadcast permissions are activated.
               </p>
             </div>
             <Badge variant="success" className="hidden sm:inline-flex gap-1">
@@ -137,7 +138,13 @@ export default function HospitalRegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {otpStep ? (
+            <EmailOtpVerification
+              email={form.email.trim()}
+              onVerified={completeRegistration}
+              onBack={() => setOtpStep(false)}
+            />
+          ) : <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
@@ -148,18 +155,18 @@ export default function HospitalRegisterPage() {
                   type="email"
                   value={form.email}
                   onChange={(e) => update('email', e.target.value)}
-                  placeholder="hospital@lifepulse.in"
+                  placeholder="hospital@example.com"
                   className={inputClass}
                 />
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-400 block mb-1.5">
-                  Password (min 6)
+                  Password (min 8)
                 </label>
                 <input
                   required
                   type="password"
-                  minLength={6}
+                  minLength={8}
                   value={form.password}
                   onChange={(e) => update('password', e.target.value)}
                   placeholder="••••••••"
@@ -328,12 +335,12 @@ export default function HospitalRegisterPage() {
                 Register Hospital Authority
               </Button>
             </div>
-          </form>
+          </form>}
         </Card>
       </div>
 
       <div className="mx-auto w-full max-w-3xl py-4 text-center text-xs text-slate-500">
-        LifePulse Emergency Medical Authority Verification Portal
+        RaktaRun Emergency Medical Authority Verification Portal
       </div>
     </div>
   );

@@ -18,6 +18,25 @@ import { Button } from '../../components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 
+const isCertificateImage = (file: File) => {
+  const extension = file.name.toLowerCase().split('.').pop();
+  const expectedMime = extension === 'jpg' || extension === 'jpeg' ? 'image/jpeg'
+    : extension === 'png' ? 'image/png'
+      : extension === 'webp' ? 'image/webp'
+        : null;
+  return Boolean(expectedMime && (!file.type || file.type === expectedMime));
+};
+
+const readFileAsBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result = String(reader.result || '');
+    resolve(result.split(',')[1] || result);
+  };
+  reader.onerror = () => reject(reader.error || new Error('Could not read certificate image.'));
+  reader.readAsDataURL(file);
+});
+
 export const DonorRegisterPage: React.FC = () => {
   const { profile, roleData, refreshProfile } = useAuth();
   const navigate = useNavigate();
@@ -40,7 +59,7 @@ export const DonorRegisterPage: React.FC = () => {
   const [certificateId, setCertificateId] = useState(roleData?.verification?.certificateId || `LP-CERT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`);
   const [verifiedBy, setVerifiedBy] = useState(roleData?.verification?.verifiedBy || 'Dr. Screening Officer');
   const [certificateFileName, setCertificateFileName] = useState<string>(roleData?.verification?.certificateFileName || '');
-  const [certificateFileBase64, setCertificateFileBase64] = useState<string>('');
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (roleData) {
@@ -73,47 +92,64 @@ export const DonorRegisterPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!isCertificateImage(file)) {
+      e.target.value = '';
+      setErrorMessage('Upload a certificate image in JPG, PNG, or WEBP format. PDF files are not accepted.');
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      e.target.value = '';
+      setErrorMessage('Certificate images must be 3 MB or smaller.');
+      return;
+    }
+
+    setErrorMessage(null);
     setCertificateFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      const base64Data = result.split(',')[1] || result;
-      setCertificateFileBase64(base64Data);
-    };
-    reader.readAsDataURL(file);
+    setCertificateFile(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!certificateFile && !roleData?.verification?.certificateFileName) {
+      setErrorMessage('Please upload your hospital screening certificate as a JPG, PNG, or WEBP image.');
+      return;
+    }
+    if (certificateFile && !isCertificateImage(certificateFile)) {
+      setErrorMessage('Upload a certificate image in JPG, PNG, or WEBP format. PDF files are not accepted.');
+      return;
+    }
+    if (certificateFile && certificateFile.size > 3 * 1024 * 1024) {
+      setErrorMessage('Certificate images must be 3 MB or smaller.');
+      return;
+    }
     setLoading(true);
     setErrorMessage(null);
 
     const rhType = bloodGroup.includes('-') ? 'negative' : 'positive';
 
-    const payload = {
-      fullName,
-      phone,
-      bloodGroup,
-      rhType,
-      bloodComponentEligibility: components,
-      hemoglobinLevel: Number(hemoglobinLevel),
-      weight: Number(weight),
-      homeLocality,
-      preferredRadius: Number(preferredRadius),
-      hospitalName,
-      certificateId,
-      verifiedBy,
-      certificateFileName: certificateFileName || 'certificate.pdf',
-      certificateFileBase64: certificateFileBase64 || btoa('Hospital Verified Screening Certificate Mock Content'),
-    };
-
     try {
+      const certificateFileBase64 = certificateFile ? await readFileAsBase64(certificateFile) : '';
+      const payload = {
+        fullName,
+        phone,
+        bloodGroup,
+        rhType,
+        bloodComponentEligibility: components,
+        hemoglobinLevel: Number(hemoglobinLevel),
+        weight: Number(weight),
+        homeLocality,
+        preferredRadius: Number(preferredRadius),
+        hospitalName,
+        certificateId,
+        verifiedBy,
+        ...(certificateFileBase64 ? { certificateFileName, certificateFileBase64 } : {}),
+      };
       await api.post('/donors', payload);
       await refreshProfile();
       navigate('/donor');
     } catch (err: any) {
       console.error('Registration error:', err);
-      setErrorMessage(err.response?.data?.error || 'Failed to complete donor onboarding.');
+      setErrorMessage(err.response?.data?.error || err.message || 'Failed to complete donor onboarding.');
     } finally {
       setLoading(false);
     }
@@ -141,7 +177,7 @@ export const DonorRegisterPage: React.FC = () => {
                 Hospital Screened Blood Network
               </h2>
               <p className="text-xs text-slate-600 dark:text-rose-200/80 mt-1 leading-relaxed">
-                LifePulse is an emergency dispatch network reserved for hospital-verified donors. Please upload the digital screening certificate
+                RaktaRun is an emergency dispatch network reserved for hospital-verified donors. Please upload the digital screening certificate
                 issued during your clinical evaluation in Udupi or Dakshina Kannada.
               </p>
             </div>
@@ -369,12 +405,12 @@ export const DonorRegisterPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                  Upload Digital Certificate (PDF / Scanned Image)
+                  Upload Digital Certificate Image (JPG / PNG / WEBP)
                 </label>
                 <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center hover:border-rose-500/50 transition bg-slate-50/50 dark:bg-slate-950/40">
                   <input
                     type="file"
-                    accept=".pdf,.png,.jpg,.jpeg,.txt"
+                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                     onChange={handleFileUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
@@ -391,7 +427,7 @@ export const DonorRegisterPage: React.FC = () => {
                       <p className="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                         Click or drag file here to attach certificate
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">PDF, JPG, PNG up to 5MB</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">JPG, PNG, or WEBP images up to 3 MB. PDFs are not accepted.</p>
                     </>
                   )}
                 </div>

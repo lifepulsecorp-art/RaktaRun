@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LifePulseLogo } from '../components/LifePulseLogo';
+import { RaktaRunLogo } from '../components/RaktaRunLogo';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
@@ -23,7 +23,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between p-6 transition-colors duration-200">
       {/* Top Header */}
       <div className="mx-auto w-full max-w-5xl flex items-center justify-between py-2">
-        <LifePulseLogo size="md" showSubtitle={true} />
+        <RaktaRunLogo size="md" showSubtitle={true} />
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
@@ -43,7 +43,7 @@ export default function RegisterPage() {
             Coastal Karnataka Emergency Network
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Join the LifePulse Network
+            Join the RaktaRun Network
           </h1>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
             Choose your registration path to connect with emergency blood coordination across Udupi & Dakshina Kannada.
@@ -152,7 +152,7 @@ export default function RegisterPage() {
 
       {/* Footer */}
       <div className="mx-auto w-full max-w-5xl py-4 text-center text-xs text-slate-500 dark:text-slate-600">
-        LifePulse Emergency Portal • Udupi & Dakshina Kannada Medical Response Network
+        RaktaRun Emergency Portal • Udupi & Dakshina Kannada Medical Response Network
       </div>
     </div>
   );

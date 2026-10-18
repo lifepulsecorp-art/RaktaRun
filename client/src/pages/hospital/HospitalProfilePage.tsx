@@ -108,7 +108,7 @@ export const HospitalProfilePage: React.FC = () => {
         setHospitalId(res.data.id);
         // Sync user role record
         await api.post('/auth/sync', { hospitalId: res.data.id, role: 'hospital' });
-        setSuccessMessage('Hospital registered! Pending verification by LifePulse Admin.');
+        setSuccessMessage('Hospital registered! Pending verification by RaktaRun Admin.');
       }
       await refreshProfile();
     } catch (err: any) {
@@ -122,7 +122,7 @@ export const HospitalProfilePage: React.FC = () => {
   return (
     <AppLayout
       title="Hospital Medical Profile"
-      subtitle="LifePulse Medical Authority • Block G Facility & Blood Bank Accreditation"
+      subtitle="RaktaRun Medical Authority • Block G Facility & Blood Bank Accreditation"
       badge={
         <Badge variant={verificationStatus === 'verified' ? 'success' : 'warning'} className="uppercase">
           {verificationStatus}
@@ -144,7 +144,7 @@ export const HospitalProfilePage: React.FC = () => {
               <div>
                 <h3 className="text-base font-bold text-emerald-900 dark:text-emerald-200">Accredited Emergency Medical Center</h3>
                 <p className="text-xs text-emerald-700 dark:text-emerald-300/80 mt-1">
-                  This facility is officially authorized by LifePulse Medical Authority. You have permission to dispatch
+                  This facility is officially authorized by RaktaRun Medical Authority. You have permission to dispatch
                   instant blood emergency alerts to verified donors in Udupi & Dakshina Kannada.
                 </p>
               </div>
@@ -155,7 +155,7 @@ export const HospitalProfilePage: React.FC = () => {
               <div>
                 <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">Verification In Progress</h3>
                 <p className="text-xs text-amber-700 dark:text-amber-300/80 mt-1">
-                  Your blood bank accreditation is pending review by the LifePulse District Admin. Please ensure all licensing
+                  Your blood bank accreditation is pending review by the RaktaRun District Admin. Please ensure all licensing
                   and emergency contact information below is complete.
                 </p>
               </div>

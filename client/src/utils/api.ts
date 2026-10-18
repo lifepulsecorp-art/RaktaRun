@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { auth } from '../config/firebase';
+import { getToken } from './tokenStorage';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -9,7 +10,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  const localToken = localStorage.getItem('lifepulse_token');
+  const localToken = getToken();
   if (localToken) {
     config.headers.Authorization = `Bearer ${localToken}`;
   } else {

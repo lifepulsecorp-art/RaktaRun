@@ -36,7 +36,7 @@ export default function AdminBuddyReportsPage() {
 
   const review = async (referralId: string, decision: 'dismissed' | 'confirmed' | 'delete_and_block') => {
     const promptText = decision === 'delete_and_block'
-      ? 'Permanently remove this referrer account and block its email from creating another LifePulse account?'
+      ? 'Permanently remove this referrer account and block its email from creating another RaktaRun account?'
       : decision === 'confirmed'
         ? 'Confirm this concern and flag the referrer account for admin review?'
         : 'Dismiss this hospital report?';

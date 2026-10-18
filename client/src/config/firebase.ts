@@ -2,8 +2,6 @@ import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 
 const apiKey = import.meta.env.VITE_FIREBASE_API_KEY?.trim();
-const firebaseConfigured = Boolean(apiKey && apiKey !== 'YOUR_FIREBASE_API_KEY');
-
 const firebaseConfig = {
   apiKey,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -13,6 +11,13 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
+const firebaseConfigured = Boolean(
+  apiKey && apiKey !== 'YOUR_FIREBASE_API_KEY'
+  && firebaseConfig.authDomain
+  && firebaseConfig.projectId
+  && firebaseConfig.appId
+);
 
 // The app supports local JWT auth without Firebase credentials. Avoid creating
 // Firebase Auth with the placeholder key from .env.example, which crashes the UI.

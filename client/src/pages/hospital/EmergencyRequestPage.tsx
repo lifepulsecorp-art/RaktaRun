@@ -1,9 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Radio, ShieldCheck, AlertCircle } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { AppLayout } from '../../components/AppLayout';
+import { usePolling } from '../../hooks/usePolling';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -28,11 +29,7 @@ export default function EmergencyRequestPage() {
     }
   };
 
-  useEffect(() => {
-    refresh();
-    const timer = setInterval(refresh, 8000);
-    return () => clearInterval(timer);
-  }, [hospitalId]);
+  usePolling(refresh, 8000);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

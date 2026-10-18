@@ -10,7 +10,7 @@ import {
   Building2,
   Users,
 } from 'lucide-react';
-import { LifePulseLogo } from '../components/LifePulseLogo';
+import { RaktaRunLogo } from '../components/RaktaRunLogo';
 
 const COMPATIBILITY_DATA: Record<string, { canGiveTo: string[]; isUniversal?: boolean; note: string }> = {
   'O-': { canGiveTo: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'], isUniversal: true, note: 'Universal Red Cell Hero! Vital in immediate trauma resuscitations.' },
@@ -33,7 +33,13 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-50 px-6 py-12 shadow-sm sm:px-12 sm:py-16 lg:px-16 lg:py-20">
           <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl" />
-          <div className="relative z-10 max-w-3xl space-y-6">
+          <img
+            src="/raktarun-mark.png"
+            alt="RaktaRun blood-drop emblem"
+            className="pointer-events-none absolute right-8 top-1/2 hidden h-56 w-56 -translate-y-1/2 object-contain lg:block xl:right-12 xl:h-64 xl:w-64"
+            loading="lazy"
+          />
+          <div className="relative z-10 max-w-3xl space-y-6 lg:max-w-[calc(100%-18rem)]">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-700/20 bg-emerald-700/5 px-3.5 py-1.5 text-xs font-bold tracking-wide text-emerald-800">
               <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
               <span>A little care can go a long way</span>
@@ -48,7 +54,7 @@ export default function HomePage() {
             </h1>
 
             <p className="max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
-              When someone needs blood, LifePulse brings nearby donors and local hospitals together. It is simple to join, easy to use, and made for showing up when it matters.
+              When someone needs blood, RaktaRun brings nearby donors and local hospitals together. It is simple to join, easy to use, and made for showing up when it matters.
             </p>
 
             <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row">
@@ -265,13 +271,13 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="pt-8 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <LifePulseLogo size="sm" subtitle="Emergency Blood Coordination Network" />
+            <RaktaRunLogo size="sm" subtitle="Emergency Blood Coordination Network" />
             <div className="flex items-center gap-6">
               <Link to="/hero-wall" className="hover:text-slate-900 dark:hover:text-white transition">Heroes Wall</Link>
               <Link to="/register/hospital" className="hover:text-slate-900 dark:hover:text-white transition">Hospital Enrolment</Link>
               <Link to="/login" className="hover:text-slate-900 dark:hover:text-white transition">Sign In</Link>
             </div>
-            <p>© 2026 LifePulse. Udupi & Dakshina Kannada Emergency Health Grid.</p>
+            <p>© 2026 RaktaRun. Udupi & Dakshina Kannada Emergency Health Grid.</p>
           </div>
         </footer>
       </div>

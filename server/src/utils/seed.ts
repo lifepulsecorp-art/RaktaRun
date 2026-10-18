@@ -1,27 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import 'dotenv/config';
 import { writeJson } from './db.js';
 import type { User, Hospital, Donor, BloodRequest, Match } from '../types.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const CERTIFICATES_DIR = path.join(__dirname, '../../data/certificates');
-
-// Ensure certificates directory exists
-if (!fs.existsSync(CERTIFICATES_DIR)) {
-  fs.mkdirSync(CERTIFICATES_DIR, { recursive: true });
-}
-
-// Create sample mock certificate files
-fs.writeFileSync(
-  path.join(CERTIFICATES_DIR, 'cert_LP-CERT-2025-00841.txt'),
-  'LifePulse Medical Verification Certificate #LP-CERT-2025-00841\nDonor: Rahul Shetty (O+)\nVerified By: Dr. Anand Kumar (Kasturba Hospital, Manipal)\nDate: 2026-08-15\nStatus: Screened & Approved'
-);
-fs.writeFileSync(
-  path.join(CERTIFICATES_DIR, 'cert_LP-CERT-2025-00842.txt'),
-  'LifePulse Medical Verification Certificate #LP-CERT-2025-00842\nDonor: Sneha Rao (A+)\nVerified By: Dr. Pradeep Nayak (AJ Hospital, Mangaluru)\nDate: 2026-09-01\nStatus: Screened & Approved'
-);
 
 // 1. Users (including Admin with provided UID)
 const users: User[] = [
@@ -29,7 +8,7 @@ const users: User[] = [
     uid: '5G6ajWegMiepIzvIyreG7bx82SG2',
     email: 'admin@lifepulse.in',
     role: 'admin',
-    name: 'LifePulse System Admin',
+    name: 'RaktaRun System Admin',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -166,7 +145,6 @@ const donors: Donor[] = [
       certificateId: 'LP-CERT-2025-00841',
       verifiedAt: '2026-08-15T00:00:00.000Z',
       verifiedBy: 'Dr. Anand Kumar',
-      certificateFileName: 'cert_LP-CERT-2025-00841.txt',
       expiryDate: '2027-08-15T00:00:00.000Z',
     },
     homeLocality: 'Manipal, Udupi',
@@ -206,7 +184,6 @@ const donors: Donor[] = [
       certificateId: 'LP-CERT-2025-00842',
       verifiedAt: '2026-09-01T00:00:00.000Z',
       verifiedBy: 'Dr. Pradeep Nayak',
-      certificateFileName: 'cert_LP-CERT-2025-00842.txt',
       expiryDate: '2027-09-01T00:00:00.000Z',
     },
     homeLocality: 'Kadri, Mangaluru',
@@ -406,12 +383,12 @@ const matches: Match[] = [
   },
 ];
 
-console.log('Seeding LifePulse JSON Database...');
-writeJson('users', users);
-writeJson('hospitals', hospitals);
-writeJson('donors', donors);
-writeJson('bloodRequests', bloodRequests);
-writeJson('matches', matches);
+console.log('Seeding RaktaRun Supabase database...');
+(await writeJson('users', users));
+(await writeJson('hospitals', hospitals));
+(await writeJson('donors', donors));
+(await writeJson('bloodRequests', bloodRequests));
+(await writeJson('matches', matches));
 console.log('Seed completed successfully:');
 console.log(`   - Users: ${users.length} (Admin UID: 5G6ajWegMiepIzvIyreG7bx82SG2)`);
 console.log(`   - Hospitals: ${hospitals.length}`);

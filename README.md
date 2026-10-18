@@ -70,10 +70,9 @@
                                     │ Atomic Persistence
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        Local JSON Data Layer                           │
-│  - users.json, hospitals.json, donors.json                             │
-│  - bloodRequests.json, matches.json, auditLogs.json                    │
-│  - server/data/certificates/ (Screening documents)                     │
+│              Supabase Postgres + Private Object Storage                │
+│  - User, hospital, donor, request, match, and audit records             │
+│  - Private donor-certificate bucket; admins retrieve files through API  │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -100,12 +99,19 @@ Create a `.env` file in `server/` (reference `server/.env.example`):
 ```env
 PORT=5000
 NODE_ENV=development
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_SECRET_KEY=your_supabase_secret_key
+SUPABASE_CERTIFICATES_BUCKET=donor-certificates
+JWT_SECRET=use_a_long_random_secret
+OTP_SECRET=use_a_different_long_random_secret
 
 # Brevo Transactional Email & SMS Gateway
 BREVO_API_KEY=your_brevo_api_key_here
 BREVO_SENDER_EMAIL=lifepulsecorp@gmail.com
 BREVO_SENDER_NAME=RaktaRun Emergency Network
 ```
+
+For Firebase Web settings, create `client/.env` from `client/.env.example`. Set Firebase Admin and Supabase server secrets in `server/.env`; never use a `VITE_` prefix for server secrets.
 
 ### 4. Running the Application
 ```bash
@@ -119,6 +125,10 @@ npm run seed
 - **Frontend Client:** [http://localhost:5173](http://localhost:5173)
 - **Backend API Health:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
 - **Public Hero Wall:** [http://localhost:5173/heroes](http://localhost:5173/heroes)
+
+## ☁️ Vercel Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the Supabase schema, one-time JSON data migration, Firebase Auth settings, Vercel Services configuration, environment variables, and escalation scheduler setup.
 
 ---
 

@@ -8,6 +8,7 @@ import { AppLayout } from '../components/AppLayout';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { usePolling } from '../hooks/usePolling';
 
 export const LiveTrackingPage: React.FC = () => {
   const { requestId = '' } = useParams();
@@ -57,15 +58,11 @@ export const LiveTrackingPage: React.FC = () => {
     }
   }, [requestId, role, celebrated]);
 
-  useEffect(() => {
-    refresh();
-    const intervalMs = role === 'donor' ? 4000 : 2500;
-    const timer = setInterval(refresh, intervalMs);
-    return () => {
-      clearInterval(timer);
-      if (watchId.current !== null) navigator.geolocation?.clearWatch(watchId.current);
-    };
-  }, [refresh, role]);
+  usePolling(refresh, 5000);
+
+  useEffect(() => () => {
+    if (watchId.current !== null) navigator.geolocation?.clearWatch(watchId.current);
+  }, []);
 
   const startSharing = useCallback(() => {
     if (!navigator.geolocation) {
@@ -190,7 +187,7 @@ export const LiveTrackingPage: React.FC = () => {
       setBuddyReferrals((current) => current.map((lead) => lead.id === referralId ? data.referral : lead));
       setReportingBuddyId('');
       setBuddyReportNotes('');
-      setBuddyNotice('Report sent to LifePulse administrators for review.');
+      setBuddyNotice('Report sent to RaktaRun administrators for review.');
     } catch (err: any) {
       setBuddyNotice(err.response?.data?.error || 'Could not submit the report.');
     }
@@ -344,7 +341,7 @@ export const LiveTrackingPage: React.FC = () => {
                 <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   {sharing
                     ? `Your phone's exact coordinates are transmitting live to ${request?.hospitalName} trauma unit. Ephemeral tracking automatically ceases when you arrive within 150m.`
-                    : 'LifePulse requires browser device location permission to guide your transit and provide real-time ETA to the hospital.'}
+                    : 'RaktaRun requires browser device location permission to guide your transit and provide real-time ETA to the hospital.'}
                 </p>
 
                 {notice && (
@@ -604,7 +601,7 @@ export const LiveTrackingPage: React.FC = () => {
             </p>
             <div className="mt-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 text-left text-xs text-slate-600 dark:text-slate-400 space-y-1">
               <p className="font-semibold text-slate-900 dark:text-slate-200">“Would you like us to celebrate your contribution publicly?”</p>
-              <p>Choosing yes will feature your first name, blood group, and district on the public LifePulse Hero Wall with a custom share card.</p>
+              <p>Choosing yes will feature your first name, blood group, and district on the public RaktaRun Hero Wall with a custom share card.</p>
             </div>
             <div className="mt-6 flex flex-col gap-2.5">
               <Button

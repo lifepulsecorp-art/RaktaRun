@@ -6,7 +6,7 @@ import api from '../../utils/api';
 import { AppLayout } from '../../components/AppLayout';
 
 const BADGE_DESCRIPTIONS: Record<string, { label: string; icon: string; desc: string }> = {
-  life_pulse_hero: { label: 'LifePulse Hero', icon: '✦', desc: 'Responded to your first verified hospital emergency dispatch.' },
+  life_pulse_hero: { label: 'RaktaRun Hero', icon: '✦', desc: 'Responded to your first verified hospital emergency dispatch.' },
   rapid_responder: { label: 'Rapid Responder', icon: '›', desc: 'Accepted alert promptly and arrived within required trauma window.' },
   repeat_hero: { label: 'Repeat Hero', icon: '◆', desc: 'Supported 3 or more verified life-saving emergency requests.' },
   rare_blood_hero: { label: 'Rare Blood Hero', icon: '◇', desc: 'Screened donor with high-priority Rh-negative blood group.' },
@@ -55,7 +55,7 @@ export const DonorHeroCardPage: React.FC = () => {
       ctx.fillStyle = '#fb7185';
       ctx.font = 'bold 46px Arial, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('LIFEPULSE HERO', 540, 220);
+      ctx.fillText('RAKTARUN HERO', 540, 220);
 
       ctx.fillStyle = '#fda4af';
       ctx.font = '30px Arial, sans-serif';
@@ -110,7 +110,7 @@ export const DonorHeroCardPage: React.FC = () => {
       // Footer
       ctx.fillStyle = '#f43f5e';
       ctx.font = 'bold 40px Arial, sans-serif';
-      ctx.fillText('LifePulse', 540, 1690);
+      ctx.fillText('RaktaRun', 540, 1690);
 
       ctx.fillStyle = '#94a3b8';
       ctx.font = '30px Arial, sans-serif';
@@ -128,7 +128,7 @@ export const DonorHeroCardPage: React.FC = () => {
       ctx.textAlign = 'left';
       ctx.fillStyle = '#fb7185';
       ctx.font = 'bold 32px Arial, sans-serif';
-      ctx.fillText('LIFEPULSE · EMERGENCY HERO RECOGNITION', 72, 88);
+      ctx.fillText('RAKTARUN · EMERGENCY HERO RECOGNITION', 72, 88);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 68px Arial, sans-serif';
@@ -160,7 +160,7 @@ export const DonorHeroCardPage: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `lifepulse-my-hero-card-${format}.png`;
+      link.download = `raktarun-my-hero-card-${format}.png`;
       link.click();
       URL.revokeObjectURL(url);
     }, 'image/png');
@@ -237,7 +237,7 @@ export const DonorHeroCardPage: React.FC = () => {
             </button>
           </div>
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
-            Watermarked and certified by LifePulse Emergency Network for Udupi & Dakshina Kannada.
+            Watermarked and certified by RaktaRun Emergency Network for Udupi & Dakshina Kannada.
           </p>
         </div>
 
@@ -294,7 +294,7 @@ export const DonorHeroCardPage: React.FC = () => {
               {consentNotice && <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{consentNotice}</span>}
             </div>
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              When enabled, your first name, blood group, and completed donation count appear on the public LifePulse Hero Wall. Exact home location and phone numbers remain strictly confidential.
+              When enabled, your first name, blood group, and completed donation count appear on the public RaktaRun Hero Wall. Exact home location and phone numbers remain strictly confidential.
             </p>
 
             <div className="mt-4 flex items-center justify-between rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-inner">

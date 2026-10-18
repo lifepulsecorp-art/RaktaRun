@@ -4,8 +4,8 @@ import type { Donor } from '../types.js';
 
 const router = Router();
 
-router.get('/', (_req, res) => {
-  const heroes = readJson<Donor>('donors')
+router.get('/', async (_req, res) => {
+  const heroes = (await readJson<Donor>('donors'))
     .filter((donor) => donor.publicHeroConsent === true && donor.eligibilityStatus === 'eligible' && donor.heroStats.totalDonations > 0)
     .map((donor) => ({
       id: donor.id,

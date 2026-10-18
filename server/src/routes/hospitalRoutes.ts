@@ -10,25 +10,25 @@ import { dispatchAlertNotifications, sendRegistrationNotification } from '../ser
 
 const router = Router();
 
-function audit(req: AuthenticatedRequest, action: string, entityType: string, entityId: string, details?: Record<string, unknown>) {
-  insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action, entityType, entityId, details, createdAt: new Date().toISOString() });
+async function audit(req: AuthenticatedRequest, action: string, entityType: string, entityId: string, details?: Record<string, unknown>) {
+  (await insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action, entityType, entityId, details, createdAt: new Date().toISOString() }));
 }
 
 // GET /api/hospitals - List hospitals
-router.get('/', (req, res) => {
-  const hospitals = readJson<Hospital>('hospitals');
+router.get('/', async (req, res) => {
+  const hospitals = (await readJson<Hospital>('hospitals'));
   res.json(hospitals);
 });
 
 // GET /api/hospitals/:id - Hospital details
-router.get('/:id', (req, res) => {
-  const hospital = find<Hospital>('hospitals', (h) => h.id === req.params.id);
+router.get('/:id', async (req, res) => {
+  const hospital = (await find<Hospital>('hospitals', (h) => h.id === req.params.id));
   if (!hospital) return res.status(404).json({ error: 'Hospital not found' });
   res.json(hospital);
 });
 
 // POST /api/hospitals - Register a hospital
-router.post('/', authenticate, (req: AuthenticatedRequest, res) => {
+router.post('/', authenticate, async (req: AuthenticatedRequest, res) => {
   const { name, address, district, coordinates, bloodBankContact, licenseNumber, registrationNumber } = req.body;
 
   if (!name || !address || !district || !coordinates || !bloodBankContact || !licenseNumber) {
@@ -50,12 +50,12 @@ router.post('/', authenticate, (req: AuthenticatedRequest, res) => {
     updatedAt: new Date().toISOString(),
   };
 
-  insert<Hospital>('hospitals', newHospital);
+  (await insert<Hospital>('hospitals', newHospital));
   res.status(201).json(newHospital);
 });
 
 // POST /api/hospitals/register - Self-service registration from public onboarding
-router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
+router.post('/register', authenticate, async (req: AuthenticatedRequest, res) => {
   const {
     name,
     registrationNumber,
@@ -72,13 +72,14 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
   }
 
   // Check if hospital already exists for this UID
-  let existing = find<Hospital>('hospitals', (h) => h.uid === req.user!.uid);
+  let existing = (await find<Hospital>('hospitals', (h) => h.uid === req.user!.uid));
   if (existing) {
-    const updated = update<Hospital>('hospitals', existing.id, {
+    const updated = (await update<Hospital>('hospitals', existing.id, {
       name,
       registrationNumber: registrationNumber || existing.registrationNumber,
       address: `${address}, ${locality || ''} - ${pincode || ''}`.trim(),
-    });
+    }));
+    (await update<User>('users', req.user!.uid, { hospitalId: existing.id, role: 'hospital', name }));
     return res.status(200).json({ hospital: updated || existing });
   }
 
@@ -107,8 +108,8 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
     updatedAt: new Date().toISOString(),
   };
 
-  insert<Hospital>('hospitals', newHospital);
-  update<User>('users', req.user!.uid, { hospitalId: newHospital.id, role: 'hospital', name });
+  (await insert<Hospital>('hospitals', newHospital));
+  (await update<User>('users', req.user!.uid, { hospitalId: newHospital.id, role: 'hospital', name }));
 
   sendRegistrationNotification({
     name: newHospital.bloodBankContact.name || name,
@@ -122,8 +123,8 @@ router.post('/register', authenticate, (req: AuthenticatedRequest, res) => {
 });
 
 // PUT /api/hospitals/:id - Update hospital profile
-router.put('/:id', authenticate, (req: AuthenticatedRequest, res) => {
-  const hospital = find<Hospital>('hospitals', (h) => h.id === req.params.id);
+router.put('/:id', authenticate, async (req: AuthenticatedRequest, res) => {
+  const hospital = (await find<Hospital>('hospitals', (h) => h.id === req.params.id));
   if (!hospital) return res.status(404).json({ error: 'Hospital not found' });
 
   // Only allow admin or the hospital themselves
@@ -141,36 +142,42 @@ router.put('/:id', authenticate, (req: AuthenticatedRequest, res) => {
   if (licenseNumber) patch.licenseNumber = licenseNumber;
   if (registrationNumber) patch.registrationNumber = registrationNumber;
 
-  const updated = update<Hospital>('hospitals', hospital.id, patch);
+  const updated = (await update<Hospital>('hospitals', hospital.id, patch));
+  if (hospital.uid) {
+    const userPatch: Partial<User> = {};
+    if (name) userPatch.name = String(name).trim();
+    if (bloodBankContact?.phone) userPatch.phone = String(bloodBankContact.phone).trim();
+    if (Object.keys(userPatch).length) (await update<User>('users', hospital.uid, userPatch));
+  }
   res.json({ message: 'Hospital profile updated', hospital: updated });
 });
 
 // PUT /api/hospitals/:id/verify - Admin verifies hospital
-router.put('/:id/verify', authenticate, authorizeRoles('admin'), (req: AuthenticatedRequest, res) => {
+router.put('/:id/verify', authenticate, authorizeRoles('admin'), async (req: AuthenticatedRequest, res) => {
   const { status } = req.body; // 'verified' | 'rejected'
-  const updated = update<Hospital>('hospitals', req.params.id, {
+  const updated = (await update<Hospital>('hospitals', req.params.id, {
     verificationStatus: status || 'verified',
     verifiedBy: req.user?.uid,
     verifiedAt: new Date().toISOString(),
-  });
+  }));
 
   if (!updated) return res.status(404).json({ error: 'Hospital not found' });
-  insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action: 'hospital.accreditation_updated', entityType: 'hospital', entityId: updated.id, details: { status: updated.verificationStatus }, createdAt: new Date().toISOString() });
+  (await insert<AuditLog>('auditLogs', { id: `audit_${uuidv4().slice(0, 10)}`, actorUid: req.user!.uid, actorRole: req.user!.role, action: 'hospital.accreditation_updated', entityType: 'hospital', entityId: updated.id, details: { status: updated.verificationStatus }, createdAt: new Date().toISOString() }));
   res.json({ message: 'Hospital verification updated', hospital: updated });
 });
 
 // GET /api/hospitals/:id/requests - List requests for this hospital
-router.get('/:id/requests', authenticate, (req: AuthenticatedRequest, res) => {
-  const hospital = find<Hospital>('hospitals', (h) => h.id === req.params.id);
+router.get('/:id/requests', authenticate, async (req: AuthenticatedRequest, res) => {
+  const hospital = (await find<Hospital>('hospitals', (h) => h.id === req.params.id));
   if (!hospital) return res.status(404).json({ error: 'Hospital not found' });
   if (req.user!.role !== 'admin' && hospital.uid !== req.user!.uid && req.user!.hospitalId !== hospital.id) return res.status(403).json({ error: 'Forbidden' });
-  const requests = filter<BloodRequest>('bloodRequests', (r) => r.hospitalId === req.params.id);
+  const requests = (await filter<BloodRequest>('bloodRequests', (r) => r.hospitalId === req.params.id));
   res.json(requests);
 });
 
 // POST /api/hospitals/:id/requests - Create emergency blood request & trigger matching
-router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
-  const hospital = find<Hospital>('hospitals', (h) => h.id === req.params.id);
+router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), async (req: AuthenticatedRequest, res) => {
+  const hospital = (await find<Hospital>('hospitals', (h) => h.id === req.params.id));
   if (!hospital) return res.status(404).json({ error: 'Hospital not found' });
   if (req.user!.role !== 'admin' && hospital.uid !== req.user!.uid && req.user!.hospitalId !== hospital.id) return res.status(403).json({ error: 'Forbidden: cannot dispatch for this hospital' });
   if (hospital.verificationStatus !== 'verified') return res.status(403).json({ error: 'Hospital accreditation must be verified before dispatch' });
@@ -209,13 +216,13 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
     updatedAt: new Date().toISOString(),
   };
 
-  insert<BloodRequest>('bloodRequests', newRequest);
+  (await insert<BloodRequest>('bloodRequests', newRequest));
 
-  const candidates = findCandidates(newRequest, readJson<Donor>('donors'));
+  const candidates = findCandidates(newRequest, (await readJson<Donor>('donors')));
   const topMatches = candidates.slice(0, newRequest.unitsRequired * 5);
   const createdMatches: Match[] = [];
-  const config = getSystemConfig();
-  topMatches.forEach((c, index) => {
+  const config = await getSystemConfig();
+  for (const [index, c] of topMatches.entries()) {
       const match: Match = {
         id: `match_${uuidv4().substring(0, 8)}`,
         requestId,
@@ -231,14 +238,14 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      insert<Match>('matches', match);
+      (await insert<Match>('matches', match));
       createdMatches.push(match);
-      void dispatchAlertNotifications(c.donor, newRequest, match).catch((err) => {
+      await dispatchAlertNotifications(c.donor, newRequest, match).catch((err) => {
         console.warn(`[NOTIF DISPATCH ERROR] donor ${c.donor.id}:`, err);
       });
-    });
+  }
 
-  audit(req, 'request.dispatched', 'bloodRequest', requestId, { matchedCount: createdMatches.length, radiusKm: searchRadius });
+  await audit(req, 'request.dispatched', 'bloodRequest', requestId, { matchedCount: createdMatches.length, radiusKm: searchRadius });
 
   res.status(201).json({
     request: newRequest,
@@ -248,14 +255,14 @@ router.post('/:id/requests', authenticate, authorizeRoles('hospital', 'admin'), 
 });
 
 // GET /api/hospitals/:id/requests/:requestId/matches - Get matches for a request
-router.get('/:id/requests/:requestId/matches', authenticate, (req, res) => {
-  const request = find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id);
+router.get('/:id/requests/:requestId/matches', authenticate, async (req, res) => {
+  const request = (await find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id));
   if (!request) return res.status(404).json({ error: 'Request not found' });
-  const hospital = find<Hospital>('hospitals', (h) => h.id === request.hospitalId);
+  const hospital = (await find<Hospital>('hospitals', (h) => h.id === request.hospitalId));
   const authReq = req as AuthenticatedRequest;
   if (authReq.user!.role !== 'admin' && authReq.user!.uid !== hospital?.uid && authReq.user!.hospitalId !== hospital?.id) return res.status(403).json({ error: 'Forbidden' });
-  const matches = filter<Match>('matches', (m) => m.requestId === req.params.requestId);
-  const donors = readJson<Donor>('donors');
+  const matches = (await filter<Match>('matches', (m) => m.requestId === req.params.requestId));
+  const donors = (await readJson<Donor>('donors'));
 
   const detailedMatches = matches.map((m) => {
     const donor = donors.find((d) => d.id === m.donorId);
@@ -278,25 +285,25 @@ router.get('/:id/requests/:requestId/matches', authenticate, (req, res) => {
 });
 
 // Hospital teams can review no-signup buddy interests for their own requests.
-router.get('/:id/requests/:requestId/buddy-referrals', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
-  const request = find<BloodRequest>('bloodRequests', (item) => item.id === req.params.requestId && item.hospitalId === req.params.id);
+router.get('/:id/requests/:requestId/buddy-referrals', authenticate, authorizeRoles('hospital', 'admin'), async (req: AuthenticatedRequest, res) => {
+  const request = (await find<BloodRequest>('bloodRequests', (item) => item.id === req.params.requestId && item.hospitalId === req.params.id));
   if (!request) return res.status(404).json({ error: 'Request not found' });
-  const hospital = find<Hospital>('hospitals', (item) => item.id === request.hospitalId);
+  const hospital = (await find<Hospital>('hospitals', (item) => item.id === request.hospitalId));
   if (req.user!.role !== 'admin' && hospital?.uid !== req.user!.uid && req.user!.hospitalId !== hospital?.id) {
     return res.status(403).json({ error: 'Forbidden' });
   }
-  const referrals = filter<BuddyReferral>('buddyReferrals', (lead) => lead.requestId === request.id)
+  const referrals = (await filter<BuddyReferral>('buddyReferrals', (lead) => lead.requestId === request.id))
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
   res.json(referrals);
 });
 
 // Reports are limited to operational concerns; do not submit diagnoses or private medical details.
-router.post('/:id/buddy-referrals/:referralId/report', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
-  const referral = find<BuddyReferral>('buddyReferrals', (lead) => lead.id === req.params.referralId);
+router.post('/:id/buddy-referrals/:referralId/report', authenticate, authorizeRoles('hospital', 'admin'), async (req: AuthenticatedRequest, res) => {
+  const referral = (await find<BuddyReferral>('buddyReferrals', (lead) => lead.id === req.params.referralId));
   if (!referral) return res.status(404).json({ error: 'Buddy referral not found' });
-  const request = find<BloodRequest>('bloodRequests', (item) => item.id === referral.requestId && item.hospitalId === req.params.id);
+  const request = (await find<BloodRequest>('bloodRequests', (item) => item.id === referral.requestId && item.hospitalId === req.params.id));
   if (!request) return res.status(404).json({ error: 'Referral is not associated with this hospital request' });
-  const hospital = find<Hospital>('hospitals', (item) => item.id === request.hospitalId);
+  const hospital = (await find<Hospital>('hospitals', (item) => item.id === request.hospitalId));
   if (req.user!.role !== 'admin' && hospital?.uid !== req.user!.uid && req.user!.hospitalId !== hospital?.id) {
     return res.status(403).json({ error: 'Forbidden' });
   }
@@ -306,7 +313,7 @@ router.post('/:id/buddy-referrals/:referralId/report', authenticate, authorizeRo
   const category = req.body?.category as BuddyConcernCategory;
   if (!validCategories.includes(category)) return res.status(400).json({ error: 'Choose a valid report category.' });
   const notes = typeof req.body?.notes === 'string' ? req.body.notes.trim().slice(0, 240) : '';
-  const updated = update<BuddyReferral>('buddyReferrals', referral.id, {
+  const updated = (await update<BuddyReferral>('buddyReferrals', referral.id, {
     status: 'reported',
     hospitalReport: {
       id: `buddy_report_${uuidv4().slice(0, 10)}`,
@@ -316,67 +323,71 @@ router.post('/:id/buddy-referrals/:referralId/report', authenticate, authorizeRo
       notes: notes || undefined,
       reportedAt: new Date().toISOString(),
     },
-  });
-  const referrer = find<User>('users', (user) => user.uid === referral.referrerUid);
-  if (referrer && referrer.trustStatus !== 'flagged') update<User>('users', referrer.uid, { trustStatus: 'under_review' });
-  audit(req, 'buddy_referral.hospital_reported', 'buddyReferral', referral.id, { category, requestId: request.id });
-  res.status(201).json({ message: 'Report sent to LifePulse administrators for review.', referral: updated });
+  }));
+  const referrer = (await find<User>('users', (user) => user.uid === referral.referrerUid));
+  if (referrer && referrer.trustStatus !== 'flagged') (await update<User>('users', referrer.uid, { trustStatus: 'under_review' }));
+  await audit(req, 'buddy_referral.hospital_reported', 'buddyReferral', referral.id, { category, requestId: request.id });
+  res.status(201).json({ message: 'Report sent to RaktaRun administrators for review.', referral: updated });
 });
 
-router.post('/:id/requests/:requestId/cancel', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
-  const request = find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id);
+router.post('/:id/requests/:requestId/cancel', authenticate, authorizeRoles('hospital', 'admin'), async (req: AuthenticatedRequest, res) => {
+  const request = (await find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id));
   if (!request) return res.status(404).json({ error: 'Request not found' });
-  const hospital = find<Hospital>('hospitals', (h) => h.id === request.hospitalId);
+  const hospital = (await find<Hospital>('hospitals', (h) => h.id === request.hospitalId));
   if (req.user!.role !== 'admin' && req.user!.uid !== hospital?.uid && req.user!.hospitalId !== hospital?.id) return res.status(403).json({ error: 'Forbidden' });
   if (['fulfilled', 'cancelled'].includes(request.status)) return res.status(409).json({ error: 'Request is already closed' });
-  update<BloodRequest>('bloodRequests', request.id, { status: 'cancelled' });
-  readJson<Match>('matches').filter((m) => m.requestId === request.id && !['donated', 'reached'].includes(m.status)).forEach((m) => update<Match>('matches', m.id, { status: 'cancelled', donorCurrentLocation: null, etaSeconds: null, distanceRemaining: null }));
-  audit(req, 'request.cancelled', 'bloodRequest', request.id);
+  (await update<BloodRequest>('bloodRequests', request.id, { status: 'cancelled' }));
+  for (const match of (await readJson<Match>('matches')).filter((m) => m.requestId === request.id && !['donated', 'reached'].includes(m.status))) {
+    await update<Match>('matches', match.id, { status: 'cancelled', donorCurrentLocation: null, etaSeconds: null, distanceRemaining: null });
+  }
+  await audit(req, 'request.cancelled', 'bloodRequest', request.id);
   res.json({ message: 'Request cancelled' });
 });
 
-router.post('/:id/requests/:requestId/matches/:matchId/complete', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
-  const request = find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id);
-  const hospital = request && find<Hospital>('hospitals', (h) => h.id === request.hospitalId);
+router.post('/:id/requests/:requestId/matches/:matchId/complete', authenticate, authorizeRoles('hospital', 'admin'), async (req: AuthenticatedRequest, res) => {
+  const request = (await find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id));
+  const hospital = request && (await find<Hospital>('hospitals', (h) => h.id === request.hospitalId));
   if (!request) return res.status(404).json({ error: 'Request not found' });
   if (req.user!.role !== 'admin' && req.user!.uid !== hospital?.uid && req.user!.hospitalId !== hospital?.id) return res.status(403).json({ error: 'Forbidden' });
-  const match = find<Match>('matches', (m) => m.id === req.params.matchId && m.requestId === request.id);
+  const match = (await find<Match>('matches', (m) => m.id === req.params.matchId && m.requestId === request.id));
   if (!match || !['accepted', 'en_route', 'reached'].includes(match.status)) return res.status(409).json({ error: 'Only an accepted donor can be marked as donated' });
-  const donor = find<Donor>('donors', (d) => d.id === match.donorId);
+  const donor = (await find<Donor>('donors', (d) => d.id === match.donorId));
   if (!donor) return res.status(404).json({ error: 'Donor not found' });
   const completion = completeDonation(match, donor);
-  const updated = update<Match>('matches', match.id, completion.matchPatch);
-  update<Donor>('donors', donor.id, completion.donorPatch);
-  const stillNeeded = filter<Match>('matches', (m) => m.requestId === request.id && m.status === 'donated').length;
-  if (stillNeeded >= request.unitsRequired) update<BloodRequest>('bloodRequests', request.id, { status: 'fulfilled' });
-  audit(req, 'donation.completed', 'match', match.id, { requestId: request.id });
+  const updated = (await update<Match>('matches', match.id, completion.matchPatch));
+  (await update<Donor>('donors', donor.id, completion.donorPatch));
+  const stillNeeded = (await filter<Match>('matches', (m) => m.requestId === request.id && m.status === 'donated')).length;
+  if (stillNeeded >= request.unitsRequired) (await update<BloodRequest>('bloodRequests', request.id, { status: 'fulfilled' }));
+  await audit(req, 'donation.completed', 'match', match.id, { requestId: request.id });
   res.json({ message: 'Donation marked complete; location sharing stopped', match: updated });
 });
 
-router.post('/:id/requests/:requestId/unfulfilled', authenticate, authorizeRoles('hospital', 'admin'), (req: AuthenticatedRequest, res) => {
+router.post('/:id/requests/:requestId/unfulfilled', authenticate, authorizeRoles('hospital', 'admin'), async (req: AuthenticatedRequest, res) => {
   const { reason } = req.body;
-  const request = find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id);
+  const request = (await find<BloodRequest>('bloodRequests', (r) => r.id === req.params.requestId && r.hospitalId === req.params.id));
   if (!request) return res.status(404).json({ error: 'Request not found' });
-  const hospital = find<Hospital>('hospitals', (h) => h.id === request.hospitalId);
+  const hospital = (await find<Hospital>('hospitals', (h) => h.id === request.hospitalId));
   if (req.user!.role !== 'admin' && req.user!.uid !== hospital?.uid && req.user!.hospitalId !== hospital?.id) return res.status(403).json({ error: 'Forbidden' });
   if (['fulfilled', 'cancelled', 'unfulfilled'].includes(request.status)) return res.status(409).json({ error: 'Request is already closed' });
-  update<BloodRequest>('bloodRequests', request.id, { status: 'unfulfilled' });
-  readJson<Match>('matches').filter((m) => m.requestId === request.id && !['donated'].includes(m.status)).forEach((m) => update<Match>('matches', m.id, { status: 'expired', donorCurrentLocation: null, etaSeconds: null, distanceRemaining: null }));
-  audit(req, 'request.unfulfilled', 'bloodRequest', request.id, { reason: reason || 'Donor quota not met within time window' });
+  (await update<BloodRequest>('bloodRequests', request.id, { status: 'unfulfilled' }));
+  for (const match of (await readJson<Match>('matches')).filter((m) => m.requestId === request.id && m.status !== 'donated')) {
+    await update<Match>('matches', match.id, { status: 'expired', donorCurrentLocation: null, etaSeconds: null, distanceRemaining: null });
+  }
+  await audit(req, 'request.unfulfilled', 'bloodRequest', request.id, { reason: reason || 'Donor quota not met within time window' });
   res.json({ message: 'Request recorded as unfulfilled', status: 'unfulfilled' });
 });
 
 // GET /api/hospitals/:id/history - Hospital dispatch & fulfillment history
-router.get('/:id/history', authenticate, (req: AuthenticatedRequest, res) => {
-  const hospital = find<Hospital>('hospitals', (h) => h.id === req.params.id);
+router.get('/:id/history', authenticate, async (req: AuthenticatedRequest, res) => {
+  const hospital = (await find<Hospital>('hospitals', (h) => h.id === req.params.id));
   if (!hospital) return res.status(404).json({ error: 'Hospital not found' });
   if (req.user!.role !== 'admin' && hospital.uid !== req.user!.uid && req.user!.hospitalId !== hospital.id) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
-  const requests = filter<BloodRequest>('bloodRequests', (r) => r.hospitalId === hospital.id);
-  const matches = readJson<Match>('matches');
-  const donors = readJson<Donor>('donors');
+  const requests = (await filter<BloodRequest>('bloodRequests', (r) => r.hospitalId === hospital.id));
+  const matches = (await readJson<Match>('matches'));
+  const donors = (await readJson<Donor>('donors'));
 
   const history = requests.map((r) => {
     const reqMatches = matches.filter((m) => m.requestId === r.id);

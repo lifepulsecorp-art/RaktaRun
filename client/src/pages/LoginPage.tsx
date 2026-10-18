@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Lock, Mail, ShieldAlert, ArrowRight, Activity, ArrowLeft } from 'lucide-react';
-import { LifePulseLogo } from '../components/LifePulseLogo';
+import { RaktaRunLogo } from '../components/RaktaRunLogo';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { Button } from '../components/ui/Button';
 
@@ -61,7 +61,7 @@ export const LoginPage: React.FC = () => {
         <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-rose-500/10 dark:bg-rose-500/20 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex items-center justify-between">
-          <LifePulseLogo size="lg" showSubtitle={true} />
+          <RaktaRunLogo size="lg" showSubtitle={true} />
           <Link
             to="/"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition"
@@ -97,7 +97,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div className="relative z-10 text-xs text-slate-500 dark:text-slate-500">
-          LifePulse Emergency Portal • Coastal Karnataka Trauma Response
+          RaktaRun Emergency Portal • Coastal Karnataka Trauma Response
         </div>
       </div>
 
@@ -106,9 +106,9 @@ export const LoginPage: React.FC = () => {
         <div className="w-full max-w-md space-y-6">
           <div className="text-center lg:text-left">
             <div className="lg:hidden flex justify-center mb-6">
-              <LifePulseLogo size="md" showSubtitle={true} />
+              <RaktaRunLogo size="md" showSubtitle={true} />
             </div>
-            <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sign In to LifePulse</h3>
+            <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sign In to RaktaRun</h3>
             <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
               Enter your credentials to access your verified medical dashboard
             </p>
@@ -171,7 +171,7 @@ export const LoginPage: React.FC = () => {
 
 
           <div className="text-center text-sm text-slate-600 dark:text-slate-400 pt-2">
-            New to LifePulse?{' '}
+            New to RaktaRun?{' '}
             <Link to="/register" className="font-semibold text-rose-600 dark:text-rose-500 hover:text-rose-500 hover:underline">
               Register here →
             </Link>

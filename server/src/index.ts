@@ -1,10 +1,7 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-dotenv.config();
+import { timingSafeEqual } from 'crypto';
 
 import './utils/firebaseAdmin.js';
 import authRoutes from './routes/authRoutes.js';
@@ -15,9 +12,6 @@ import adminRoutes from './routes/adminRoutes.js';
 import requestRoutes from './routes/requestRoutes.js';
 import buddyRoutes from './routes/buddyRoutes.js';
 import { escalateUnansweredRequests } from './services/escalation.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -33,16 +27,34 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Static files for certificates
-app.use('/certificates', express.static(path.join(__dirname, '../data/certificates')));
-
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'LifePulse API',
+    service: 'RaktaRun API',
     timestamp: new Date().toISOString(),
   });
+});
+
+// Vercel functions do not keep a process timer alive. Trigger escalation from
+// an external scheduler (or a paid Vercel Cron schedule) using a bearer secret.
+app.get('/api/cron/escalation', async (req, res) => {
+  const secret = process.env.ESCALATION_CRON_SECRET || process.env.CRON_SECRET;
+  const provided = req.headers.authorization?.replace(/^Bearer\s+/i, '') || '';
+  if (!secret) return res.status(503).json({ error: 'Escalation scheduler is not configured.' });
+  const expectedBuffer = Buffer.from(secret);
+  const providedBuffer = Buffer.from(provided);
+  if (expectedBuffer.length !== providedBuffer.length || !timingSafeEqual(expectedBuffer, providedBuffer)) {
+    return res.status(401).json({ error: 'Unauthorized.' });
+  }
+
+  try {
+    const escalated = await escalateUnansweredRequests();
+    return res.json({ status: 'ok', escalated });
+  } catch (error) {
+    console.error('[ESCALATION CRON]', error);
+    return res.status(500).json({ error: 'Escalation run failed.' });
+  }
 });
 
 // API Routes
@@ -55,7 +67,7 @@ app.use('/api/requests', requestRoutes);
 app.use('/api/buddies', buddyRoutes);
 
 app.get('/api', (req, res) => {
-  res.json({ message: 'LifePulse API v1 — ready' });
+  res.json({ message: 'RaktaRun API v1 — ready' });
 });
 
 // 404 Handler
@@ -71,15 +83,11 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`LifePulse API running at http://localhost:${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/api/health`);
-});
-
-// A lightweight scheduler for the JSON-backed pilot implementation.
-setInterval(() => {
-  try { escalateUnansweredRequests(); }
-  catch (error) { console.error('[Escalation]', error); }
-}, 30_000).unref();
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`RaktaRun API running at http://localhost:${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/api/health`);
+  });
+}
 
 export default app;

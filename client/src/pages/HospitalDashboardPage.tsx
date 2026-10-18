@@ -4,6 +4,7 @@ import { Send, History, X, Building2, Calendar, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { AppLayout } from '../components/AppLayout';
+import { usePolling } from '../hooks/usePolling';
 
 export const HospitalDashboardPage: React.FC = () => {
   const { roleData } = useAuth();
@@ -45,11 +46,7 @@ export const HospitalDashboardPage: React.FC = () => {
     }
   }, [hospitalId]);
 
-  useEffect(() => {
-    refresh();
-    const timer = setInterval(refresh, 10000);
-    return () => clearInterval(timer);
-  }, [refresh]);
+  usePolling(refresh, 10000);
 
   return (
     <AppLayout
@@ -123,7 +120,7 @@ export const HospitalDashboardPage: React.FC = () => {
           <Link to="/hospital/profile" className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition font-medium">
             <Building2 className="h-4 w-4 text-rose-500 dark:text-rose-400" /> Manage hospital accreditation profile
           </Link>
-          <span className="text-slate-500">LifePulse Emergency Network · Coastal Karnataka</span>
+          <span className="text-slate-500">RaktaRun Emergency Network · Coastal Karnataka</span>
         </div>
       </div>
 
@@ -299,7 +296,7 @@ export const HospitalDashboardPage: React.FC = () => {
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <span className="text-xs text-slate-500">
-                Hospital Clinical Record • LifePulse Karnataka
+                Hospital Clinical Record • RaktaRun Karnataka
               </span>
               <button
                 onClick={() => setShowHistoryModal(false)}

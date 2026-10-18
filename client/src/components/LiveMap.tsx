@@ -14,13 +14,13 @@ type GoogleMapsApi = any;
 declare global {
   interface Window {
     google?: GoogleMapsApi;
-    __lifePulseMapsPromise?: Promise<GoogleMapsApi>;
+    __raktaRunMapsPromise?: Promise<GoogleMapsApi>;
   }
 }
 
 function loadGoogleMaps(apiKey: string): Promise<GoogleMapsApi> {
   if (window.google?.maps?.importLibrary) return Promise.resolve(window.google.maps);
-  if (window.__lifePulseMapsPromise) return window.__lifePulseMapsPromise;
+  if (window.__raktaRunMapsPromise) return window.__raktaRunMapsPromise;
 
   const google = window.google ?? (window.google = {});
   const maps = google.maps ?? (google.maps = {});
@@ -51,9 +51,9 @@ function loadGoogleMaps(apiKey: string): Promise<GoogleMapsApi> {
     return bootstrapPromise.then(() => maps.importLibrary(library, ...args));
   };
 
-  window.__lifePulseMapsPromise = maps.importLibrary('maps').then(() => maps);
+  window.__raktaRunMapsPromise = maps.importLibrary('maps').then(() => maps);
 
-  return window.__lifePulseMapsPromise!;
+  return window.__raktaRunMapsPromise!;
 }
 
 function distanceMeters(a: Coordinate, b: Coordinate): number {
@@ -190,6 +190,17 @@ export default function LiveMap({ hospital, donors, className = '' }: LiveMapPro
   // Key the effect to actual coordinates to keep the 5-second polling from needlessly redrawing.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapApi, hospital.latitude, hospital.longitude, pointsKey]);
+
+  useEffect(() => () => {
+    hospitalMarker.current?.setMap(null);
+    hospitalMarker.current = null;
+    for (const marker of donorMarkers.current.values()) marker.setMap(null);
+    donorMarkers.current.clear();
+    for (const line of routeLines.current.values()) line.setMap(null);
+    routeLines.current.clear();
+    routeRequests.current.clear();
+    map.current = null;
+  }, []);
 
   return (
     <div className={`overflow-hidden rounded-xl border border-slate-800 bg-slate-950 ${className}`}>

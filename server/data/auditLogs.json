@@ -556,5 +556,1792 @@
       "requestId": "req_792c1857"
     },
     "createdAt": "2026-10-11T09:11:29.290Z"
+  },
+  {
+    "id": "audit_d48cafa8-8",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_86a0e8ae",
+    "details": {
+      "matchedCount": 4,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-11T12:17:41.141Z"
+  },
+  {
+    "id": "audit_notif_349f006d",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_suresh_10",
+    "details": {
+      "requestId": "req_86a0e8ae",
+      "matchId": "match_59dcce62",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543219"
+    },
+    "createdAt": "2026-10-11T12:17:41.149Z"
+  },
+  {
+    "id": "audit_notif_860ae47b",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_86a0e8ae",
+      "matchId": "match_e622701a",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:17:41.153Z"
+  },
+  {
+    "id": "audit_notif_e23e4c0b",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_86a0e8ae",
+      "matchId": "match_289907de",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:17:41.158Z"
+  },
+  {
+    "id": "audit_notif_64c08626",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_86a0e8ae",
+      "matchId": "match_294afa37",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:17:41.162Z"
+  },
+  {
+    "id": "audit_15adafb4-6",
+    "actorUid": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "actorRole": "admin",
+    "action": "donor.eligibility_updated",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "eligibilityStatus": "eligible"
+    },
+    "createdAt": "2026-10-11T12:18:18.366Z"
+  },
+  {
+    "id": "audit_48a00ee4-e",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.cancelled",
+    "entityType": "bloodRequest",
+    "entityId": "req_86a0e8ae",
+    "createdAt": "2026-10-11T12:19:16.310Z"
+  },
+  {
+    "id": "audit_e995113b-3",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_d89b807d",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-11T12:19:26.015Z"
+  },
+  {
+    "id": "audit_notif_95f34f32",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_karthik_03",
+    "details": {
+      "requestId": "req_d89b807d",
+      "matchId": "match_3741792e",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543212"
+    },
+    "createdAt": "2026-10-11T12:19:26.025Z"
+  },
+  {
+    "id": "audit_notif_5f564629",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_d89b807d",
+      "matchId": "match_3a3645bd",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:19:26.029Z"
+  },
+  {
+    "id": "audit_notif_c1ade889",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_d89b807d",
+      "matchId": "match_a4a6317c",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:19:26.033Z"
+  },
+  {
+    "id": "audit_notif_a782fb2f",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_d89b807d",
+      "matchId": "match_22652920",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:19:26.036Z"
+  },
+  {
+    "id": "audit_notif_1016590d",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_d89b807d",
+      "matchId": "match_b7dbb888",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:19:26.042Z"
+  },
+  {
+    "id": "audit_80f0b3d8-c",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.cancelled",
+    "entityType": "bloodRequest",
+    "entityId": "req_d89b807d",
+    "createdAt": "2026-10-11T12:21:25.345Z"
+  },
+  {
+    "id": "audit_515a320d-5",
+    "actorUid": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "actorRole": "admin",
+    "action": "donor.eligibility_updated",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "eligibilityStatus": "eligible"
+    },
+    "createdAt": "2026-10-11T12:33:17.965Z"
+  },
+  {
+    "id": "audit_82029eb1-0",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_f183fe55",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-11T12:33:35.125Z"
+  },
+  {
+    "id": "audit_notif_41bef741",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_f183fe55",
+      "matchId": "match_d519973a",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:33:35.137Z"
+  },
+  {
+    "id": "audit_notif_b9af7fb0",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_f183fe55",
+      "matchId": "match_de428b4f",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:33:35.141Z"
+  },
+  {
+    "id": "audit_notif_413e01cb",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_f183fe55",
+      "matchId": "match_de01d6ca",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:33:35.145Z"
+  },
+  {
+    "id": "audit_notif_fe21ecc0",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_f183fe55",
+      "matchId": "match_3632e3c7",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:33:35.149Z"
+  },
+  {
+    "id": "audit_notif_0032b6b4",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_f183fe55",
+      "matchId": "match_202a16a4",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-11T12:33:35.154Z"
+  },
+  {
+    "id": "audit_notif_61ce3ace",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_suresh_10",
+    "details": {
+      "requestId": "req_f183fe55",
+      "matchId": "match_b4966b33",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543219"
+    },
+    "createdAt": "2026-10-11T12:35:53.189Z"
+  },
+  {
+    "id": "audit_becf75f7-f",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.cancelled",
+    "entityType": "bloodRequest",
+    "entityId": "req_f183fe55",
+    "createdAt": "2026-10-11T12:36:43.225Z"
+  },
+  {
+    "id": "audit_be584987-6",
+    "actorUid": "5G6ajWegMiepIzvIyreG7bx82SG2",
+    "actorRole": "admin",
+    "action": "donor.eligibility_updated",
+    "entityType": "donor",
+    "entityId": "donor_840da36b",
+    "details": {
+      "eligibilityStatus": "eligible"
+    },
+    "createdAt": "2026-10-13T07:19:54.585Z"
+  },
+  {
+    "id": "audit_13c013c9-3",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_cd105afd",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 50
+    },
+    "createdAt": "2026-10-13T07:24:43.551Z"
+  },
+  {
+    "id": "audit_notif_171790ab",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_cd105afd",
+      "matchId": "match_0caffbd5",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:24:43.579Z"
+  },
+  {
+    "id": "audit_notif_72fc8f6b",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_cd105afd",
+      "matchId": "match_80a61571",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:24:43.584Z"
+  },
+  {
+    "id": "audit_notif_519c1b28",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_cd105afd",
+      "matchId": "match_373daea7",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:24:43.589Z"
+  },
+  {
+    "id": "audit_notif_fd3c4f58",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_cd105afd",
+      "matchId": "match_22487d8c",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:24:43.594Z"
+  },
+  {
+    "id": "audit_notif_e35aa71c",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_cd105afd",
+      "matchId": "match_19c2c43f",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:24:43.599Z"
+  },
+  {
+    "id": "audit_28561d7f-c",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.cancelled",
+    "entityType": "bloodRequest",
+    "entityId": "req_cd105afd",
+    "createdAt": "2026-10-13T07:28:33.976Z"
+  },
+  {
+    "id": "audit_4d2b8b6d-4",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_0c452d26",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 50
+    },
+    "createdAt": "2026-10-13T07:31:44.119Z"
+  },
+  {
+    "id": "audit_notif_30d5d7bd",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_0c452d26",
+      "matchId": "match_88f377c9",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:31:44.144Z"
+  },
+  {
+    "id": "audit_notif_a0930089",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_0c452d26",
+      "matchId": "match_6719cda9",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:31:44.150Z"
+  },
+  {
+    "id": "audit_notif_d05a4d05",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_0c452d26",
+      "matchId": "match_5668d525",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:31:44.155Z"
+  },
+  {
+    "id": "audit_notif_14c88c00",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_0c452d26",
+      "matchId": "match_50fdd746",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:31:44.158Z"
+  },
+  {
+    "id": "audit_notif_46ccb450",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_0c452d26",
+      "matchId": "match_a6311ef0",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:31:44.168Z"
+  },
+  {
+    "id": "audit_notif_74da6cb2",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_suresh_10",
+    "details": {
+      "requestId": "req_0c452d26",
+      "matchId": "match_b5c9dbbd",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543219"
+    },
+    "createdAt": "2026-10-13T07:33:52.958Z"
+  },
+  {
+    "id": "audit_notif_08b86f8b",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_840da36b",
+    "details": {
+      "requestId": "req_0c452d26",
+      "matchId": "match_fd0ed94f",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "999998763",
+      "email": "donorgeorge@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:33:52.961Z"
+  },
+  {
+    "id": "audit_a27459dd-0",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_d885ced0",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-13T07:37:52.355Z"
+  },
+  {
+    "id": "audit_notif_5ec12548",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_d885ced0",
+      "matchId": "match_a8e863a8",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:37:52.386Z"
+  },
+  {
+    "id": "audit_notif_18b1eff1",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_d885ced0",
+      "matchId": "match_bae13249",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:37:52.391Z"
+  },
+  {
+    "id": "audit_notif_2da73657",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_d885ced0",
+      "matchId": "match_ccd67145",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:37:52.398Z"
+  },
+  {
+    "id": "audit_notif_8dc7dae2",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_d885ced0",
+      "matchId": "match_c5382ceb",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:37:52.402Z"
+  },
+  {
+    "id": "audit_notif_962a8152",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_d885ced0",
+      "matchId": "match_6f4a2240",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:37:52.411Z"
+  },
+  {
+    "id": "audit_b60e6944-a",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.cancelled",
+    "entityType": "bloodRequest",
+    "entityId": "req_d885ced0",
+    "createdAt": "2026-10-13T07:39:13.164Z"
+  },
+  {
+    "id": "audit_d99a1fa6-a",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_26d504f4",
+    "details": {
+      "matchedCount": 1,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-13T07:45:14.861Z"
+  },
+  {
+    "id": "audit_notif_5e95e9c0",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_suresh_10",
+    "details": {
+      "requestId": "req_26d504f4",
+      "matchId": "match_282da67d",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543219"
+    },
+    "createdAt": "2026-10-13T07:45:14.885Z"
+  },
+  {
+    "id": "audit_5ba306f2-f",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.cancelled",
+    "entityType": "bloodRequest",
+    "entityId": "req_26d504f4",
+    "createdAt": "2026-10-13T07:45:21.655Z"
+  },
+  {
+    "id": "audit_aebae5b6-c",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_6354e5bb",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 50
+    },
+    "createdAt": "2026-10-13T07:45:48.364Z"
+  },
+  {
+    "id": "audit_notif_1e6a881c",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_6354e5bb",
+      "matchId": "match_b4451429",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:45:48.399Z"
+  },
+  {
+    "id": "audit_notif_709c7bfb",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_6354e5bb",
+      "matchId": "match_28c9e42d",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:45:48.405Z"
+  },
+  {
+    "id": "audit_notif_94ae735d",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_6354e5bb",
+      "matchId": "match_ffa84610",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:45:48.410Z"
+  },
+  {
+    "id": "audit_notif_79411f8a",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_6354e5bb",
+      "matchId": "match_dde47e9a",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:45:48.415Z"
+  },
+  {
+    "id": "audit_notif_3f943075",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_6354e5bb",
+      "matchId": "match_091ea019",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:45:48.422Z"
+  },
+  {
+    "id": "audit_fe418b29-4",
+    "actorUid": "user_66f55e5d",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_afd787b2",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-13T07:47:20.625Z"
+  },
+  {
+    "id": "audit_notif_f6167f55",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_459b2abd",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:47:20.654Z"
+  },
+  {
+    "id": "audit_notif_523d21b7",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_e09444a6",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:47:20.660Z"
+  },
+  {
+    "id": "audit_notif_cf0a9f49",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_40d4b403",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:47:20.669Z"
+  },
+  {
+    "id": "audit_notif_50fd1be0",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_45f6b6e9",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:47:20.674Z"
+  },
+  {
+    "id": "audit_notif_a11c17d6",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_1d433bc7",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:47:20.678Z"
+  },
+  {
+    "id": "audit_notif_477c89a6",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_suresh_10",
+    "details": {
+      "requestId": "req_6354e5bb",
+      "matchId": "match_ecfe6590",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543219"
+    },
+    "createdAt": "2026-10-13T07:48:14.997Z"
+  },
+  {
+    "id": "audit_notif_2fa15154",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_840da36b",
+    "details": {
+      "requestId": "req_6354e5bb",
+      "matchId": "match_c9878698",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "999998763",
+      "email": "donorgeorge@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:48:15.001Z"
+  },
+  {
+    "id": "audit_notif_e66fab53",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_karthik_03",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_af9c4f8b",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543212"
+    },
+    "createdAt": "2026-10-13T07:49:45.036Z"
+  },
+  {
+    "id": "audit_notif_da0fcbc5",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_suresh_10",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_ac1ffe77",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543219"
+    },
+    "createdAt": "2026-10-13T07:49:45.040Z"
+  },
+  {
+    "id": "audit_notif_7c7e22e2",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_vikas_08",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_cd75d5c5",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator"
+      ],
+      "phone": "+919876543217"
+    },
+    "createdAt": "2026-10-13T07:49:45.045Z"
+  },
+  {
+    "id": "audit_notif_c1dcff4c",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_840da36b",
+    "details": {
+      "requestId": "req_afd787b2",
+      "matchId": "match_caa8e506",
+      "channelsDispatched": [
+        "push:browser_push",
+        "sms:simulator",
+        "email:simulator"
+      ],
+      "phone": "999998763",
+      "email": "donorgeorge@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:49:45.049Z"
+  },
+  {
+    "id": "audit_b89a127a-f",
+    "actorUid": "user_66f55e5d",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_727dfb15",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 50
+    },
+    "createdAt": "2026-10-13T07:58:34.810Z"
+  },
+  {
+    "id": "audit_notif_5f937f90",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_1e63834a",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:58:36.030Z"
+  },
+  {
+    "id": "audit_notif_8dce512e",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_fe23b20f",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:58:36.090Z"
+  },
+  {
+    "id": "audit_notif_912b5fde",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_0a55489c",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:58:36.171Z"
+  },
+  {
+    "id": "audit_notif_424244cc",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_47d126d9",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:58:36.260Z"
+  },
+  {
+    "id": "audit_notif_de954551",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_7a8ec0f1",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T07:58:36.328Z"
+  },
+  {
+    "id": "audit_notif_a6da1ac1",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_karthik_03",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_a051cccd",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent"
+      ],
+      "phone": "+919876543212"
+    },
+    "createdAt": "2026-10-13T08:00:49.743Z"
+  },
+  {
+    "id": "audit_notif_9b1017f3",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_vikas_08",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_9f41788a",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent"
+      ],
+      "phone": "+919876543217"
+    },
+    "createdAt": "2026-10-13T08:00:49.873Z"
+  },
+  {
+    "id": "audit_notif_4e29df65",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_suresh_10",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_79cf2729",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent"
+      ],
+      "phone": "+919876543219"
+    },
+    "createdAt": "2026-10-13T08:00:49.886Z"
+  },
+  {
+    "id": "audit_notif_9d618b37",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_840da36b",
+    "details": {
+      "requestId": "req_727dfb15",
+      "matchId": "match_68c58bcb",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "999998763",
+      "email": "donorgeorge@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:00:50.410Z"
+  },
+  {
+    "id": "audit_34f50c24-2",
+    "actorUid": "user_66f55e5d",
+    "actorRole": "hospital",
+    "action": "request.cancelled",
+    "entityType": "bloodRequest",
+    "entityId": "req_727dfb15",
+    "createdAt": "2026-10-13T08:02:07.686Z"
+  },
+  {
+    "id": "audit_03196e83-9",
+    "actorUid": "user_66f55e5d",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_c79f1a0c",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-13T08:02:15.760Z"
+  },
+  {
+    "id": "audit_notif_5f3fc3be",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_c79f1a0c",
+      "matchId": "match_9151b96a",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:02:16.811Z"
+  },
+  {
+    "id": "audit_notif_e919d533",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_c79f1a0c",
+      "matchId": "match_dc42cbe0",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:02:16.827Z"
+  },
+  {
+    "id": "audit_notif_2db1e482",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_c79f1a0c",
+      "matchId": "match_c8e38759",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:02:17.144Z"
+  },
+  {
+    "id": "audit_notif_e1139554",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_c79f1a0c",
+      "matchId": "match_80bc4dbf",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:02:17.273Z"
+  },
+  {
+    "id": "audit_notif_dafb3d0f",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_c79f1a0c",
+      "matchId": "match_be6d39d8",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:02:17.461Z"
+  },
+  {
+    "id": "audit_9c4eeb61-6",
+    "actorUid": "user_66f55e5d",
+    "actorRole": "hospital",
+    "action": "request.cancelled",
+    "entityType": "bloodRequest",
+    "entityId": "req_c79f1a0c",
+    "createdAt": "2026-10-13T08:03:57.440Z"
+  },
+  {
+    "id": "audit_3267780f-0",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_97db2739",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-13T08:05:50.298Z"
+  },
+  {
+    "id": "audit_notif_9e4c99cc",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_fba3cd50",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:05:54.609Z"
+  },
+  {
+    "id": "audit_notif_9ece9319",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_505fb912",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:05:54.725Z"
+  },
+  {
+    "id": "audit_notif_6e8d2cb0",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_0d9a5004",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:05:54.734Z"
+  },
+  {
+    "id": "audit_notif_d547a03a",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_517d5040",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:05:54.994Z"
+  },
+  {
+    "id": "audit_notif_3af274c3",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_5c295bc4",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:05:55.114Z"
+  },
+  {
+    "id": "audit_notif_315b6fe3",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_karthik_03",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_62e3649f",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent"
+      ],
+      "phone": "+919876543212"
+    },
+    "createdAt": "2026-10-13T08:08:08.667Z"
+  },
+  {
+    "id": "audit_notif_64b93d28",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_vikas_08",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_da376670",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent"
+      ],
+      "phone": "+919876543217"
+    },
+    "createdAt": "2026-10-13T08:08:08.838Z"
+  },
+  {
+    "id": "audit_notif_5ed79a92",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_840da36b",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_ea4c91e4",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "999998763",
+      "email": "donorgeorge@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:08:09.010Z"
+  },
+  {
+    "id": "audit_notif_d3c4be78",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_suresh_10",
+    "details": {
+      "requestId": "req_97db2739",
+      "matchId": "match_fed20612",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent"
+      ],
+      "phone": "+919876543219"
+    },
+    "createdAt": "2026-10-13T08:08:09.455Z"
+  },
+  {
+    "id": "audit_7c59c260-8",
+    "actorUid": "user_ad3b4f10",
+    "actorRole": "hospital",
+    "action": "request.dispatched",
+    "entityType": "bloodRequest",
+    "entityId": "req_1a23bee7",
+    "details": {
+      "matchedCount": 5,
+      "radiusKm": 25
+    },
+    "createdAt": "2026-10-13T08:17:43.775Z"
+  },
+  {
+    "id": "audit_notif_0d26a8f9",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_db9105bf",
+    "details": {
+      "requestId": "req_1a23bee7",
+      "matchId": "match_a9c92f2e",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "7878767869",
+      "email": "don@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:17:45.076Z"
+  },
+  {
+    "id": "audit_notif_8cbd2e0c",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_arjun_06",
+    "details": {
+      "requestId": "req_1a23bee7",
+      "matchId": "match_3193ad53",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "+919876543215",
+      "email": "arjun.kamath@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:17:45.519Z"
+  },
+  {
+    "id": "audit_notif_01938544",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_ad7edc9e",
+    "details": {
+      "requestId": "req_1a23bee7",
+      "matchId": "match_d0ec9a14",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "7867677896",
+      "email": "xoloxacker2004@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:17:45.584Z"
+  },
+  {
+    "id": "audit_notif_ff20e595",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_8418ed63",
+    "details": {
+      "requestId": "req_1a23bee7",
+      "matchId": "match_77bb6ef0",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "6786785",
+      "email": "vinayakrishnanc@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:17:45.651Z"
+  },
+  {
+    "id": "audit_notif_4222e0b7",
+    "actorUid": "system_notification_dispatcher",
+    "actorRole": "system",
+    "action": "emergency_alert.dispatched_multichannel",
+    "entityType": "donor",
+    "entityId": "donor_meera_13",
+    "details": {
+      "requestId": "req_1a23bee7",
+      "matchId": "match_3e58a502",
+      "channelsDispatched": [
+        "push:browser_push:sent",
+        "sms:brevo:sent",
+        "email:brevo:sent"
+      ],
+      "phone": "+919876543222",
+      "email": "meera.shenoy@gmail.com"
+    },
+    "createdAt": "2026-10-13T08:17:45.659Z"
   }
 ]

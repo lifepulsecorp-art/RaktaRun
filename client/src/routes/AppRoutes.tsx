@@ -1,29 +1,32 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
-import HomePage from '../pages/HomePage';
-import LoginPage from '../pages/LoginPage';
-import RegisterPage from '../pages/RegisterPage';
-import UnauthorizedPage from '../pages/UnauthorizedPage';
-import PublicDonorRegisterPage from '../pages/register/DonorRegisterPage';
-import HospitalRegisterPage from '../pages/register/HospitalRegisterPage';
-import DonorPendingPage from '../pages/donor/DonorPendingPage';
-import HospitalPendingPage from '../pages/hospital/HospitalPendingPage';
-import AdminDashboardPage from '../pages/AdminDashboardPage';
-import AdminHospitalsPage from '../pages/admin/AdminHospitalsPage';
-import AdminDonorsPage from '../pages/admin/AdminDonorsPage';
-import AdminBuddyReportsPage from '../pages/admin/AdminBuddyReportsPage';
-import HospitalDashboardPage from '../pages/HospitalDashboardPage';
-import HospitalProfilePage from '../pages/hospital/HospitalProfilePage';
-import DonorDashboardPage from '../pages/DonorDashboardPage';
-import DonorMedicalProfilePage from '../pages/donor/DonorRegisterPage';
-import LiveTrackingPage from '../pages/LiveTrackingPage';
-import EmergencyRequestPage from '../pages/hospital/EmergencyRequestPage';
-import HeroWallPage from '../pages/HeroWallPage';
-import DonorHeroCardPage from '../pages/donor/DonorHeroCardPage';
-import BuddyPage from '../pages/BuddyPage';
+
+const HomePage = lazy(() => import('../pages/HomePage'));
+const LoginPage = lazy(() => import('../pages/LoginPage'));
+const RegisterPage = lazy(() => import('../pages/RegisterPage'));
+const UnauthorizedPage = lazy(() => import('../pages/UnauthorizedPage'));
+const PublicDonorRegisterPage = lazy(() => import('../pages/register/DonorRegisterPage'));
+const HospitalRegisterPage = lazy(() => import('../pages/register/HospitalRegisterPage'));
+const DonorPendingPage = lazy(() => import('../pages/donor/DonorPendingPage'));
+const HospitalPendingPage = lazy(() => import('../pages/hospital/HospitalPendingPage'));
+const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage'));
+const AdminHospitalsPage = lazy(() => import('../pages/admin/AdminHospitalsPage'));
+const AdminDonorsPage = lazy(() => import('../pages/admin/AdminDonorsPage'));
+const AdminBuddyReportsPage = lazy(() => import('../pages/admin/AdminBuddyReportsPage'));
+const HospitalDashboardPage = lazy(() => import('../pages/HospitalDashboardPage'));
+const HospitalProfilePage = lazy(() => import('../pages/hospital/HospitalProfilePage'));
+const DonorDashboardPage = lazy(() => import('../pages/DonorDashboardPage'));
+const DonorMedicalProfilePage = lazy(() => import('../pages/donor/DonorRegisterPage'));
+const LiveTrackingPage = lazy(() => import('../pages/LiveTrackingPage'));
+const EmergencyRequestPage = lazy(() => import('../pages/hospital/EmergencyRequestPage'));
+const HeroWallPage = lazy(() => import('../pages/HeroWallPage'));
+const DonorHeroCardPage = lazy(() => import('../pages/donor/DonorHeroCardPage'));
+const BuddyPage = lazy(() => import('../pages/BuddyPage'));
 
 export default function AppRoutes() {
   return (
+    <Suspense fallback={<div className="min-h-screen grid place-items-center text-sm text-slate-500">Loading page…</div>}>
     <Routes>
       {/* PUBLIC */}
       <Route path="/" element={<HomePage />} />
@@ -65,5 +68,6 @@ export default function AppRoutes() {
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 }

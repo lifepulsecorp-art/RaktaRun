@@ -7,7 +7,6 @@ import {
   BellRing,
   UserCheck,
   Sliders,
-  Smartphone,
   Bell,
   Clock,
   Compass,
@@ -31,9 +30,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import LocationPickerModal from '../components/LocationPickerModal';
 import { AppLayout } from '../components/AppLayout';
+import { usePolling } from '../hooks/usePolling';
 
 const BADGE_MAP: Record<string, { label: string; icon: string }> = {
-  life_pulse_hero: { label: 'LifePulse Hero', icon: '✦' },
+  life_pulse_hero: { label: 'RaktaRun Hero', icon: '✦' },
   rapid_responder: { label: 'Rapid Responder', icon: '›' },
   repeat_hero: { label: 'Repeat Hero', icon: '◆' },
   rare_blood_hero: { label: 'Rare Blood Hero', icon: '◇' },
@@ -119,9 +119,9 @@ export const DonorDashboardPage: React.FC = () => {
           const permission = await Notification.requestPermission();
           setBrowserPushPermission(permission);
           if (permission === 'granted') {
-            new Notification('LifePulse Web Push Enabled', {
+            new Notification('RaktaRun Web Push Enabled', {
               body: 'You are now ready to receive real-time emergency blood requests on this device.',
-              icon: '/favicon.ico',
+              icon: '/raktarun-mark.png',
             });
           }
         } catch {
@@ -141,9 +141,9 @@ export const DonorDashboardPage: React.FC = () => {
       setTestNotifResult(res.data);
 
       if (notifPrefs.push && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-        new Notification('LifePulse Test Emergency Alert', {
+        new Notification('RaktaRun Test Emergency Alert', {
           body: `Emergency dispatch test for ${roleData?.fullName || 'Donor'}. Priority: CODE RED Trauma.`,
-          icon: '/favicon.ico',
+          icon: '/raktarun-mark.png',
         });
       }
     } catch (err: any) {
@@ -222,15 +222,12 @@ export const DonorDashboardPage: React.FC = () => {
     }
   }, []);
 
+  usePolling(refreshAlerts, 5000);
+
   useEffect(() => {
-    refreshAlerts();
-    const poll = setInterval(refreshAlerts, 4000);
-    const clock = setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      clearInterval(poll);
-      clearInterval(clock);
-    };
-  }, [refreshAlerts]);
+    const clock = window.setInterval(() => setNow(Date.now()), 5000);
+    return () => window.clearInterval(clock);
+  }, []);
 
   const pendingAlerts = allAlerts.filter(
     (entry: any) =>
@@ -746,7 +743,7 @@ export const DonorDashboardPage: React.FC = () => {
                 </button>
               </div>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Choose how and when LifePulse coordinates emergency requests with you.
+                Choose how and when RaktaRun coordinates emergency requests with you.
               </p>
 
               <div className="mt-4 space-y-3">
@@ -775,29 +772,6 @@ export const DonorDashboardPage: React.FC = () => {
                        browserPushPermission === 'granted' ? '● Browser Permitted' :
                        browserPushPermission === 'denied' ? '! Blocked by Browser' :
                        '● Permission Pending'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* SMS Alerts */}
-                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3 text-xs space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-semibold">
-                      <Smartphone className="h-4 w-4 text-sky-600 dark:text-sky-400" /> SMS Emergency Alerts
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={notifPrefs.sms}
-                      onChange={(e) => setNotifPrefs({ ...notifPrefs, sms: e.target.checked })}
-                      className="accent-rose-600 h-4 w-4 rounded cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between pl-6 text-[11px] text-slate-500 dark:text-slate-400">
-                    <span>Immediate cellular SMS dispatched to {roleData?.phone || 'registered phone'}</span>
-                    <span className={`px-2 py-0.5 rounded-full font-medium ${
-                      notifPrefs.sms ? 'bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                    }`}>
-                      {notifPrefs.sms ? '● Brevo SMS Gateway' : 'Disabled'}
                     </span>
                   </div>
                 </div>
@@ -912,7 +886,7 @@ export const DonorDashboardPage: React.FC = () => {
               <h3 className="font-bold text-slate-900 dark:text-white text-base">Community Hero Recognition & Shareables</h3>
             </div>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Celebrate your life-saving donations publicly on the LifePulse Community Wall. Displays only your first name, blood group, and verified district. Contact numbers and home coordinates remain strictly confidential.
+              Celebrate your life-saving donations publicly on the RaktaRun Community Wall. Displays only your first name, blood group, and verified district. Contact numbers and home coordinates remain strictly confidential.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Link
@@ -979,7 +953,7 @@ export const DonorDashboardPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs font-black uppercase tracking-widest text-rose-600 dark:text-rose-400">
-                    LIFE PULSE EMERGENCY ALERT
+                    RAKTARUN EMERGENCY ALERT
                   </p>
                   <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Someone near you needs your blood.</h2>
                 </div>
@@ -1283,7 +1257,7 @@ export const DonorDashboardPage: React.FC = () => {
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <span className="text-xs text-slate-500">
-                LifePulse Emergency Health Network • Coastal Karnataka
+                RaktaRun Emergency Health Network • Coastal Karnataka
               </span>
               <button
                 onClick={() => setShowHistoryModal(false)}
